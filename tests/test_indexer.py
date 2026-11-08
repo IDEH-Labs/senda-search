@@ -143,3 +143,33 @@ def test_storage_purge_url_and_domain(temp_storage):
             "SELECT COUNT(*) FROM documents_fts WHERE documents_fts MATCH 'text'"
         ).fetchone()[0]
         assert res == 1
+
+
+def test_storage_robots_cache_and_frontier_persistence(temp_storage):
+    # 1. Robots policy caching and expiration check
+    temp_storage.save_robots_policy("fsf.org", "User-agent: *\nDisallow: /private\n")
+    cached = temp_storage.get_robots_policy("fsf.org", max_age_seconds=3600.0)
+    assert cached == "User-agent: *\nDisallow: /private\n"
+
+    # Expired check
+    expired = temp_storage.get_robots_policy("fsf.org", max_age_seconds=0.0)
+    assert expired is None
+
+    # Nonexistent
+    assert temp_storage.get_robots_policy("nonexistent.org") is None
+
+    # 2. Frontier queue persistence
+    added = temp_storage.enqueue_frontier_url("https://fsf.org/news", "fsf.org", depth=1)
+    assert added is True
+    # Duplicate rejected
+    assert temp_storage.enqueue_frontier_url("https://fsf.org/news", "fsf.org", depth=1) is False
+
+    pending = temp_storage.get_pending_frontier_urls(limit=10)
+    assert len(pending) == 1
+    assert pending[0]["url"] == "https://fsf.org/news"
+
+    # Mark completed
+    temp_storage.mark_frontier_url_completed("https://fsf.org/news")
+    pending_after = temp_storage.get_pending_frontier_urls(limit=10)
+    assert len(pending_after) == 0
+

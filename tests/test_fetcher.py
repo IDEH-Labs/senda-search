@@ -131,3 +131,17 @@ async def test_fetcher_successful_html_retrieval():
             assert doc.text == html_payload
             assert doc.content_type == "text/html"
             assert doc.encoding.lower() in ("utf-8", "utf8")
+
+
+@pytest.mark.asyncio
+async def test_pinning_network_backend_connects_to_validated_ip():
+    from senda.crawler.fetcher import PinningNetworkBackend
+    backend = PinningNetworkBackend()
+
+    with patch("senda.crawler.network_guard.NetworkGuard.resolve_and_validate", return_value=["93.184.216.34"]):
+        with patch("httpcore.AnyIOBackend.connect_tcp", new_callable=pytest.importorskip("unittest.mock").AsyncMock) as mock_connect:
+            await backend.connect_tcp("example.com", 443)
+            # Verify socket connected directly to the pinned public IP (anti-DNS rebinding)
+            mock_connect.assert_called_once()
+            assert mock_connect.call_args.kwargs["host"] == "93.184.216.34"
+

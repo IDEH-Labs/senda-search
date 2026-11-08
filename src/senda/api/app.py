@@ -5,7 +5,7 @@
 
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, Request, Query, Header, HTTPException
+from fastapi import FastAPI, Request, Query, Header, HTTPException, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -102,6 +102,20 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
     async def privacy(request: Request):
         """Render verifiable privacy policy."""
         return templates.TemplateResponse(request=request, name="privacy.html", context={})
+
+    @app.get("/opensearch.xml")
+    async def opensearch(request: Request):
+        """OpenSearch 1.1 Description Document for auto-discovery by web browsers."""
+        base_url = str(request.base_url).rstrip("/")
+        xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+    <ShortName>{settings.APP_NAME}</ShortName>
+    <Description>{settings.APP_NAME} — Sovereign, independent web search engine</Description>
+    <InputEncoding>UTF-8</InputEncoding>
+    <Url type="text/html" method="get" template="{base_url}/search?q={{searchTerms}}"/>
+    <Url type="application/x-suggestions+json" method="get" template="{base_url}/api/v1/search?q={{searchTerms}}"/>
+</OpenSearchDescription>"""
+        return Response(content=xml_content, media_type="application/opensearchdescription+xml")
 
     @app.get("/search")
     async def search(

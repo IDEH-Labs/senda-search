@@ -8,8 +8,9 @@ inspection, and MIME-type gating.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Iterable
 from urllib.parse import urljoin
+import httpcore
 import httpx
 
 from senda.config import settings
@@ -29,6 +30,41 @@ class DocumentTooLargeError(FetchError):
 class UnsupportedContentTypeError(FetchError):
     """Raised when the remote resource is not indexable HTML/text."""
     pass
+
+
+class PinningNetworkBackend(httpcore.AnyIOBackend):
+    """Custom network backend enforcing DNS pre-resolution and IP socket pinning.
+
+    Closes the Time-Of-Check to Time-Of-Use (TOCTOU) DNS rebinding vulnerability by
+    ensuring the TCP socket connects exclusively to the pre-validated public IP,
+    while allowing TLS certificate checks to inspect the original hostname.
+    """
+
+    async def connect_tcp(
+        self,
+        host: str,
+        port: int,
+        timeout: Optional[float] = None,
+        local_address: Optional[str] = None,
+        socket_options: Optional[Iterable] = None,
+    ) -> httpcore.AsyncNetworkStream:
+        validated_ips = NetworkGuard.resolve_and_validate(host, port)
+        pinned_ip = validated_ips[0]
+        return await super().connect_tcp(
+            host=pinned_ip,
+            port=port,
+            timeout=timeout,
+            local_address=local_address,
+            socket_options=socket_options,
+        )
+
+
+class AntiSSRFTransport(httpx.AsyncHTTPTransport):
+    """Hardened HTTP transport leveraging PinningNetworkBackend."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._pool._network_backend = PinningNetworkBackend()
 
 
 @dataclass(frozen=True)
@@ -58,11 +94,13 @@ class SafeFetcher:
         timeout_seconds: Optional[float] = None,
         max_size_bytes: Optional[int] = None,
         max_redirects: Optional[int] = None,
+        transport: Optional[httpx.AsyncBaseTransport] = None,
     ):
         self.user_agent = user_agent or settings.USER_AGENT
         self.timeout_seconds = timeout_seconds or settings.REQUEST_TIMEOUT_SECONDS
         self.max_size_bytes = max_size_bytes or settings.MAX_DOCUMENT_SIZE_BYTES
         self.max_redirects = max_redirects or settings.MAX_REDIRECTS
+        self.transport = transport or AntiSSRFTransport(verify=True)
 
     async def fetch(self, url: str) -> FetchedDocument:
         """Safely fetch a URL with full anti-SSRF verification and streaming size guards.
@@ -81,7 +119,7 @@ class SafeFetcher:
         }
 
         async with httpx.AsyncClient(
-            verify=True,
+            transport=self.transport,
             timeout=httpx.Timeout(self.timeout_seconds),
             follow_redirects=False,  # We manage redirects manually to validate every destination
         ) as client:

@@ -79,6 +79,13 @@ CREATE TABLE IF NOT EXISTS frontier_queue (
 
 CREATE INDEX IF NOT EXISTS idx_frontier_domain ON frontier_queue(domain);
 CREATE INDEX IF NOT EXISTS idx_frontier_status ON frontier_queue(fetch_status);
+
+-- Persistent robots.txt policy cache table
+CREATE TABLE IF NOT EXISTS robots_policies (
+    domain TEXT PRIMARY KEY,
+    content TEXT NOT NULL,
+    fetched_at TEXT NOT NULL
+);
 """
 
 
@@ -229,6 +236,90 @@ class StorageEngine:
             cur = conn.execute("DELETE FROM documents WHERE domain = ?", (domain_normalized,))
             conn.commit()
             return cur.rowcount
+
+    def save_robots_policy(self, domain: str, content: str) -> None:
+        """Persist parsed robots.txt to reduce repetitive outbound network requests."""
+        now = datetime.now(timezone.utc).isoformat()
+        domain_normalized = domain.strip().lower()
+        with self.get_connection() as conn:
+            conn.execute(
+                """
+                INSERT INTO robots_policies (domain, content, fetched_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(domain) DO UPDATE SET content = excluded.content, fetched_at = excluded.fetched_at
+                """,
+                (domain_normalized, content, now)
+            )
+            conn.commit()
+
+    def get_robots_policy(self, domain: str, max_age_seconds: float = 86400.0) -> Optional[str]:
+        """Retrieve cached robots.txt if younger than max_age_seconds."""
+        domain_normalized = domain.strip().lower()
+        with self.get_connection() as conn:
+            cur = conn.execute(
+                "SELECT content, fetched_at FROM robots_policies WHERE domain = ?",
+                (domain_normalized,)
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            try:
+                fetched_at = datetime.fromisoformat(row["fetched_at"])
+                age = (datetime.now(timezone.utc) - fetched_at).total_seconds()
+                if age <= max_age_seconds:
+                    return row["content"]
+            except Exception:
+                pass
+            return None
+
+    def enqueue_frontier_url(self, url: str, domain: str, depth: int) -> bool:
+        """Persist a discovered URL into the frontier queue table."""
+        now = datetime.now(timezone.utc).isoformat()
+        with self.get_connection() as conn:
+            cur = conn.execute(
+                """
+                INSERT OR IGNORE INTO frontier_queue (url, domain, depth, discovered_at, fetch_status)
+                VALUES (?, ?, ?, ?, 'pending')
+                """,
+                (url, domain, depth, now)
+            )
+            conn.commit()
+            return cur.rowcount > 0
+
+    def get_pending_frontier_urls(self, limit: int = 500) -> list[dict[str, Any]]:
+        """Fetch unvisited URLs to resume crawling seamlessly after restarts."""
+        with self.get_connection() as conn:
+            cur = conn.execute(
+                """
+                SELECT url, domain, depth FROM frontier_queue
+                WHERE fetch_status = 'pending'
+                ORDER BY depth ASC, discovered_at ASC
+                LIMIT ?
+                """,
+                (limit,)
+            )
+            return [dict(row) for row in cur.fetchall()]
+
+    def mark_frontier_url_completed(self, url: str) -> None:
+        """Mark URL as successfully fetched in frontier."""
+        now = datetime.now(timezone.utc).isoformat()
+        with self.get_connection() as conn:
+            conn.execute(
+                "UPDATE frontier_queue SET fetch_status = 'completed', last_fetched_at = ? WHERE url = ?",
+                (now, url)
+            )
+            conn.commit()
+
+    def mark_frontier_url_failed(self, url: str) -> None:
+        """Mark URL as failed in frontier."""
+        now = datetime.now(timezone.utc).isoformat()
+        with self.get_connection() as conn:
+            conn.execute(
+                "UPDATE frontier_queue SET fetch_status = 'failed', last_fetched_at = ? WHERE url = ?",
+                (now, url)
+            )
+            conn.commit()
 
     def get_stats(self) -> dict[str, Any]:
         """Return operational indexing statistics."""

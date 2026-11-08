@@ -48,6 +48,12 @@ def test_api_static_pages(client):
     assert r_privacy.status_code == 200
     assert "Verifiable Privacy Policy" in r_privacy.text
 
+    r_opensearch = client.get("/opensearch.xml")
+    assert r_opensearch.status_code == 200
+    assert "application/opensearchdescription+xml" in r_opensearch.headers["content-type"]
+    assert "<OpenSearchDescription" in r_opensearch.text
+    assert "Senda" in r_opensearch.text
+
 
 def test_api_html_search(client):
     response = client.get("/search?q=Foundation")

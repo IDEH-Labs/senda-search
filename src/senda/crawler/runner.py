@@ -42,16 +42,27 @@ class CrawlerRunner:
         if self.robots_manager.has_policy(domain):
             return
 
+        # 1. Check persistent SQLite cache first
+        cached_policy = self.storage.get_robots_policy(domain)
+        if cached_policy is not None:
+            self.robots_manager.register_policy(domain, cached_policy)
+            return
+
+        # 2. Fetch over network if not in database
         robots_url = f"{scheme}://{domain}/robots.txt"
         try:
             doc = await self.fetcher.fetch(robots_url)
             if doc.status_code == 200:
                 self.robots_manager.register_policy(domain, doc.text)
+                self.storage.save_robots_policy(domain, doc.text)
             else:
+                empty_policy = "User-agent: *\nAllow: /\n"
                 self.robots_manager.register_empty_policy(domain)
+                self.storage.save_robots_policy(domain, empty_policy)
         except (FetchError, SSRFSecurityViolation):
-            # If robots.txt cannot be reached or triggers SSRF, register empty policy (default allow)
+            empty_policy = "User-agent: *\nAllow: /\n"
             self.robots_manager.register_empty_policy(domain)
+            self.storage.save_robots_policy(domain, empty_policy)
 
     async def crawl_seed(
         self,
@@ -65,7 +76,19 @@ class CrawlerRunner:
         Returns total number of successfully indexed documents.
         """
         self.frontier.max_depth = max_depth
+
+        # Enqueue seed in memory and persistent storage
+        parsed_seed = urlparse(seed_url)
+        seed_domain = parsed_seed.netloc.lower()
         self.frontier.add_url(seed_url, depth=0)
+        self.storage.enqueue_frontier_url(seed_url, seed_domain, depth=0)
+
+        # Restore any pending URLs from database to resume interrupted crawls
+        pending_records = self.storage.get_pending_frontier_urls(limit=200)
+        for row in pending_records:
+            if row["depth"] <= max_depth:
+                self.frontier.add_url(row["url"], depth=row["depth"])
+
         indexed_count = 0
 
         while self.frontier.pending_count() > 0 and indexed_count < max_pages:
@@ -86,6 +109,7 @@ class CrawlerRunner:
 
             if not self.robots_manager.is_allowed(current_url, user_agent=self.fetcher.user_agent):
                 logger.info(f"Robots disallows: {current_url}")
+                self.storage.mark_frontier_url_failed(current_url)
                 continue
 
             # Update frontier delay if robots declared Crawl-delay
@@ -98,9 +122,11 @@ class CrawlerRunner:
                 doc = await self.fetcher.fetch(current_url)
             except (FetchError, SSRFSecurityViolation) as e:
                 logger.warning(f"Failed to fetch {current_url}: {e}")
+                self.storage.mark_frontier_url_failed(current_url)
                 continue
 
             if doc.status_code != 200:
+                self.storage.mark_frontier_url_failed(current_url)
                 continue
 
             # 3. Extract content and metadata
@@ -108,6 +134,8 @@ class CrawlerRunner:
 
             # 4. Store and index
             was_indexed = self.storage.upsert_document(extracted, status_code=doc.status_code)
+            self.storage.mark_frontier_url_completed(current_url)
+
             if was_indexed:
                 indexed_count += 1
                 if on_page_indexed:
@@ -116,6 +144,9 @@ class CrawlerRunner:
             # 5. Enqueue outgoing links if depth permits
             if current_depth < max_depth:
                 for link in extracted.outgoing_links:
-                    self.frontier.add_url(link, depth=current_depth + 1)
+                    parsed_link = urlparse(link)
+                    link_domain = parsed_link.netloc.lower()
+                    if self.frontier.add_url(link, depth=current_depth + 1):
+                        self.storage.enqueue_frontier_url(link, link_domain, depth=current_depth + 1)
 
         return indexed_count
