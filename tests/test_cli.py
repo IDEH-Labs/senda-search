@@ -74,3 +74,11 @@ def test_cli_purge_domain(test_db_env, monkeypatch, capsys):
 
     captured = capsys.readouterr()
     assert "Purged 0 document(s) belonging to domain 'gentoo.org'" in captured.out or "Purged 1 document(s)" in captured.out
+
+
+def test_cli_crawl_missing_args(test_db_env, monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["senda", "crawl"])
+    main()
+    captured = capsys.readouterr()
+    assert "Error: Must provide either a seed URL or --seeds-file." in captured.out
+

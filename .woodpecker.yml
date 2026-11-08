@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+steps:
+  test:
+    image: python:3.12-slim
+    commands:
+      - python -m pip install --upgrade pip
+      - pip install -e ".[dev]"
+      - pytest -v --cov=senda --cov-report=term-missing --cov-fail-under=85
+
+when:
+  - event: [push, pull_request, tag]
+    branch: [main]

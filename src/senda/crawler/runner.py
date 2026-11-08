@@ -71,17 +71,34 @@ class CrawlerRunner:
         max_depth: int = 2,
         on_page_indexed: Optional[Callable[[str, str, int], None]] = None,
     ) -> int:
-        """Execute a breadth-first crawl starting from seed_url.
+        """Execute a breadth-first crawl starting from a single seed_url."""
+        return await self.crawl_seeds(
+            seed_urls=[seed_url],
+            max_pages=max_pages,
+            max_depth=max_depth,
+            on_page_indexed=on_page_indexed,
+        )
+
+    async def crawl_seeds(
+        self,
+        seed_urls: list[str],
+        max_pages: int = 10,
+        max_depth: int = 2,
+        on_page_indexed: Optional[Callable[[str, str, int], None]] = None,
+    ) -> int:
+        """Execute a breadth-first crawl starting from multiple seed_urls.
 
         Returns total number of successfully indexed documents.
         """
         self.frontier.max_depth = max_depth
 
-        # Enqueue seed in memory and persistent storage
-        parsed_seed = urlparse(seed_url)
-        seed_domain = parsed_seed.netloc.lower()
-        self.frontier.add_url(seed_url, depth=0)
-        self.storage.enqueue_frontier_url(seed_url, seed_domain, depth=0)
+        # Enqueue all seeds in memory and persistent storage
+        for seed_url in seed_urls:
+            parsed_seed = urlparse(seed_url)
+            seed_domain = parsed_seed.netloc.lower()
+            if seed_domain:
+                self.frontier.add_url(seed_url, depth=0)
+                self.storage.enqueue_frontier_url(seed_url, seed_domain, depth=0)
 
         # Restore any pending URLs from database to resume interrupted crawls
         pending_records = self.storage.get_pending_frontier_urls(limit=200)

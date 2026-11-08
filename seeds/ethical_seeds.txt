@@ -1,0 +1,22 @@
+# Senda Search Engine — Curated Sovereign & Free Software Seeds
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+# IDEH Labs Sovereign Ecosystem
+https://ideh.top
+
+# Free Software Foundation & GNU Project
+https://fsf.org
+https://www.gnu.org
+
+# Linux Kernel & Community
+https://www.kernel.org
+
+# Sovereign Linux Distributions
+https://www.gentoo.org
+https://www.debian.org
+
+# Digital Freedom & Rights
+https://www.eff.org
+https://archive.org
+https://libreplanet.org

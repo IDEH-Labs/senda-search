@@ -58,19 +58,37 @@ def cmd_search(args):
 
 
 def cmd_crawl(args):
-    """Crawl web pages starting from a seed URL."""
+    """Crawl web pages starting from a seed URL or seeds file."""
+    seeds = []
+    if args.seed:
+        seeds.append(args.seed)
+    if args.seeds_file:
+        from pathlib import Path
+        seeds_path = Path(args.seeds_file)
+        if not seeds_path.exists():
+            print(f"Error: Seeds file not found: {args.seeds_file}")
+            return
+        for line in seeds_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                seeds.append(line)
+
+    if not seeds:
+        print("Error: Must provide either a seed URL or --seeds-file.")
+        return
+
     runner = CrawlerRunner()
 
     def progress(url: str, title: str, count: int):
         print(f"[{count}/{args.max_pages}] Indexed: {title[:50]}... ({url})")
 
-    print(f"\n[Senda Crawler] Starting crawl from: {args.seed}")
+    print(f"\n[Senda Crawler] Starting crawl with {len(seeds)} seed(s)")
     print(f"Max Pages: {args.max_pages} | Max Depth: {args.max_depth} | Politeness: {settings.DEFAULT_CRAWL_DELAY_SECONDS}s")
 
     try:
         indexed = asyncio.run(
-            runner.crawl_seed(
-                seed_url=args.seed,
+            runner.crawl_seeds(
+                seed_urls=seeds,
                 max_pages=args.max_pages,
                 max_depth=args.max_depth,
                 on_page_indexed=progress,
@@ -122,7 +140,8 @@ def main():
 
     # Command: crawl
     p_crawl = subparsers.add_parser("crawl", help="Crawl and index websites")
-    p_crawl.add_argument("seed", help="Seed URL to begin crawling")
+    p_crawl.add_argument("seed", nargs="?", default=None, help="Seed URL to begin crawling")
+    p_crawl.add_argument("--seeds-file", help="Path to text file containing seed URLs (one per line)")
     p_crawl.add_argument("--max-pages", type=int, default=10, help="Max documents to index (default: 10)")
     p_crawl.add_argument("--max-depth", type=int, default=2, help="Max link hop depth (default: 2)")
 
