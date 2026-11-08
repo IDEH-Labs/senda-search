@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+"""Unit tests for DocumentExtractor."""
+
+from senda.extractor.parser import DocumentExtractor
+
+
+def test_extractor_parses_metadata_and_body():
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Senda Search Engine - Sovereign &amp; Free</title>
+        <meta name="description" content="An independent ethical search engine.">
+        <style>body { background: #fff; }</style>
+        <script>console.log("tracking code should be removed");</script>
+    </head>
+    <body>
+        <nav><a href="/home">Home</a> <a href="/about">About</a></nav>
+        <header><h1>Welcome to Senda</h1></header>
+        <main>
+            <h2>Ethical Principles</h2>
+            <p>Senda prioritizes user privacy and software freedom.</p>
+            <p>Visit the <a href="https://fsf.org">Free Software Foundation</a> for more details.</p>
+            <a href="https://example.com/spam" rel="nofollow">Spam Link</a>
+        </main>
+        <footer><p>&copy; 2026 IDEH Labs</p></footer>
+    </body>
+    </html>
+    """
+
+    doc = DocumentExtractor.extract("https://ideh.top/senda", html)
+
+    assert doc.url == "https://ideh.top/senda"
+    assert doc.title == "Senda Search Engine - Sovereign & Free"
+    assert doc.description == "An independent ethical search engine."
+    assert doc.language == "en"
+    assert "Ethical Principles" in doc.headings
+    assert "Senda prioritizes user privacy and software freedom." in doc.body_text
+
+    # Verify script, style, nav, and footer were stripped from body_text
+    assert "tracking code" not in doc.body_text
+    assert "background: #fff" not in doc.body_text
+    assert "Home About" not in doc.body_text
+    assert "IDEH Labs" not in doc.body_text
+
+    # Verify outgoing links (nofollow ignored, canonicalized)
+    assert "https://fsf.org/" in doc.outgoing_links
+    assert not any("spam" in link for link in doc.outgoing_links)
+    assert doc.content_hash != ""
+
+
+def test_extractor_fallback_title():
+    html = """
+    <html>
+    <body>
+        <h1>Headline Title</h1>
+        <p>Some content</p>
+    </body>
+    </html>
+    """
+    doc = DocumentExtractor.extract("https://example.com", html)
+    assert doc.title == "Headline Title"
+    assert "Some content" in doc.body_text
+
+
+def test_extractor_deduplication_hash():
+    html1 = "<html><head><title>Test</title></head><body><p>Hello World</p></body></html>"
+    html2 = "<html><head><title>Test</title></head><body><p>Hello   World</p><script>alert(1)</script></body></html>"
+
+    doc1 = DocumentExtractor.extract("https://example.com/1", html1)
+    doc2 = DocumentExtractor.extract("https://example.com/2", html2)
+
+    # Cleaned body and title match, so content_hash must match
+    assert doc1.content_hash == doc2.content_hash
