@@ -1,0 +1,28 @@
+#!/sbin/openrc-run
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+name="senda"
+description="Senda Sovereign Search Engine"
+
+: ${SENDA_USER:="senda"}
+: ${SENDA_GROUP:="senda"}
+: ${SENDA_DIR:="/var/lib/senda"}
+: ${SENDA_HOST:="127.0.0.1"}
+: ${SENDA_PORT:="8000"}
+
+command="${SENDA_DIR}/.venv/bin/senda"
+command_args="serve --host ${SENDA_HOST} --port ${SENDA_PORT}"
+command_user="${SENDA_USER}:${SENDA_GROUP}"
+command_background="yes"
+pidfile="/run/senda.pid"
+directory="${SENDA_DIR}"
+
+depend() {
+    need net
+    after firewall
+}
+
+start_pre() {
+    checkpath -d -m 0750 -o "${SENDA_USER}:${SENDA_GROUP}" "${SENDA_DIR}/data"
+}

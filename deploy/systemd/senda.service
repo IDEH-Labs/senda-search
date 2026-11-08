@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+[Unit]
+Description=Senda Sovereign Search Engine
+Documentation=https://github.com/ideh-labs/senda-search
+After=network.target
+
+[Service]
+Type=simple
+User=senda
+Group=senda
+WorkingDirectory=/var/lib/senda
+ExecStart=/var/lib/senda/.venv/bin/senda serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5s
+
+# Hardening / Sandboxing
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/senda/data
+PrivateTmp=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
