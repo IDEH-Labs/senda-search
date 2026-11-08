@@ -197,3 +197,37 @@ class RobotsCache:
 
     def clear(self) -> None:
         self._cache.clear()
+
+
+class RobotsPolicyManager:
+    """High-level manager coordinating domain robots.txt fetching and evaluation."""
+
+    def __init__(self, cache: Optional[RobotsCache] = None):
+        self._cache = cache or RobotsCache()
+
+    def has_policy(self, domain: str) -> bool:
+        return self._cache.get(domain) is not None
+
+    def register_policy(self, domain: str, content: str) -> RobotsPolicy:
+        policy = RobotsPolicy(content)
+        self._cache.set(domain, policy)
+        return policy
+
+    def register_empty_policy(self, domain: str) -> RobotsPolicy:
+        policy = RobotsPolicy("User-agent: *\nAllow: /\n")
+        self._cache.set(domain, policy)
+        return policy
+
+    def is_allowed(self, url: str, user_agent: Optional[str] = None) -> bool:
+        domain = urlparse(url).netloc.lower()
+        policy = self._cache.get(domain)
+        if policy is None:
+            return True
+        return policy.is_allowed(url, user_agent)
+
+    def get_crawl_delay(self, domain: str, user_agent: Optional[str] = None) -> Optional[float]:
+        policy = self._cache.get(domain)
+        if policy is None:
+            return None
+        return policy.get_crawl_delay(user_agent)
+

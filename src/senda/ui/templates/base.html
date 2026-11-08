@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--
+SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>{% block title %}Senda - Sovereign Search Engine{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/senda.css">
+</head>
+<body>
+    <header class="app-header">
+        <a href="/" class="brand">
+            <span>Senda</span>
+            <span class="brand-badge" data-i18n="brand_sub">Sovereign Search</span>
+        </a>
+        <nav class="main-nav">
+            <a href="/" data-i18n="nav_home">Search</a>
+            <a href="/about" data-i18n="nav_about">About</a>
+            <a href="/privacy" data-i18n="nav_privacy">Privacy</a>
+            <select id="langSelector" class="lang-select" aria-label="Select Language">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+            </select>
+        </nav>
+    </header>
+
+    <main class="content-area">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <p>
+            <span data-i18n="footer_text">Senda is sovereign software governed by the GNU GPLv3 license.</span>
+            &bull;
+            <a href="https://ideh.top" target="_blank" rel="noopener">IDEH Labs</a>
+            &bull;
+            <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GPL-3.0-or-later</a>
+        </p>
+    </footer>
+
+    <script src="/static/js/i18n.js"></script>
+</body>
+</html>

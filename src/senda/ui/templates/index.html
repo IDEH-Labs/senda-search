@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-container">
+    <h1 class="hero-title" data-i18n="hero_title">Senda</h1>
+    <p class="hero-subtitle" data-i18n="hero_subtitle">
+        Independent, ethical, and verifiable web search engine. Free software under GPL-3.0.
+    </p>
+
+    <form class="search-form" action="/search" method="get">
+        <div class="search-input-wrapper">
+            <input
+                type="text"
+                name="q"
+                class="search-input"
+                placeholder="Explore the sovereign web..."
+                data-i18n="search_placeholder"
+                required
+                autofocus
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <button type="submit" class="search-button" data-i18n="search_btn">Search</button>
+        </div>
+    </form>
+
+    <div class="privacy-pills">
+        <span class="privacy-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span data-i18n="pill_no_logs">Zero Query Logs</span>
+        </span>
+        <span class="privacy-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span data-i18n="pill_no_tracking">Zero Profiling</span>
+        </span>
+        <span class="privacy-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 14.14 14.14"></path></svg>
+            <span data-i18n="pill_no_cookies">Zero Cookies</span>
+        </span>
+        <span class="privacy-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"></path></svg>
+            <span data-i18n="pill_fsf">100% Free Software</span>
+        </span>
+    </div>
+</div>
+{% endblock %}

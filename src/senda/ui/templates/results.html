@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ query }} - Senda Search{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div style="margin-bottom: 2rem;">
+        <form class="search-form" action="/search" method="get">
+            <div class="search-input-wrapper">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="search-input"
+                    required
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <button type="submit" class="search-button" data-i18n="search_btn">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="results-header">
+        <span class="results-meta">
+            <strong>{{ results.total_matches }}</strong> <span data-i18n="results_found">results found in</span> {{ results.duration_ms }} ms
+        </span>
+        {% if results.total_pages > 1 %}
+        <span class="results-meta">
+            <span data-i18n="results_page">Page</span> {{ results.page }} <span data-i18n="results_of">of</span> {{ results.total_pages }}
+        </span>
+        {% endif %}
+    </div>
+
+    {% if results.items %}
+    <ol class="results-list">
+        {% for item in results.items %}
+        <li class="result-card">
+            <span class="result-domain">{{ item.domain }}</span>
+            <a href="{{ item.url }}" class="result-title" rel="noopener noreferrer" target="_blank">{{ item.title }}</a>
+            <p class="result-snippet">{{ item.snippet | safe }}</p>
+        </li>
+        {% endfor %}
+    </ol>
+
+    {% if results.total_pages > 1 %}
+    <nav class="pagination" aria-label="Search pagination">
+        {% if results.page > 1 %}
+        <a href="/search?q={{ query | urlencode }}&p={{ results.page - 1 }}" class="pagination-btn">&laquo;</a>
+        {% endif %}
+
+        {% for p in range(1, results.total_pages + 1) %}
+            {% if p == results.page %}
+                <span class="pagination-btn active">{{ p }}</span>
+            {% elif p <= 5 or p > results.total_pages - 2 or (p >= results.page - 2 and p <= results.page + 2) %}
+                <a href="/search?q={{ query | urlencode }}&p={{ p }}" class="pagination-btn">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if results.page < results.total_pages %}
+        <a href="/search?q={{ query | urlencode }}&p={{ results.page + 1 }}" class="pagination-btn">&raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="info-card" style="text-align: center; margin-top: 2rem;">
+        <h2 data-i18n="no_results_title">No results matched your query</h2>
+        <p data-i18n="no_results_desc">
+            Try checking your spelling, using more general terms, or adding new sites to the crawler index.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
