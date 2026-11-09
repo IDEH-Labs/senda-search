@@ -24,7 +24,7 @@ fi
 
 # 2. Prepare directories and permissions
 echo "Configuring directories..."
-mkdir -p /var/lib/senda
+mkdir -p /var/lib/senda/data
 mkdir -p /etc/senda
 mkdir -p /opt/senda
 

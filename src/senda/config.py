@@ -13,7 +13,6 @@ class SendaSettings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_prefix="SENDA_",
-        env_file=".env",
         extra="ignore"
     )
 
