@@ -22,9 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pure-Python Morphological Stemmer:** Dependency-free stemmer for Spanish and English inflectional suffixes enabling accurate root matching without heavy external NLP libraries.
 - **Concurrent Multi-Domain Crawler:** Asynchronous worker pool (`CrawlerRunner.crawl_seeds`) with active domain locking and RFC 9309 politeness enforcement, enabling high throughput across diverse hosts with zero per-domain contention.
 - **POST Search Query Privacy:** Privacy-preserving `POST /search` endpoint keeping search queries out of the browser URL bar, local navigation history, and intermediary HTTP proxy logs.
+- **Sovereign Search Verticals:** Four ethical search categories directly accessible via UI tabs and API (`category=all|web|news|images|library`):
+  - 🌐 **Web:** Decentralized, independent web indexed with anti-SEO text density.
+  - 📰 **Noticias:** Chronological news and tech policy feeds with extracted publication timestamps.
+  - 🖼️ **Imágenes:** Free Culture media index (Wikimedia Commons, Creative Commons, CC0) featuring direct privacy-preserving thumbnails (`referrerpolicy="no-referrer"`) and license attribution badges.
+  - 📚 **Biblioteca:** Free knowledge and encyclopedia index covering Wikipedia, Project Gutenberg, GNU Manuals, and Internet Archive.
+- **Dedicated Image FTS5 Index:** SQLite `images` and `images_fts` tables with automatic synchronization triggers and BM25 relevance ranking over image metadata and alt text.
 - **REST API:** FastAPI application providing `/api/v1/search`, `/api/v1/stats`, `/api/v1/health`, `/api/v1/takedown`, and OpenSearch 1.1 discovery at `/opensearch.xml`.
-- **Sovereign Web UI:** Semantic, accessible HTML5 templates functional 100% without JavaScript, featuring automatic dark mode, OpenSearch auto-discovery link, and zero external asset calls.
+- **Sovereign Web UI:** Semantic, accessible HTML5 templates functional 100% without JavaScript, featuring automatic dark mode, OpenSearch auto-discovery link, category tabs, and zero external asset calls.
 - **Client-Side i18n:** Multi-language support (English canonical, Spanish, French, German) with privacy-preserving local storage.
-- **Administrative CLI:** Command-line suite (`senda crawl`, `senda search`, `senda stats`, `senda purge-domain`, `senda purge-url`, `senda serve`).
-- **Test Suite:** 62 unit and integration tests with 89% codebase coverage.
+- **Administrative CLI:** Command-line suite (`senda crawl`, `senda search --category`, `senda stats`, `senda purge-domain`, `senda purge-url`, `senda serve`).
+- **Test Suite:** 65 unit and integration tests with 88% codebase coverage.
 - **Documentation:** Architecture guide, installation manual for Gentoo Linux / POSIX, administration manual, security threat model, privacy policy, and software bill of materials (SBOM).

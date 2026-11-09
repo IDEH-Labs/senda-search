@@ -40,18 +40,22 @@ def cmd_search(args):
     """Execute search query in the terminal."""
     storage = StorageEngine()
     retriever = SearchRetriever(storage)
-    results = retriever.search(args.query, page=args.page, page_size=args.limit)
+    results = retriever.search(args.query, page=args.page, page_size=args.limit, category=args.category)
 
-    print(f"\nSenda Search: '{args.query}'")
-    print(f"Matched {results.total_matches} documents in {results.duration_ms} ms (Page {results.page}/{results.total_pages or 1})\n")
+    cat_label = f" [{args.category.upper()}]" if args.category != "all" else ""
+    print(f"\nSenda Search{cat_label}: '{args.query}'")
+    print(f"Matched {results.total_matches} items in {results.duration_ms} ms (Page {results.page}/{results.total_pages or 1})\n")
 
     if not results.items:
-        print("No matching documents found.")
+        print("No matching items found.")
         return
 
     for i, item in enumerate(results.items, start=1):
         clean_snippet = item.snippet.replace("<mark>", "\033[1;33m").replace("</mark>", "\033[0m")
-        print(f"[{i}] \033[1;34m{item.title}\033[0m")
+        badge = f" [{item.doc_type.upper()}]" if item.doc_type != "web" else ""
+        print(f"[{i}]\033[1;35m{badge}\033[0m \033[1;34m{item.title}\033[0m")
+        if item.media_url:
+            print(f"    \033[36mMedia: {item.media_url}\033[0m")
         print(f"    \033[90m{item.url}\033[0m")
         print(f"    {clean_snippet}")
         print(f"    \033[32m[BM25 Score: {item.relevance_score}]\033[0m\n")
@@ -135,6 +139,7 @@ def main():
     # Command: search
     p_search = subparsers.add_parser("search", help="Query the local search index")
     p_search.add_argument("query", help="Search terms or quoted phrases")
+    p_search.add_argument("--category", choices=["all", "web", "news", "images", "library"], default="all", help="Search vertical (default: all)")
     p_search.add_argument("--page", type=int, default=1, help="Page number (default: 1)")
     p_search.add_argument("--limit", type=int, default=10, help="Results per page (default: 10)")
 

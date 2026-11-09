@@ -89,3 +89,41 @@ def test_extractor_anti_seo_text_density():
     assert doc_high.text_density > 0.8
     assert doc_low.text_density < 0.1
     assert doc_high.text_density > doc_low.text_density
+
+
+def test_extractor_verticals_and_images():
+    html_library = """
+    <html>
+        <head>
+            <title>Linux Kernel - Wikipedia</title>
+            <meta name="date" content="2026-05-15">
+        </head>
+        <body>
+            <h1>Linux Overview</h1>
+            <p>The Linux kernel is free and open-source software.</p>
+            <img src="/upload/tux.png" alt="Tux the penguin mascot" width="300" height="300">
+        </body>
+    </html>
+    """
+    doc_lib = DocumentExtractor.extract("https://en.wikipedia.org/wiki/Linux", html_library)
+
+    assert doc_lib.doc_type == "library"
+    assert doc_lib.published_at == "2026-05-15"
+    assert len(doc_lib.images) == 1
+    assert doc_lib.images[0].image_url == "https://en.wikipedia.org/upload/tux.png"
+    assert doc_lib.images[0].alt_text == "Tux the penguin mascot"
+    assert "Wikimedia" in doc_lib.images[0].license or "Free Culture" in doc_lib.images[0].license
+
+    # News classification
+    html_news = """
+    <html>
+        <head>
+            <title>FSF Defends User Freedom</title>
+            <meta property="article:published_time" content="2026-11-01T12:00:00Z">
+        </head>
+        <body><p>News dispatch on rights.</p></body>
+    </html>
+    """
+    doc_news = DocumentExtractor.extract("https://fsf.org/news/sovereignty", html_news)
+    assert doc_news.doc_type == "news"
+    assert doc_news.published_at == "2026-11-01"

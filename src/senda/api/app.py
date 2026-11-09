@@ -24,6 +24,10 @@ class SearchItemModel(BaseModel):
     title: str
     snippet: str
     relevance_score: float
+    doc_type: str = "web"
+    media_url: Optional[str] = None
+    published_at: Optional[str] = None
+    license: Optional[str] = None
 
 
 class SearchResponseModel(BaseModel):
@@ -33,6 +37,7 @@ class SearchResponseModel(BaseModel):
     page_size: int
     total_pages: int
     duration_ms: float
+    category: str = "all"
     items: list[SearchItemModel]
 
 
@@ -122,13 +127,18 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
     async def search(
         request: Request,
         q: str = Query(default="", max_length=256),
+        category: str = Query(default="all"),
         p: int = Query(default=1, ge=1),
         format: Optional[str] = Query(default=None),
         accept: Optional[str] = Header(default=None),
     ):
-        """Search endpoint supporting both HTML rendering and JSON content negotiation."""
+        """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
         clean_q = q.strip()
-        results = app_retriever.search(clean_q, page=p, page_size=10)
+        cat = category.lower().strip()
+        if cat not in ("all", "web", "news", "images", "library"):
+            cat = "all"
+
+        results = app_retriever.search(clean_q, page=p, page_size=12 if cat == "images" else 10, category=cat)
 
         # Content negotiation
         if format == "json" or (accept and "application/json" in accept and not ("text/html" in accept)):
@@ -139,6 +149,7 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
             name="results.html",
             context={
                 "query": clean_q,
+                "category": cat,
                 "results": results,
             }
         )
@@ -154,12 +165,16 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         form_data = urllib.parse.parse_qs(body_bytes.decode("utf-8", errors="replace"))
 
         q = form_data.get("q", [""])[0].strip()
+        cat = form_data.get("category", ["all"])[0].lower().strip()
+        if cat not in ("all", "web", "news", "images", "library"):
+            cat = "all"
+
         try:
             p = max(1, int(form_data.get("p", ["1"])[0]))
         except ValueError:
             p = 1
 
-        results = app_retriever.search(q, page=p, page_size=10)
+        results = app_retriever.search(q, page=p, page_size=12 if cat == "images" else 10, category=cat)
 
         # Content negotiation
         if format == "json" or (accept and "application/json" in accept and not ("text/html" in accept)):
@@ -170,6 +185,7 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
             name="results.html",
             context={
                 "query": q,
+                "category": cat,
                 "results": results,
             }
         )
@@ -177,11 +193,15 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
     @app.get("/api/v1/search", response_model=SearchResponseModel)
     async def api_search(
         q: str = Query(..., min_length=1, max_length=256),
+        category: str = Query(default="all"),
         page: int = Query(default=1, ge=1),
         page_size: int = Query(default=10, ge=1, le=50),
     ):
         """Dedicated JSON search API endpoint."""
-        results = app_retriever.search(q.strip(), page=page, page_size=page_size)
+        cat = category.lower().strip()
+        if cat not in ("all", "web", "news", "images", "library"):
+            cat = "all"
+        results = app_retriever.search(q.strip(), page=page, page_size=page_size, category=cat)
         return results
 
     @app.get("/api/v1/stats", response_model=StatsResponseModel)

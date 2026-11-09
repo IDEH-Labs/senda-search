@@ -169,3 +169,73 @@ def test_anti_seo_text_density_ranking_boost(tmp_path):
     assert results.items[1].url == "https://commercial-spam.com/post"
     assert results.items[0].relevance_score > results.items[1].relevance_score
 
+
+def test_search_verticals_and_images(tmp_path):
+    from senda.extractor.parser import ExtractedImage
+
+    storage = StorageEngine(db_path=tmp_path / "verticals_test.db")
+
+    # 1. News document
+    storage.upsert_document(
+        ExtractedDocument(
+            url="https://fsf.org/news/copyleft-summit",
+            title="Copyleft Summit 2026 Announced",
+            description="Global gathering of software freedom advocates.",
+            language="en",
+            headings="Keynotes and Workshops",
+            body_text="Discussion on GPL enforcement, sovereign hosting, and digital autonomy.",
+            content_hash="h_news",
+            doc_type="news",
+            published_at="2026-11-05",
+        )
+    )
+
+    # 2. Library / Encyclopedia document with free media image
+    storage.upsert_document(
+        ExtractedDocument(
+            url="https://en.wikipedia.org/wiki/GNU_General_Public_License",
+            title="GNU General Public License - Wikipedia",
+            description="Comprehensive historical encyclopedia entry on the GPL.",
+            language="en",
+            headings="Origins and History",
+            body_text="The GNU General Public License is a series of widely used free software licenses.",
+            content_hash="h_lib",
+            doc_type="library",
+            images=[
+                ExtractedImage(
+                    image_url="https://upload.wikimedia.org/wikipedia/commons/gplv3.png",
+                    alt_text="GNU GPLv3 official logo",
+                    page_url="https://en.wikipedia.org/wiki/GNU_General_Public_License",
+                    page_title="GNU General Public License",
+                    domain="en.wikipedia.org",
+                    license="CC-BY-SA 4.0 / Wikimedia Commons"
+                )
+            ]
+        )
+    )
+
+    retriever = SearchRetriever(storage)
+
+    # Web / All search
+    all_res = retriever.search("GNU", category="all")
+    assert all_res.total_matches >= 1
+
+    # News vertical search
+    news_res = retriever.search("sovereign", category="news")
+    assert news_res.total_matches == 1
+    assert news_res.items[0].doc_type == "news"
+    assert news_res.items[0].url == "https://fsf.org/news/copyleft-summit"
+
+    # Library vertical search
+    lib_res = retriever.search("License", category="library")
+    assert lib_res.total_matches == 1
+    assert lib_res.items[0].doc_type == "library"
+    assert "wikipedia.org" in lib_res.items[0].url
+
+    # Free Culture Images vertical search
+    img_res = retriever.search("GPLv3", category="images")
+    assert img_res.total_matches == 1
+    assert img_res.items[0].doc_type == "image"
+    assert img_res.items[0].media_url == "https://upload.wikimedia.org/wikipedia/commons/gplv3.png"
+    assert "Wikimedia" in img_res.items[0].license
+

@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS documents (
     first_indexed_at TEXT NOT NULL,
     last_crawled_at TEXT NOT NULL,
     status_code INTEGER DEFAULT 200,
-    text_density REAL DEFAULT 0.0
+    text_density REAL DEFAULT 0.0,
+    doc_type TEXT DEFAULT 'web',
+    published_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_documents_domain ON documents(domain);
@@ -66,6 +68,47 @@ CREATE TRIGGER IF NOT EXISTS trg_documents_au AFTER UPDATE ON documents BEGIN
     VALUES ('delete', old.id, old.title, old.headings, old.description, old.body);
     INSERT INTO documents_fts(rowid, title, headings, description, body)
     VALUES (new.id, new.title, new.headings, new.description, new.body);
+END;
+
+-- Free Culture Images Repository
+CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    image_url TEXT UNIQUE NOT NULL,
+    page_url TEXT NOT NULL,
+    page_title TEXT NOT NULL,
+    domain TEXT NOT NULL,
+    alt_text TEXT NOT NULL,
+    license TEXT DEFAULT 'Free Culture',
+    first_indexed_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_images_domain ON images(domain);
+
+-- Full-Text Search Virtual Table for Images
+CREATE VIRTUAL TABLE IF NOT EXISTS images_fts USING fts5(
+    alt_text,
+    page_title,
+    domain,
+    content='images',
+    content_rowid='id',
+    tokenize='unicode61 remove_diacritics 2'
+);
+
+CREATE TRIGGER IF NOT EXISTS trg_images_ai AFTER INSERT ON images BEGIN
+    INSERT INTO images_fts(rowid, alt_text, page_title, domain)
+    VALUES (new.id, new.alt_text, new.page_title, new.domain);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_images_ad AFTER DELETE ON images BEGIN
+    INSERT INTO images_fts(images_fts, rowid, alt_text, page_title, domain)
+    VALUES ('delete', old.id, old.alt_text, old.page_title, old.domain);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_images_au AFTER UPDATE ON images BEGIN
+    INSERT INTO images_fts(images_fts, rowid, alt_text, page_title, domain)
+    VALUES ('delete', old.id, old.alt_text, old.page_title, old.domain);
+    INSERT INTO images_fts(rowid, alt_text, page_title, domain)
+    VALUES (new.id, new.alt_text, new.page_title, new.domain);
 END;
 
 -- Frontier queue state table
@@ -120,11 +163,21 @@ class StorageEngine:
         """Create schema, tables, triggers, and indices if they do not exist."""
         with self.get_connection() as conn:
             conn.executescript(SCHEMA_SQL)
-            # Automatic schema migration for text_density
+            # Automatic schema migrations
+            for col_sql in [
+                "ALTER TABLE documents ADD COLUMN text_density REAL DEFAULT 0.0;",
+                "ALTER TABLE documents ADD COLUMN doc_type TEXT DEFAULT 'web';",
+                "ALTER TABLE documents ADD COLUMN published_at TEXT;"
+            ]:
+                try:
+                    conn.execute(col_sql)
+                except sqlite3.OperationalError:
+                    pass
+
             try:
-                conn.execute("ALTER TABLE documents ADD COLUMN text_density REAL DEFAULT 0.0;")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_documents_doc_type ON documents(doc_type);")
             except sqlite3.OperationalError:
-                pass  # Column already exists
+                pass
             conn.commit()
 
     def upsert_document(
@@ -140,7 +193,25 @@ class StorageEngine:
         now = datetime.now(timezone.utc).isoformat()
 
         with self.get_connection() as conn:
-            # Check existing document
+            # 1. Upsert free culture images if present
+            for img in doc.images:
+                try:
+                    conn.execute(
+                        """
+                        INSERT INTO images (
+                            image_url, page_url, page_title, domain, alt_text, license, first_indexed_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(image_url) DO UPDATE SET
+                            alt_text = excluded.alt_text,
+                            page_title = excluded.page_title,
+                            license = excluded.license
+                        """,
+                        (img.image_url, img.page_url, img.page_title, img.domain, img.alt_text, img.license, now)
+                    )
+                except Exception:
+                    pass
+
+            # 2. Check existing document
             cur = conn.execute(
                 "SELECT id, content_hash FROM documents WHERE url = ?",
                 (doc.url,)
@@ -171,6 +242,8 @@ class StorageEngine:
                         body = ?,
                         content_hash = ?,
                         text_density = ?,
+                        doc_type = ?,
+                        published_at = ?,
                         last_crawled_at = ?,
                         status_code = ?
                     WHERE id = ?
@@ -184,6 +257,8 @@ class StorageEngine:
                         doc.body_text,
                         doc.content_hash,
                         doc.text_density,
+                        doc.doc_type,
+                        doc.published_at,
                         now,
                         status_code,
                         doc_id
@@ -196,9 +271,9 @@ class StorageEngine:
                     """
                     INSERT INTO documents (
                         url, domain, title, description, language,
-                        headings, body, content_hash, text_density, first_indexed_at,
-                        last_crawled_at, status_code
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        headings, body, content_hash, text_density, doc_type,
+                        published_at, first_indexed_at, last_crawled_at, status_code
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         doc.url,
@@ -210,6 +285,8 @@ class StorageEngine:
                         doc.body_text,
                         doc.content_hash,
                         doc.text_density,
+                        doc.doc_type,
+                        doc.published_at,
                         now,
                         now,
                         status_code

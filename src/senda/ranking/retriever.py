@@ -26,11 +26,15 @@ class SearchResultItem:
     title: str
     snippet: str
     relevance_score: float
+    doc_type: str = "web"
+    media_url: Optional[str] = None
+    published_at: Optional[str] = None
+    license: Optional[str] = None
 
 
 @dataclass(frozen=True)
 class SearchResultSet:
-    """Paginated collection of ranked search results."""
+    """Paginated collection of ranked search results across sovereign verticals."""
     query: str
     sanitized_query: str
     total_matches: int
@@ -38,6 +42,7 @@ class SearchResultSet:
     page_size: int
     total_pages: int
     duration_ms: float
+    category: str = "all"
     items: list[SearchResultItem] = field(default_factory=list)
 
 
@@ -170,9 +175,10 @@ class SearchRetriever:
         self,
         query: str,
         page: int = 1,
-        page_size: int = 10
+        page_size: int = 10,
+        category: str = "all"
     ) -> SearchResultSet:
-        """Execute a ranked full-text search with BM25, query operators, and contextual snippets."""
+        """Execute a ranked full-text search with BM25, query operators, and vertical categories."""
         start_time = time.perf_counter()
 
         page = max(1, page)
@@ -185,6 +191,7 @@ class SearchRetriever:
             return SearchResultSet(
                 query=query,
                 sanitized_query="",
+                category=category,
                 total_matches=0,
                 page=page,
                 page_size=page_size,
@@ -193,14 +200,112 @@ class SearchRetriever:
                 items=[]
             )
 
+        # 1. Specialized Search Vertical: Free Culture Images
+        if category == "images":
+            with self.storage.get_connection() as conn:
+                count_sql = """
+                    SELECT COUNT(*) FROM images_fts
+                    JOIN images img ON img.id = images_fts.rowid
+                    WHERE images_fts MATCH ?
+                      AND (? IS NULL OR img.domain = ? OR img.domain LIKE '%.' || ?)
+                """
+                count_cur = conn.execute(
+                    count_sql,
+                    (
+                        parsed.fts_expression,
+                        parsed.domain_filter,
+                        parsed.domain_filter,
+                        parsed.domain_filter
+                    )
+                )
+                total_matches = count_cur.fetchone()[0]
+
+                if total_matches == 0:
+                    duration = (time.perf_counter() - start_time) * 1000.0
+                    return SearchResultSet(
+                        query=query,
+                        sanitized_query=parsed.fts_expression,
+                        category="images",
+                        total_matches=0,
+                        page=page,
+                        page_size=page_size,
+                        total_pages=0,
+                        duration_ms=round(duration, 2),
+                        items=[]
+                    )
+
+                total_pages = (total_matches + page_size - 1) // page_size
+                query_sql = """
+                    SELECT
+                        img.image_url,
+                        img.page_url,
+                        img.page_title,
+                        img.domain,
+                        img.alt_text,
+                        img.license,
+                        bm25(images_fts, 5.0, 2.0, 1.0) AS bm25_score
+                    FROM images_fts
+                    JOIN images img ON img.id = images_fts.rowid
+                    WHERE images_fts MATCH ?
+                      AND (? IS NULL OR img.domain = ? OR img.domain LIKE '%.' || ?)
+                    ORDER BY bm25_score ASC
+                    LIMIT ? OFFSET ?
+                """
+                rows = conn.execute(
+                    query_sql,
+                    (
+                        parsed.fts_expression,
+                        parsed.domain_filter,
+                        parsed.domain_filter,
+                        parsed.domain_filter,
+                        page_size,
+                        offset
+                    )
+                ).fetchall()
+
+                image_items = [
+                    SearchResultItem(
+                        url=row["page_url"],
+                        domain=row["domain"],
+                        title=row["alt_text"] or row["page_title"],
+                        snippet=f"License: {row['license']} • Source: {row['domain']}",
+                        relevance_score=round(-float(row["bm25_score"]), 6),
+                        doc_type="image",
+                        media_url=row["image_url"],
+                        license=row["license"]
+                    )
+                    for row in rows
+                ]
+
+                duration = (time.perf_counter() - start_time) * 1000.0
+                return SearchResultSet(
+                    query=query,
+                    sanitized_query=parsed.fts_expression,
+                    category="images",
+                    total_matches=total_matches,
+                    page=page,
+                    page_size=page_size,
+                    total_pages=total_pages,
+                    duration_ms=round(duration, 2),
+                    items=image_items
+                )
+
+        # 2. Document Search Verticals (All, Web, News, Library/Encyclopedia)
+        vertical_condition = ""
+        if category == "news":
+            vertical_condition = "AND (d.doc_type = 'news' OR d.url LIKE '%/news%' OR d.url LIKE '%/blog%' OR d.url LIKE '%/noticias%')"
+        elif category == "library":
+            vertical_condition = "AND (d.doc_type = 'library' OR d.domain LIKE '%wikipedia%' OR d.domain LIKE '%archive.org%' OR d.domain LIKE '%gutenberg.org%' OR d.domain LIKE '%gnu.org%')"
+
         with self.storage.get_connection() as conn:
-            # 1. Count total matching rows filtered by domain and language
-            count_sql = """
+            # Count total matching rows filtered by domain and language
+            count_sql = f"""
                 SELECT COUNT(*) FROM documents_fts
                 JOIN documents d ON d.id = documents_fts.rowid
                 WHERE documents_fts MATCH ?
                   AND (? IS NULL OR d.domain = ? OR d.domain LIKE '%.' || ?)
                   AND (? IS NULL OR d.language = ?)
+                  {vertical_condition}
             """
             count_cur = conn.execute(
                 count_sql,
@@ -220,6 +325,7 @@ class SearchRetriever:
                 return SearchResultSet(
                     query=query,
                     sanitized_query=parsed.fts_expression,
+                    category=category,
                     total_matches=0,
                     page=page,
                     page_size=page_size,
@@ -230,13 +336,15 @@ class SearchRetriever:
 
             total_pages = (total_matches + page_size - 1) // page_size
 
-            # 2. Retrieve ranked rows with BM25, anti-SEO text density boost, snippets, and filters
-            query_sql = """
+            # Retrieve ranked rows with BM25, anti-SEO text density boost, snippets, and filters
+            query_sql = f"""
                 SELECT
                     d.url,
                     d.domain,
                     d.title,
                     d.description,
+                    COALESCE(d.doc_type, 'web') AS doc_type,
+                    d.published_at,
                     COALESCE(d.text_density, 0.0) AS text_density,
                     snippet(documents_fts, -1, '<mark>', '</mark>', '...', 28) AS fts_snippet,
                     bm25(documents_fts, ?, ?, ?, ?) AS bm25_score
@@ -245,6 +353,7 @@ class SearchRetriever:
                 WHERE documents_fts MATCH ?
                   AND (? IS NULL OR d.domain = ? OR d.domain LIKE '%.' || ?)
                   AND (? IS NULL OR d.language = ?)
+                  {vertical_condition}
                 ORDER BY (bm25(documents_fts, ?, ?, ?, ?) * (1.0 + COALESCE(d.text_density, 0.0))) ASC
                 LIMIT ? OFFSET ?
             """
@@ -288,6 +397,8 @@ class SearchRetriever:
                         title=row["title"],
                         snippet=snippet_text,
                         relevance_score=final_score,
+                        doc_type=row["doc_type"],
+                        published_at=row["published_at"],
                     )
                 )
 
@@ -296,6 +407,7 @@ class SearchRetriever:
         return SearchResultSet(
             query=query,
             sanitized_query=parsed.fts_expression,
+            category=category,
             total_matches=total_matches,
             page=page,
             page_size=page_size,

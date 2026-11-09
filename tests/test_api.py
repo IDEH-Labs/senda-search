@@ -75,13 +75,29 @@ def test_api_post_search_privacy(client):
     # JSON content negotiation via POST
     response_json = client.post(
         "/search?format=json",
-        data={"q": "sovereignty"},
+        data={"q": "sovereignty", "category": "all"},
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
     assert response_json.status_code == 200
     data = response_json.json()
     assert data["total_matches"] == 1
     assert data["items"][0]["url"] == "https://fsf.org/news"
+
+
+def test_api_category_verticals(client):
+    # Category web
+    r_web = client.get("/search?q=Foundation&category=web")
+    assert r_web.status_code == 200
+    assert "Free Software Foundation Updates" in r_web.text
+
+    # Category images (empty in this fixture, but renders image layout)
+    r_img = client.get("/search?q=Foundation&category=images")
+    assert r_img.status_code == 200
+
+    # REST API category
+    r_api = client.get("/api/v1/search?q=Foundation&category=web")
+    assert r_api.status_code == 200
+    assert r_api.json()["category"] == "web"
 
 
 def test_api_content_negotiation_json(client):

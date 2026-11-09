@@ -20,3 +20,19 @@ https://www.debian.org
 https://www.eff.org
 https://archive.org
 https://libreplanet.org
+
+# Free Knowledge & Sovereign Digital Library
+https://en.wikipedia.org
+https://es.wikipedia.org
+https://www.gutenberg.org
+https://www.gnu.org/manual
+
+# Free Cultural Media (Wikimedia Commons)
+https://commons.wikimedia.org
+
+# Ethical Tech News & Journalistic Feeds
+https://www.fsf.org/news
+https://www.eff.org/deeplinks
+https://lwn.net
+https://fsfe.org/news
+https://planet.debian.org

@@ -7,7 +7,15 @@
         Independent, ethical, and verifiable web search engine. Free software under GPL-3.0.
     </p>
 
+    <div class="category-tabs" style="justify-content: center; border-bottom: none; margin-bottom: 0.75rem;">
+        <button type="button" class="category-tab active" onclick="setCategory('all', this)">🌐 <span data-i18n="tab_web">Web</span></button>
+        <button type="button" class="category-tab" onclick="setCategory('news', this)">📰 <span data-i18n="tab_news">Noticias</span></button>
+        <button type="button" class="category-tab" onclick="setCategory('images', this)">🖼️ <span data-i18n="tab_images">Imágenes</span></button>
+        <button type="button" class="category-tab" onclick="setCategory('library', this)">📚 <span data-i18n="tab_library">Biblioteca</span></button>
+    </div>
+
     <form class="search-form" action="/search" method="get">
+        <input type="hidden" name="category" id="search-category" value="all">
         <div class="search-input-wrapper">
             <input
                 type="text"
@@ -23,6 +31,16 @@
             <button type="submit" class="search-button" data-i18n="search_btn">Search</button>
         </div>
     </form>
+
+    <script>
+        function setCategory(cat, btn) {
+            document.getElementById('search-category').value = cat;
+            document.querySelectorAll('.category-tabs .category-tab').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            btn.classList.add('active');
+        }
+    </script>
 
     <div class="privacy-pills">
         <span class="privacy-pill">
