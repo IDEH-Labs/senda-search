@@ -1524,3 +1524,151 @@ footer.app-footer a:hover {
   font-size: 0.75rem;
   margin-left: 0.3rem;
 }
+
+/* ==========================================================================
+   Verifiable Encyclopedic Entity Card (Wikipedia & Wikidata)
+   ========================================================================== */
+.entity-card {
+  margin-bottom: 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.entity-card-body {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.entity-thumbnail-wrapper {
+  flex-shrink: 0;
+  width: 140px;
+  height: 175px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+}
+
+.entity-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.entity-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.entity-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.entity-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.entity-badge {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-cyan);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+.entity-description {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-accent);
+}
+
+.entity-extract {
+  margin: 0 0 1rem 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.entity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.entity-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bg-surface);
+  background: var(--text-cyan);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.entity-action-btn:hover {
+  opacity: 0.9;
+}
+
+.entity-action-btn.secondary {
+  color: var(--text-secondary);
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+}
+
+.entity-action-btn.secondary:hover {
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
+
+.entity-card-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(0, 0, 0, 0.12);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+}
+
+.entity-footer-sep {
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  .entity-card-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .entity-thumbnail-wrapper {
+    width: 100%;
+    max-width: 200px;
+    height: 180px;
+  }
+}

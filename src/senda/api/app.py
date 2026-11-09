@@ -24,6 +24,7 @@ from senda.providers.internal import InternalStorageProvider
 from senda.providers.openalex import OpenAlexProvider
 from senda.providers.fediverse import FediverseProvider
 from senda.providers.bluesky import BlueskyProvider
+from senda.providers.wikipedia import WikipediaEntityProvider
 from senda.providers.base import SearchResultItem
 from senda.ai.grounded_synthesis import GroundedSynthesizer
 
@@ -70,6 +71,7 @@ class SearchResponseModel(BaseModel):
     category: str = "all"
     items: list[SearchItemModel]
     grounded_synthesis: Optional[dict] = None
+    entity_card: Optional[dict] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -127,6 +129,7 @@ def create_app(
         enabled=settings.BLUESKY_ENABLED,
     )
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
+    app_wiki_entity = WikipediaEntityProvider()
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -433,6 +436,13 @@ def create_app(
             if synth_res:
                 grounded_data = synth_res.model_dump()
 
+        # Verifiable Encyclopedic Entity Card (Wikipedia & Wikidata on-demand)
+        entity_data = None
+        if current_page == 1 and clean_q and cat in ("all", "web", "library"):
+            entity_card_obj = await app_wiki_entity.get_entity(clean_q, lang=settings.DEFAULT_LANGUAGE)
+            if entity_card_obj:
+                entity_data = entity_card_obj.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -443,6 +453,7 @@ def create_app(
             category=cat,
             items=formatted_items,
             grounded_synthesis=grounded_data,
+            entity_card=entity_data,
         )
 
         # Content negotiation
@@ -460,6 +471,7 @@ def create_app(
                 "time_filter": tf,
                 "safe_search": ss,
                 "grounded_synthesis": grounded_data,
+                "entity_card": entity_data,
             },
             theme,
         )

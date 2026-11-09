@@ -95,6 +95,52 @@
         <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
     </div>
 
+    <!-- Verifiable Encyclopedic Entity Card (Wikipedia / Wikidata) -->
+    {% if entity_card %}
+    <aside class="entity-card" role="region" aria-label="Ficha enciclopédica verificable">
+        <div class="entity-card-body">
+            {% if entity_card.thumbnail_url %}
+            <div class="entity-thumbnail-wrapper">
+                <img src="{{ entity_card.thumbnail_url }}" alt="{{ entity_card.title }}" class="entity-thumbnail" loading="lazy" referrerpolicy="no-referrer">
+            </div>
+            {% endif %}
+            <div class="entity-info">
+                <div class="entity-header">
+                    <h2 class="entity-title">{{ entity_card.title }}</h2>
+                    {% if entity_card.wikibase_item %}
+                    <span class="entity-badge" title="Identificador Wikidata universal">{{ entity_card.wikibase_item }}</span>
+                    {% endif %}
+                </div>
+                {% if entity_card.description %}
+                <p class="entity-description">{{ entity_card.description }}</p>
+                {% endif %}
+                <p class="entity-extract">{{ entity_card.extract }}</p>
+                
+                <div class="entity-actions">
+                    <a href="{{ entity_card.wikipedia_url }}" target="_blank" rel="noopener noreferrer" class="entity-action-btn">
+                        <span>Artículo en Wikipedia ↗</span>
+                    </a>
+                    <a href="{{ entity_card.history_url }}" target="_blank" rel="noopener noreferrer" class="entity-action-btn secondary" title="Auditar historial y autores de esta información">
+                        <span>Historial de cambios ↗</span>
+                    </a>
+                    <a href="/search?q={{ entity_card.title | urlencode }}&category=library" class="entity-action-btn secondary" title="Explorar publicaciones científicas primarias">
+                        <span>Ver obras en Biblioteca</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <footer class="entity-card-footer">
+            <span class="entity-footer-source">Fuente: {{ entity_card.source }}</span>
+            <span class="entity-footer-sep">&bull;</span>
+            <span class="entity-footer-license">{{ entity_card.license }}</span>
+            {% if entity_card.last_updated %}
+            <span class="entity-footer-sep">&bull;</span>
+            <span class="entity-footer-date">Revisión: {{ entity_card.last_updated[:10] }}</span>
+            {% endif %}
+        </footer>
+    </aside>
+    {% endif %}
+
     <!-- Grounded AI Synthesis (Zero JS, Accessible, Attributed to Primary Sources) -->
     {% if grounded_synthesis %}
     <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis de fuentes primarias">

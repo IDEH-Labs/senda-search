@@ -22,6 +22,7 @@ from senda.providers.doaj import DoajProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.providers.fediverse import FediverseProvider
 from senda.providers.bluesky import BlueskyProvider
+from senda.providers.wikipedia import WikipediaEntityCard, WikipediaEntityProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
 
 __all__ = [
@@ -42,6 +43,8 @@ __all__ = [
     "PubMedProvider",
     "FediverseProvider",
     "BlueskyProvider",
+    "WikipediaEntityCard",
+    "WikipediaEntityProvider",
     "ProviderAggregator",
     "BANG_SHORTCUTS",
 ]
