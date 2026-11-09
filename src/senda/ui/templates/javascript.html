@@ -1,30 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}JavaScript Web Labels - Senda (GNU LibreJS Compliant){% endblock %}
+{% block title %}JavaScript Web Labels - Senda (GNU LibreJS){% endblock %}
 
 {% block content %}
-<div class="info-card">
-    <h1>JavaScript Licenses (GNU LibreJS)</h1>
-    <p>
-        Senda adheres strictly to the Free Software Foundation's criteria for Free JavaScript.
-        The search engine is 100% operational with JavaScript disabled.
-    </p>
+<div class="static-content-container" style="max-width: 860px; margin: 2rem auto; padding: 0 1.5rem;">
+    <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
+            Licencias de JavaScript (GNU LibreJS Web Labels)
+        </h1>
+        <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem;">
+            <strong>Senda</strong> cumple estrictamente con los criterios de <em>Software Libre para JavaScript</em> establecidos por la 
+            <a href="https://www.fsf.org" target="_blank" rel="noopener noreferrer" style="color: var(--text-accent);">Free Software Foundation (FSF)</a>. 
+            El buscador no requiere JavaScript para su funcionamiento esencial: la búsqueda, paginación, filtros y redirecciones operan al 100% mediante HTML semántico y procesamiento en el servidor.
+        </p>
 
-    <table id="jslicense-labels1" style="width: 100%; border-collapse: collapse; margin-top: 1.5rem;">
-        <thead>
-            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
-                <th style="padding: 0.75rem;">Script</th>
-                <th style="padding: 0.75rem;">License</th>
-                <th style="padding: 0.75rem;">Source Code</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 0.75rem;"><a href="/static/js/i18n.js">i18n.js</a></td>
-                <td style="padding: 0.75rem;"><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPLv3 or later</a></td>
-                <td style="padding: 0.75rem;"><a href="/static/js/i18n.js">/static/js/i18n.js</a></td>
-            </tr>
-        </tbody>
-    </table>
+        <div style="overflow-x: auto;">
+            <table id="jslicense-labels1" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-strong); color: var(--text-main);">
+                        <th style="padding: 0.75rem 1rem;">Archivo / Script</th>
+                        <th style="padding: 0.75rem 1rem;">Licencia Canónica</th>
+                        <th style="padding: 0.75rem 1rem;">Código Fuente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted);">
+                        <td style="padding: 0.85rem 1rem;">
+                            <a href="/static/js/i18n.js" style="color: var(--text-accent); text-decoration: none; font-family: var(--font-mono);">i18n.js</a>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer" style="color: var(--text-link);">GNU-GPL-3.0-or-later</a>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            <a href="/static/js/i18n.js" style="color: var(--text-cyan); text-decoration: none; font-family: var(--font-mono);">/static/js/i18n.js</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 1rem; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-main); line-height: 1.5;">
+                ✓ <strong>Garantía de libertad digital:</strong> Los scripts de Senda son libres de ofuscación, libres de telemetría de terceros, no registran pulsaciones de teclas ni realizan rastreo de comportamiento. Si utiliza el complemento <strong>GNU LibreJS</strong>, este identificará automáticamente estos scripts como software libre y los ejecutará sin advertencias de bloqueo.
+            </p>
+        </div>
+    </div>
 </div>
 {% endblock %}
