@@ -94,13 +94,21 @@ class SafeFetcher:
         timeout_seconds: Optional[float] = None,
         max_size_bytes: Optional[int] = None,
         max_redirects: Optional[int] = None,
+        proxy: Optional[str] = None,
         transport: Optional[httpx.AsyncBaseTransport] = None,
     ):
         self.user_agent = user_agent or settings.USER_AGENT
         self.timeout_seconds = timeout_seconds or settings.REQUEST_TIMEOUT_SECONDS
         self.max_size_bytes = max_size_bytes or settings.MAX_DOCUMENT_SIZE_BYTES
         self.max_redirects = max_redirects or settings.MAX_REDIRECTS
-        self.transport = transport or AntiSSRFTransport(verify=True)
+        self.proxy = proxy or settings.CRAWLER_PROXY or None
+
+        if transport:
+            self.transport = transport
+        elif self.proxy:
+            self.transport = httpx.AsyncHTTPTransport(proxy=self.proxy, verify=True)
+        else:
+            self.transport = AntiSSRFTransport(verify=True)
 
     async def fetch(self, url: str) -> FetchedDocument:
         """Safely fetch a URL with full anti-SSRF verification and streaming size guards.

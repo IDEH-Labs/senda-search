@@ -82,3 +82,20 @@ def test_cli_crawl_missing_args(test_db_env, monkeypatch, capsys):
     captured = capsys.readouterr()
     assert "Error: Must provide either a seed URL or --seeds-file." in captured.out
 
+
+def test_cli_crawl_daemon_once(test_db_env, tmp_path, monkeypatch, capsys):
+    from unittest.mock import AsyncMock
+    seeds_file = tmp_path / "test_seeds.txt"
+    seeds_file.write_text("https://example.org\nhttps://fsf.org\n", encoding="utf-8")
+
+    monkeypatch.setattr(sys, "argv", ["senda", "crawl-daemon", "--seeds-file", str(seeds_file), "--once", "--max-pages", "5"])
+
+    with patch("senda.cli.main.CrawlerRunner.crawl_seeds", new_callable=AsyncMock) as mock_crawl:
+        mock_crawl.return_value = 2
+        main()
+
+    captured = capsys.readouterr()
+    assert "Senda Ethical Indexer Daemon" in captured.out
+    assert "Cycle #1 completed. Indexed/Updated: 2 docs." in captured.out
+    assert "Senda Indexer Daemon stopped cleanly." in captured.out
+

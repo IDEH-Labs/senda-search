@@ -114,6 +114,14 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
             "img-src * data:; "
             "frame-ancestors 'none';"
         )
+        # Advertise Tor Onion Service to Tor Browser per RFC / Tor Project standard
+        if settings.ONION_HOST:
+            onion_raw = settings.ONION_HOST.strip().rstrip("/")
+            if not onion_raw.startswith("http://") and not onion_raw.startswith("https://"):
+                onion_raw = f"http://{onion_raw}"
+            q_part = f"?{request.url.query}" if request.url.query else ""
+            response.headers["Onion-Location"] = f"{onion_raw}{request.url.path}{q_part}"
+
         return response
 
     @app.middleware("http")

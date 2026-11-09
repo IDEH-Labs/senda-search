@@ -137,7 +137,7 @@ class QuerySanitizer:
         # Combine into valid SQLite FTS5 expression
         fts_parts: list[str] = []
         if positive_clauses:
-            fts_parts.append(" ".join(positive_clauses))
+            fts_parts.append(" AND ".join(positive_clauses))
 
         if negative_clauses:
             # FTS5 syntax: expr1 NOT expr2

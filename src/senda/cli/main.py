@@ -103,6 +103,87 @@ def cmd_crawl(args):
         print("\n[Crawl Cancelled] Interrupted by user.")
 
 
+def cmd_crawl_daemon(args):
+    """Run continuous, polite background crawling daemon."""
+    from pathlib import Path
+    import signal
+    import time
+
+    seeds_file = args.seeds_file
+    if not seeds_file:
+        default_file = Path(__file__).resolve().parent.parent.parent.parent / "seeds" / "ethical_seeds.txt"
+        if not default_file.exists():
+            default_file = Path("seeds/ethical_seeds.txt")
+        if default_file.exists():
+            seeds_file = str(default_file)
+
+    seeds = []
+    if seeds_file and Path(seeds_file).exists():
+        for line in Path(seeds_file).read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                seeds.append(line)
+
+    if not seeds:
+        print("Error: No seeds found. Provide --seeds-file or populate seeds/ethical_seeds.txt.")
+        return
+
+    interval_minutes = args.interval_minutes or settings.CRAWL_DAEMON_INTERVAL_MINUTES
+    max_pages = args.max_pages or settings.CRAWL_DAEMON_MAX_PAGES
+    max_depth = args.max_depth
+
+    print(f"\n=== [Senda Ethical Indexer Daemon] ===")
+    print(f"Seeds loaded:    {len(seeds)} seed URLs")
+    print(f"Cycle interval:  {interval_minutes} minutes")
+    print(f"Max per cycle:   {max_pages} pages (Depth: {max_depth})")
+    print(f"Politeness rate: {settings.DEFAULT_CRAWL_DELAY_SECONDS}s per domain")
+    print(f"Crawler Proxy:   {settings.CRAWLER_PROXY or 'Direct (Anti-SSRF Pinned)'}")
+    print("Running in background. Press Ctrl+C or send SIGTERM to stop.\n")
+
+    shutdown = False
+
+    def handle_sig(sig, frame):
+        nonlocal shutdown
+        print("\n[Daemon] Graceful shutdown signal received. Finishing active cycle...")
+        shutdown = True
+
+    try:
+        signal.signal(signal.SIGINT, handle_sig)
+        signal.signal(signal.SIGTERM, handle_sig)
+    except (ValueError, AttributeError):
+        pass
+
+    runner = CrawlerRunner()
+    cycle = 1
+
+    while not shutdown:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Starting crawl cycle #{cycle}...")
+        try:
+            indexed = asyncio.run(
+                runner.crawl_seeds(
+                    seed_urls=seeds,
+                    max_pages=max_pages,
+                    max_depth=max_depth,
+                    on_page_indexed=lambda url, title, count: print(f"  [Cycle #{cycle} - {count}/{max_pages}] Indexed: {title[:45]} ({url})"),
+                )
+            )
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Cycle #{cycle} completed. Indexed/Updated: {indexed} docs.")
+        except Exception as e:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Cycle #{cycle} warning: {e}")
+
+        cycle += 1
+        if shutdown or args.once:
+            break
+
+        sleep_secs = interval_minutes * 60
+        for _ in range(int(sleep_secs)):
+            if shutdown:
+                break
+            time.sleep(1)
+
+    print("[Daemon] Senda Indexer Daemon stopped cleanly.")
+
+
 def cmd_purge_domain(args):
     """Purge all indexed documents from a specified domain."""
     storage = StorageEngine()
@@ -158,6 +239,14 @@ def main():
     p_crawl.add_argument("--max-pages", type=int, default=10, help="Max documents to index (default: 10)")
     p_crawl.add_argument("--max-depth", type=int, default=2, help="Max link hop depth (default: 2)")
 
+    # Command: crawl-daemon
+    p_daemon = subparsers.add_parser("crawl-daemon", help="Run background continuous ethical crawl daemon")
+    p_daemon.add_argument("--seeds-file", help="Path to text file containing seed URLs (defaults to seeds/ethical_seeds.txt)")
+    p_daemon.add_argument("--interval-minutes", type=int, default=None, help=f"Interval between crawl cycles in minutes (default: {settings.CRAWL_DAEMON_INTERVAL_MINUTES})")
+    p_daemon.add_argument("--max-pages", type=int, default=None, help=f"Maximum pages to index per cycle (default: {settings.CRAWL_DAEMON_MAX_PAGES})")
+    p_daemon.add_argument("--max-depth", type=int, default=2, help="Max link hop depth (default: 2)")
+    p_daemon.add_argument("--once", action="store_true", help="Run a single crawl cycle and exit cleanly")
+
     # Command: purge-domain
     p_purgd = subparsers.add_parser("purge-domain", help="Takedown/purge entire domain from index")
     p_purgd.add_argument("domain", help="Domain name to purge (e.g. example.com)")
@@ -177,6 +266,7 @@ def main():
         "stats": cmd_stats,
         "search": cmd_search,
         "crawl": cmd_crawl,
+        "crawl-daemon": cmd_crawl_daemon,
         "purge-domain": cmd_purge_domain,
         "purge-url": cmd_purge_url,
         "serve": cmd_serve,

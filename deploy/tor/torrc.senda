@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+# Senda Search Engine — Tor Hidden Service v3 Configuration
+
+# Instructions:
+# 1. Install tor (apt install tor / pacman -S tor / emerge net-vpn/tor)
+# 2. Append this configuration to /etc/tor/torrc or /etc/tor/torrc.d/senda.conf
+# 3. Restart tor daemon (systemctl restart tor)
+# 4. Read your .onion address from: /var/lib/tor/senda_onion/hostname
+# 5. Export SENDA_ONION_HOST="youraddress.onion" in Senda's systemd unit to enable Onion-Location headers
+
+HiddenServiceDir /var/lib/tor/senda_onion/
+HiddenServiceVersion 3
+HiddenServicePort 80 127.0.0.1:8000

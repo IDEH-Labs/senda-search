@@ -233,3 +233,15 @@ def test_api_health_endpoints(client):
     data_v1 = r_v1.json()
     assert data_v1["status"] == "healthy"
     assert data_v1["app"] == "Senda"
+
+
+def test_onion_location_header(client, monkeypatch):
+    """Verify Onion-Location header is correctly advertised to Tor Browser when configured."""
+    monkeypatch.setattr("senda.config.settings.ONION_HOST", "http://sendatest1234567890abcdef.onion")
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert resp.headers.get("Onion-Location") == "http://sendatest1234567890abcdef.onion/"
+
+    resp_search = client.get("/search?q=freedom")
+    assert resp_search.status_code == 200
+    assert resp_search.headers.get("Onion-Location") == "http://sendatest1234567890abcdef.onion/search?q=freedom"

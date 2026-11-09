@@ -85,3 +85,18 @@ def test_dns_resolution_returning_private_ip_is_blocked():
     with patch("socket.getaddrinfo", return_value=mock_addrinfo):
         with pytest.raises(SSRFSecurityViolation, match="prohibited IP '10.0.0.5'"):
             NetworkGuard.resolve_and_validate("evil-internal.example.org", 80)
+
+
+def test_tor_onion_address_validation():
+    # Valid v3 onion (56 chars base32)
+    valid_v3 = "expyuzz5wqqfdgah56trgahphgahpagah56trgahphgahpagah56trga.onion"
+    ips = NetworkGuard.resolve_and_validate(valid_v3)
+    assert ips == ["127.0.0.1"]
+
+    # Invalid characters in onion address
+    with pytest.raises(SSRFSecurityViolation, match="Invalid Tor .onion address format"):
+        NetworkGuard.resolve_and_validate("invalid_onion_address!@#.onion")
+
+    # Invalid length
+    with pytest.raises(SSRFSecurityViolation, match="Invalid Tor .onion address format"):
+        NetworkGuard.resolve_and_validate("short.onion")

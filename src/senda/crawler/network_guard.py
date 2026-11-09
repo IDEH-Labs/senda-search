@@ -85,7 +85,16 @@ class NetworkGuard:
                 raise SSRFSecurityViolation(f"Host '{hostname}' is a forbidden non-public IP literal.")
             return [str(ip_literal)]
         except ValueError:
-            pass  # It's a standard domain name, continue to DNS resolution
+            pass  # It's a standard domain name or special-use domain
+
+        # Tor Special-Use Domain (.onion per RFC 7686)
+        if hostname.lower().endswith(".onion"):
+            onion_label = hostname.lower()[:-6]
+            # Valid Tor v3 (56 chars base32) or legacy v2 (16 chars base32)
+            base32_chars = set("abcdefghijklmnopqrstuvwxyz234567")
+            if len(onion_label) in (16, 56) and set(onion_label).issubset(base32_chars):
+                return ["127.0.0.1"]
+            raise SSRFSecurityViolation(f"Invalid Tor .onion address format: '{hostname}'.")
 
         # Resolve through system resolver
         try:

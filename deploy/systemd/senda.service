@@ -11,6 +11,11 @@ Type=simple
 User=senda
 Group=senda
 WorkingDirectory=/var/lib/senda
+Environment="SENDA_DATABASE_PATH=/var/lib/senda/data/senda.db"
+Environment="SENDA_HOST=127.0.0.1"
+Environment="SENDA_PORT=8000"
+# Uncomment when Tor Onion service is configured to emit Onion-Location headers
+# Environment="SENDA_ONION_HOST=http://your-address.onion"
 ExecStart=/opt/senda/venv/bin/senda serve --host 127.0.0.1 --port 8000
 Restart=on-failure
 RestartSec=5s

@@ -79,6 +79,24 @@ class SendaSettings(BaseSettings):
     DEFAULT_REGION: str = "co"
     DEFAULT_LANGUAGE: str = "es"
 
+    # Tor Onion Service & Anonymous Crawling
+    ONION_HOST: str = Field(
+        default="",
+        description="Optional Tor .onion hostname (e.g., 'senda...onion') to emit RFC Onion-Location headers."
+    )
+    CRAWLER_PROXY: str = Field(
+        default="",
+        description="Optional SOCKS5 or HTTP proxy URL (e.g., 'socks5://127.0.0.1:9050') for Tor crawling."
+    )
+    CRAWL_DAEMON_INTERVAL_MINUTES: int = Field(
+        default=30,
+        description="Default interval in minutes between background crawl daemon passes."
+    )
+    CRAWL_DAEMON_MAX_PAGES: int = Field(
+        default=50,
+        description="Default maximum documents to index per background crawl cycle."
+    )
+
     # Web service
     SERVER_HOST: str = "127.0.0.1"
     SERVER_PORT: int = 8000
