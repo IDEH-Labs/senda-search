@@ -4,6 +4,8 @@
 """Unit tests for SearchProvider adapters, normalization, and aggregator."""
 
 import pytest
+from unittest.mock import patch, AsyncMock
+import httpx
 from senda.indexer.storage import StorageEngine
 from senda.extractor.parser import ExtractedDocument
 from senda.providers.base import SearchResultItem
@@ -122,3 +124,158 @@ def test_provider_configuration_states():
 
     mojeek = MojeekProvider("")
     assert mojeek.is_configured is False
+
+
+@pytest.mark.asyncio
+async def test_searxng_provider_mocked():
+    searx = SearXNGProvider("http://localhost:8888")
+    fake_json = {
+        "results": [
+            {
+                "title": "Debian Project",
+                "url": "https://www.debian.org/",
+                "content": "Debian is a complete Free Operating System.",
+                "engine": "duckduckgo",
+                "score": 0.95,
+                "publishedDate": "2026-01-01",
+                "thumbnail_src": "https://www.debian.org/logo.png",
+            },
+            {
+                "title": "No URL item",
+                "content": "Should be ignored",
+            }
+        ]
+    }
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = httpx.Response(200, json=fake_json)
+        results = await searx.search("Debian", category="images", page=1, safe_search="strict", time_filter="month", region="es")
+        assert len(results) == 1
+        item = results[0]
+        assert item.title == "Debian Project"
+        assert item.url == "https://www.debian.org/"
+        assert item.snippet == "Debian is a complete Free Operating System."
+        assert "duckduckgo" in item.source
+        assert item.media_url == "https://www.debian.org/logo.png"
+        assert "anonimizada" in item.why_seen
+
+        # Error response returns empty
+        mock_get.return_value = httpx.Response(500)
+        assert await searx.search("Debian") == []
+
+        # Exception returns empty
+        mock_get.side_effect = httpx.ConnectError("Network unreachable")
+        assert await searx.search("Debian") == []
+
+
+@pytest.mark.asyncio
+async def test_brave_provider_mocked():
+    brave = BraveSearchProvider("brave_test_token_123")
+    fake_json = {
+        "web": {
+            "results": [
+                {
+                    "title": "Arch Linux",
+                    "url": "https://archlinux.org/",
+                    "description": "A lightweight and flexible Linux distribution.",
+                    "page_age": "2026-02-01",
+                    "language": "en",
+                    "is_sponsored": False,
+                },
+                {
+                    "title": "No URL result",
+                    "description": "Ignored",
+                }
+            ]
+        }
+    }
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = httpx.Response(200, json=fake_json)
+        results = await brave.search("Arch", category="all", page=2, page_size=5, safe_search="moderate", region="co", time_filter="w")
+        assert len(results) == 1
+        item = results[0]
+        assert item.title == "Arch Linux"
+        assert item.url == "https://archlinux.org/"
+        assert item.snippet == "A lightweight and flexible Linux distribution."
+        assert item.source == "Brave Search"
+        assert "Brave Search API" in item.why_seen
+
+        # Error handling
+        mock_get.return_value = httpx.Response(403)
+        assert await brave.search("Arch") == []
+
+        mock_get.side_effect = httpx.ReadTimeout("Timeout")
+        assert await brave.search("Arch") == []
+
+
+@pytest.mark.asyncio
+async def test_mojeek_provider_mocked():
+    mojeek = MojeekProvider("mojeek_test_token_456")
+    fake_json = {
+        "response": {
+            "results": [
+                {
+                    "title": "Trisquel GNU/Linux",
+                    "url": "https://trisquel.info/",
+                    "desc": "A 100% Free Software operating system.",
+                    "date": "2026-03-15",
+                },
+                {
+                    "title": "Item without URL",
+                    "desc": "Skip me",
+                }
+            ]
+        }
+    }
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = httpx.Response(200, json=fake_json)
+        results = await mojeek.search("Trisquel", safe_search="strict", page=2, page_size=10)
+        assert len(results) == 1
+        item = results[0]
+        assert item.title == "Trisquel GNU/Linux"
+        assert item.url == "https://trisquel.info/"
+        assert item.snippet == "A 100% Free Software operating system."
+        assert item.source == "Mojeek"
+        assert "Mojeek Ltd" in item.why_seen
+
+        # Error response
+        mock_get.return_value = httpx.Response(502)
+        assert await mojeek.search("Trisquel") == []
+
+        mock_get.side_effect = Exception("General error")
+        assert await mojeek.search("Trisquel") == []
+
+
+@pytest.mark.asyncio
+async def test_aggregator_multi_provider_fusion():
+    searx = SearXNGProvider("http://localhost:8888")
+    brave = BraveSearchProvider("brave_token")
+    mojeek = MojeekProvider("mojeek_token")
+
+    searx_res = [
+        SearchResultItem(title="Senda Meta", url="https://senda.ideh.top", snippet="Senda search", source="SearXNG (google)", why_seen="Meta")
+    ]
+    brave_res = [
+        SearchResultItem(title="Senda Brave Duplicate", url="https://senda.ideh.top", snippet="Duplicate url", source="Brave Search", why_seen="Brave"),
+        SearchResultItem(title="GNU Org", url="https://gnu.org", snippet="GNU system", source="Brave Search", why_seen="Brave"),
+    ]
+    mojeek_res = [
+        SearchResultItem(title="FSF Org", url="https://fsf.org", snippet="Free Software", source="Mojeek", why_seen="Mojeek"),
+    ]
+
+    with patch.object(searx, "search", new_callable=AsyncMock, return_value=searx_res), \
+         patch.object(brave, "search", new_callable=AsyncMock, return_value=brave_res), \
+         patch.object(mojeek, "search", new_callable=AsyncMock, return_value=mojeek_res):
+
+        aggregator = ProviderAggregator(
+            searxng_provider=searx,
+            brave_provider=brave,
+            mojeek_provider=mojeek,
+        )
+
+        fused = await aggregator.aggregate("free software", category="all", page=1, page_size=10)
+
+        # Ensure deduplication: senda.ideh.top only appears once
+        urls = [r.url for r in fused]
+        assert urls.count("https://senda.ideh.top") == 1
+        assert "https://gnu.org" in urls
+        assert "https://fsf.org" in urls

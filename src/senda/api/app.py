@@ -116,6 +116,22 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         )
         return response
 
+    @app.middleware("http")
+    async def head_request_middleware(request: Request, call_next):
+        """Handle RFC 9110 HTTP HEAD requests by serving headers without payload body."""
+        is_head = request.method == "HEAD"
+        if is_head:
+            request.scope["method"] = "GET"
+        response = await call_next(request)
+        if is_head:
+            return Response(
+                content=b"",
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.media_type,
+            )
+        return response
+
     def resolve_theme(request: Request, query_theme: Optional[str] = None) -> str:
         """Resolve theme: query parameter > cookie > default ('dark')."""
         if query_theme in ("light", "dark"):
@@ -383,6 +399,15 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         return {
             prefix: {"template": tpl, "service": srv}
             for prefix, (tpl, srv) in BANG_SHORTCUTS.items()
+        }
+
+    @app.get("/health")
+    async def health_check():
+        """Top-level health check endpoint for reverse proxies and monitors."""
+        return {
+            "status": "healthy",
+            "app": settings.APP_NAME,
+            "version": settings.APP_VERSION,
         }
 
     @app.get("/api/v1/health")

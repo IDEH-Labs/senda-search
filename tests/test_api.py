@@ -198,3 +198,38 @@ def test_theme_toggle_zero_js_and_cookie(client):
     r_search_light = client.get("/search?q=freedom&theme=light")
     assert r_search_light.status_code == 200
     assert 'data-theme="light"' in r_search_light.text
+
+
+def test_api_head_requests(client):
+    """Verify RFC 9110 HTTP HEAD support for all public routes and zero body."""
+    # Test HEAD on homepage
+    r_home = client.head("/")
+    assert r_home.status_code == 200
+    assert r_home.text == ""
+    assert "text/html" in r_home.headers.get("content-type", "")
+    assert r_home.headers["X-Frame-Options"] == "DENY"
+
+    # Test HEAD on health endpoint
+    r_health = client.head("/health")
+    assert r_health.status_code == 200
+    assert r_health.text == ""
+
+    # Test HEAD on search
+    r_search = client.head("/search?q=Foundation")
+    assert r_search.status_code == 200
+    assert r_search.text == ""
+
+
+def test_api_health_endpoints(client):
+    """Verify both /health and /api/v1/health endpoints work consistently."""
+    r_top = client.get("/health")
+    assert r_top.status_code == 200
+    data_top = r_top.json()
+    assert data_top["status"] == "healthy"
+    assert data_top["app"] == "Senda"
+
+    r_v1 = client.get("/api/v1/health")
+    assert r_v1.status_code == 200
+    data_v1 = r_v1.json()
+    assert data_v1["status"] == "healthy"
+    assert data_v1["app"] == "Senda"
