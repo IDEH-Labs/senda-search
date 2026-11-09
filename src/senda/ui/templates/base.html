@@ -2,52 +2,121 @@
 <!--
 SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+Senda Sovereign Search Engine — Free Software under GNU GPLv3+
 -->
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Senda — Sovereign, ethical, independent and libre web search engine with zero query logs and zero profiling.">
+    <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#090d16" media="(prefers-color-scheme: dark)">
+    
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Senda">
     <link rel="jslicense" href="/javascript">
-    <title>{% block title %}Senda - Sovereign Search Engine{% endblock %}</title>
+    
+    <title>{% block title %}Senda — Sovereign Search Engine{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/senda.css">
+    
+    <script>
+        // Early theme detection to prevent flash of unstyled theme
+        // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
+        (function() {
+            try {
+                var saved = localStorage.getItem('senda_theme');
+                if (saved === 'dark' || saved === 'light') {
+                    document.documentElement.setAttribute('data-theme', saved);
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'auto');
+                }
+            } catch(e) {}
+        })();
+        // @license-end
+    </script>
 </head>
 <body>
-    <header class="app-header">
-        <a href="/" class="brand">
-            <span>Senda</span>
+    <a href="#main-content" class="skip-link" data-i18n="skip_to_content">Skip to content</a>
+
+    <header class="app-header" role="banner">
+        <a href="/" class="brand" aria-label="Senda Home">
+            <svg class="brand-logo" width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="sendaGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#10b981"/>
+                        <stop offset="50%" stop-color="#06b6d4"/>
+                        <stop offset="100%" stop-color="#3b82f6"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="20" cy="20" r="18" stroke="url(#sendaGrad)" stroke-width="2.5" fill="none" opacity="0.3"/>
+                <path d="M20 5 L24 16 L35 20 L24 24 L20 35 L16 24 L5 20 L16 16 Z" fill="url(#sendaGrad)"/>
+                <circle cx="20" cy="20" r="3.5" fill="#ffffff"/>
+            </svg>
+            <span class="brand-text">Senda</span>
             <span class="brand-badge" data-i18n="brand_sub">Sovereign Search</span>
         </a>
-        <nav class="main-nav">
-            <a href="/" data-i18n="nav_home">Search</a>
-            <a href="/about" data-i18n="nav_about">About</a>
-            <a href="/privacy" data-i18n="nav_privacy">Privacy</a>
-            <select id="langSelector" class="lang-select" aria-label="Select Language">
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="pt">Português</option>
-                <option value="it">Italiano</option>
-                <option value="ja">日本語</option>
-                <option value="zh">简体中文</option>
-            </select>
+
+        <nav class="main-nav" role="navigation" aria-label="Main Navigation">
+            <a href="/" class="nav-link" data-i18n="nav_home">Search</a>
+            <a href="/about" class="nav-link" data-i18n="nav_about">About</a>
+            <a href="/privacy" class="nav-link" data-i18n="nav_privacy">Privacy</a>
+            
+            <div class="header-controls">
+                <!-- Theme Switcher -->
+                <button type="button" id="themeToggle" class="control-btn theme-toggle" aria-label="Toggle color theme" title="Toggle color theme (Light / Dark / Auto)">
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path><path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path><path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                </button>
+
+                <!-- Language Selector -->
+                <div class="lang-selector-wrapper">
+                    <select id="langSelector" class="lang-select" aria-label="Select Language">
+                        <option value="en">English (EN)</option>
+                        <option value="es">Español (ES)</option>
+                        <option value="fr">Français (FR)</option>
+                        <option value="de">Deutsch (DE)</option>
+                        <option value="pt">Português (PT)</option>
+                        <option value="it">Italiano (IT)</option>
+                        <option value="ja">日本語 (JA)</option>
+                        <option value="zh">简体中文 (ZH)</option>
+                    </select>
+                </div>
+            </div>
         </nav>
     </header>
 
-    <main class="content-area">
+    <main id="main-content" class="content-area" role="main">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="app-footer">
-        <p>
-            <span data-i18n="footer_text">Senda is sovereign software governed by the GNU GPLv3 license.</span>
-            &bull;
-            <a href="https://ideh.top" target="_blank" rel="noopener">IDEH Labs</a>
-            &bull;
-            <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GPL-3.0-or-later</a>
-        </p>
+    <footer class="app-footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-meta">
+                <span data-i18n="footer_text">Senda is sovereign, libre software governed by the GNU GPL-3.0-or-later license.</span>
+                <span class="footer-separator">&bull;</span>
+                <a href="https://ideh.top" target="_blank" rel="noopener noreferrer">IDEH Labs</a>
+                <span class="footer-separator">&bull;</span>
+                <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GPLv3+</a>
+                <span class="footer-separator">&bull;</span>
+                <a href="/javascript" rel="jslicense">LibreJS Web Labels</a>
+            </div>
+            <div class="footer-forges">
+                <a href="https://codeberg.org/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="Codeberg Sovereign Forge">Codeberg</a>
+                <span class="footer-separator">&bull;</span>
+                <a href="https://gitlab.com/ideh-labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="GitLab Mirror">GitLab</a>
+                <span class="footer-separator">&bull;</span>
+                <a href="https://github.com/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="GitHub Mirror">GitHub</a>
+            </div>
+        </div>
     </footer>
 
     <script src="/static/js/i18n.js"></script>
