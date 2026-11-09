@@ -171,6 +171,15 @@ header.app-header {
   align-items: center;
 }
 
+.brand-logo {
+  display: block;
+  transition: transform var(--transition-normal);
+}
+
+.brand:hover .brand-logo {
+  transform: rotate(-5deg) scale(1.08);
+}
+
 .brand-text {
   font-size: 1.25rem;
   font-weight: 700;
@@ -285,7 +294,45 @@ body.homepage-view main.content-area {
 }
 
 .home-emblem {
-  filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.3));
+  transition: transform var(--transition-normal), filter var(--transition-normal);
+  filter: drop-shadow(0 0 28px rgba(45, 212, 191, 0.40)) drop-shadow(0 0 50px rgba(56, 189, 248, 0.22));
+}
+
+.home-emblem:hover {
+  transform: scale(1.05) rotate(-3deg);
+  filter: drop-shadow(0 0 36px rgba(45, 212, 191, 0.60)) drop-shadow(0 0 65px rgba(56, 189, 248, 0.35));
+}
+
+[data-theme="light"] .home-emblem {
+  filter: drop-shadow(0 6px 16px rgba(15, 118, 110, 0.25));
+}
+
+[data-theme="light"] .home-emblem:hover {
+  transform: scale(1.05) rotate(-3deg);
+  filter: drop-shadow(0 8px 24px rgba(15, 118, 110, 0.35));
+}
+
+/* Dynamic SVG Logo Gradient adaptation between Dark & Light themes */
+[data-theme="light"] #brandCurveGrad stop:nth-child(1),
+[data-theme="light"] #heroCurveGrad stop:nth-child(1) {
+  stop-color: #0f766e !important;
+}
+[data-theme="light"] #brandCurveGrad stop:nth-child(2),
+[data-theme="light"] #heroCurveGrad stop:nth-child(2) {
+  stop-color: #059669 !important;
+}
+[data-theme="light"] #brandCurveGrad stop:nth-child(3),
+[data-theme="light"] #heroCurveGrad stop:nth-child(3) {
+  stop-color: #0284c7 !important;
+}
+
+[data-theme="light"] #heroHalo stop:nth-child(1) {
+  stop-color: #059669 !important;
+  stop-opacity: 0.16 !important;
+}
+[data-theme="light"] #heroHalo stop:nth-child(2) {
+  stop-color: #0284c7 !important;
+  stop-opacity: 0.08 !important;
 }
 
 .home-brand-title {

@@ -13,6 +13,13 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
     <meta name="theme-color" content="#080c14">
     
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon.png">
+    <link rel="apple-touch-icon" href="/static/img/senda-icon-192.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta property="og:image" content="/static/img/senda-og.png">
+    <meta name="twitter:image" content="/static/img/senda-og.png">
+
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Senda">
     <link rel="jslicense" href="/javascript">
     
@@ -40,17 +47,18 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <header class="app-header" role="banner">
         <a href="/" class="brand" aria-label="Senda">
             <div class="brand-logo-wrapper" aria-hidden="true">
-                <svg class="brand-logo" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="brand-logo" width="28" height="28" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <linearGradient id="logoGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#10b981"/>
-                            <stop offset="60%" stop-color="#06b6d4"/>
-                            <stop offset="100%" stop-color="#3b82f6"/>
+                        <linearGradient id="brandCurveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#2dd4bf"/>
+                            <stop offset="50%" stop-color="#00d2a0"/>
+                            <stop offset="100%" stop-color="#38bdf8"/>
                         </linearGradient>
                     </defs>
-                    <rect x="3" y="3" width="26" height="26" rx="8" stroke="url(#logoGrad)" stroke-width="1.8" fill="rgba(16,185,129,0.06)"/>
-                    <path d="M16 7 L18.8 13.2 L25 16 L18.8 18.8 L16 25 L13.2 18.8 L7 16 L13.2 13.2 Z" fill="url(#logoGrad)"/>
-                    <circle cx="16" cy="16" r="2.2" fill="#ffffff"/>
+                    <circle cx="256" cy="256" r="148" fill="none" stroke="#00d2a0" stroke-width="16" opacity="0.30"/>
+                    <circle cx="256" cy="256" r="148" fill="none" stroke="#38bdf8" stroke-width="12" stroke-dasharray="24 30" opacity="0.40"/>
+                    <path d="M 306 170 C 306 135 272 120 230 120 C 180 120 154 145 154 188 C 154 238 204 256 254 272 C 314 290 348 316 348 358 C 348 408 296 434 236 434 C 176 434 142 400 142 358"
+                          fill="none" stroke="url(#brandCurveGrad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <span class="brand-text">Senda</span>

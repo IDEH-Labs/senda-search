@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Senda Logo">
+  <title>Senda — Logo Adaptable Oficial</title>
+  <style>
+    :root {
+      --senda-stop-1: #0f766e;
+      --senda-stop-2: #059669;
+      --senda-stop-3: #0284c7;
+      --senda-ring-1: #059669;
+      --senda-ring-2: #0284c7;
+      --senda-halo-opacity: 0.14;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --senda-stop-1: #2dd4bf;
+        --senda-stop-2: #00d2a0;
+        --senda-stop-3: #38bdf8;
+        --senda-ring-1: #00d2a0;
+        --senda-ring-2: #38bdf8;
+        --senda-halo-opacity: 0.35;
+      }
+    }
+    .senda-halo { fill: var(--senda-ring-1); fill-opacity: var(--senda-halo-opacity); }
+    .senda-ring-solid { stroke: var(--senda-ring-1); }
+    .senda-ring-dash { stroke: var(--senda-ring-2); }
+    .senda-path { stroke: url(#adaptive-grad); }
+  </style>
+  <defs>
+    <linearGradient id="adaptive-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--senda-stop-1)"/>
+      <stop offset="50%" stop-color="var(--senda-stop-2)"/>
+      <stop offset="100%" stop-color="var(--senda-stop-3)"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="160" class="senda-halo"/>
+  <circle cx="256" cy="256" r="148" fill="none" class="senda-ring-solid" stroke-width="2.5" opacity="0.35"/>
+  <circle cx="256" cy="256" r="148" fill="none" class="senda-ring-dash" stroke-width="1.5" stroke-dasharray="14 18" opacity="0.4"/>
+  <path d="M 306 170 C 306 135 272 120 230 120 C 180 120 154 145 154 188 C 154 238 204 256 254 272 C 314 290 348 316 348 358 C 348 408 296 434 236 434 C 176 434 142 400 142 358"
+        class="senda-path" fill="none" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

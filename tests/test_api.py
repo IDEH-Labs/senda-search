@@ -154,3 +154,20 @@ def test_api_takedown(client):
     # Verify document is gone
     r_stats_after = client.get("/api/v1/stats").json()
     assert r_stats_after["total_documents"] == 0
+
+
+def test_api_brand_assets_and_manifest(client):
+    """Verify webmanifest and static brand assets are served properly."""
+    r_manifest = client.get("/manifest.webmanifest")
+    assert r_manifest.status_code == 200
+    data = r_manifest.json()
+    assert data["name"] == "Senda"
+    assert len(data["icons"]) >= 3
+
+    r_favicon = client.get("/static/img/favicon.svg")
+    assert r_favicon.status_code == 200
+    assert "svg" in r_favicon.headers.get("content-type", "")
+
+    r_og = client.get("/static/img/senda-og.png")
+    assert r_og.status_code == 200
+    assert r_og.headers.get("content-type") == "image/png"

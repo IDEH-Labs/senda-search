@@ -150,10 +150,50 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
     <ShortName>{settings.APP_NAME}</ShortName>
     <Description>{settings.APP_NAME} — Buscador web libre y ético</Description>
     <InputEncoding>UTF-8</InputEncoding>
+    <Image width="16" height="16" type="image/png">{base_url}/static/img/favicon.png</Image>
+    <Image width="64" height="64" type="image/png">{base_url}/static/img/senda-icon-48.png</Image>
     <Url type="text/html" method="get" template="{base_url}/search?q={{searchTerms}}"/>
     <Url type="application/x-suggestions+json" method="get" template="{base_url}/api/v1/search?q={{searchTerms}}"/>
 </OpenSearchDescription>"""
         return Response(content=xml_content, media_type="application/opensearchdescription+xml")
+
+    @app.get("/manifest.webmanifest")
+    async def webmanifest(request: Request):
+        """PWA Web App Manifest declaring Senda icons and theme colors."""
+        manifest = {
+            "name": settings.APP_NAME,
+            "short_name": settings.APP_NAME,
+            "description": "Buscador web ético, rápido y privado",
+            "start_url": "/",
+            "display": "minimal-ui",
+            "background_color": "#080c14",
+            "theme_color": "#080c14",
+            "icons": [
+                {
+                    "src": "/static/img/senda-icon-48.png",
+                    "sizes": "48x48",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/static/img/senda-icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                },
+                {
+                    "src": "/static/img/senda-icon-512.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                },
+                {
+                    "src": "/static/img/senda-symbol-adaptive.svg",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml"
+                }
+            ]
+        }
+        return JSONResponse(content=manifest, media_type="application/manifest+json")
 
     @app.get("/search")
     async def search(

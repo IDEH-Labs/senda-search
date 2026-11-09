@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160">
+  <defs>
+    <linearGradient id="hl-curve-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="50%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(15, 15) scale(0.254)">
+    <circle cx="256" cy="256" r="148" fill="none" stroke="#059669" stroke-width="3" opacity="0.30"/>
+    <path d="M 306 170 C 306 135 272 120 230 120 C 180 120 154 145 154 188 C 154 238 204 256 254 272 C 314 290 348 316 348 358 C 348 408 296 434 236 434 C 176 434 142 400 142 358"
+          fill="none" stroke="url(#hl-curve-grad)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="175" y="98" fill="#0f172a" font-family="'Source Sans 3', 'Liberation Sans', -apple-system, BlinkMacSystemFont, sans-serif" font-size="64" font-weight="700" letter-spacing="-0.03em">Senda</text>
+  <text x="177" y="128" fill="#64748b" font-family="'Source Sans 3', 'Liberation Sans', -apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="500" letter-spacing="0.14em">BUSCADOR LIBRE</text>
+</svg>
