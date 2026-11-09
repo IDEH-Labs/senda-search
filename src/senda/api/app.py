@@ -34,6 +34,7 @@ from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.providers.base import SearchResultItem
 from senda.ai.grounded_synthesis import GroundedSynthesizer
+from senda.countries import get_country_name, get_countries_grouped
 
 
 # Pydantic schemas for API documentation and validation
@@ -261,6 +262,8 @@ def create_app(
         ctx = dict(context)
         ctx["theme"] = current_theme
         ctx["settings"] = settings
+        ctx["countries_grouped"] = get_countries_grouped()
+        ctx["current_country_name"] = get_country_name(context.get("region"))
         resp = templates.TemplateResponse(request=request, name=name, context=ctx)
         if query_theme in ("light", "dark"):
             resp.set_cookie(

@@ -669,6 +669,59 @@ body.homepage-view main.content-area {
   flex-direction: column;
 }
 
+.filter-country-menu {
+  min-width: 270px;
+  max-width: 330px;
+}
+
+.country-search-box {
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.country-search-input {
+  width: 100%;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  outline: none;
+}
+
+.country-search-input:focus {
+  border-color: var(--border-chip-active);
+}
+
+.country-scroll-list {
+  max-height: 290px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.country-continent-header {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-cyan);
+  padding: 0.55rem 0.85rem 0.25rem 0.85rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.country-continent-header:first-of-type {
+  border-top: none;
+}
+
+.country-code-pill {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-left: 0.25rem;
+}
+
 .filter-dropdown-item {
   display: flex;
   align-items: center;

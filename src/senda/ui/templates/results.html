@@ -142,56 +142,39 @@
             </details>
             {% endif %}
 
-            <!-- Región Dropdown -->
-            <details class="filter-dropdown">
+            <!-- Región Dropdown (Todos los países y territorios del mundo) -->
+            <details class="filter-dropdown filter-region-dropdown">
                 <summary class="filter-dropdown-btn {% if region and region != 'all' %}is-filtered{% endif %}">
                     <span class="dropdown-btn-label">
-                        {% if region == 'co' %}Colombia (CO)
-                        {% elif region == 'es' %}España (ES)
-                        {% elif region == 'mx' %}México (MX)
-                        {% elif region == 'ar' %}Argentina (AR)
-                        {% elif region == 'cl' %}Chile (CL)
-                        {% elif region == 'pe' %}Perú (PE)
-                        {% elif region == 'us' %}Estados Unidos (US)
-                        {% else %}Región: Global{% endif %}
+                        {% if region and region != 'all' %}{{ current_country_name }}{% else %}Región: Global{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </summary>
-                <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'all' or not region %}active{% endif %}">
-                        <span>Global (Todo el mundo)</span>
-                        {% if region == 'all' or not region %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=es&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'es' %}active{% endif %}">
-                        <span>España (ES)</span>
-                        {% if region == 'es' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=mx&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'mx' %}active{% endif %}">
-                        <span>México (MX)</span>
-                        {% if region == 'mx' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=ar&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'ar' %}active{% endif %}">
-                        <span>Argentina (AR)</span>
-                        {% if region == 'ar' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'co' %}active{% endif %}">
-                        <span>Colombia (CO)</span>
-                        {% if region == 'co' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=cl&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'cl' %}active{% endif %}">
-                        <span>Chile (CL)</span>
-                        {% if region == 'cl' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=pe&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'pe' %}active{% endif %}">
-                        <span>Perú (PE)</span>
-                        {% if region == 'pe' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=us&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'us' %}active{% endif %}">
-                        <span>Estados Unidos (US)</span>
-                        {% if region == 'us' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
+                <div class="filter-dropdown-menu filter-country-menu">
+                    <div class="country-search-box">
+                        <input type="text" id="countryQuickFilter" class="country-search-input" placeholder="Buscar país o código..." autocomplete="off">
+                    </div>
+                    
+                    <div class="country-scroll-list" id="countryScrollList">
+                        <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item country-item {% if region == 'all' or not region %}active{% endif %}" data-country="global todo el mundo all">
+                            <span class="country-item-title">🌐 Global (Todo el mundo)</span>
+                            {% if region == 'all' or not region %}<span class="item-check">✓</span>{% endif %}
+                        </a>
+
+                        {% for continent, country_list in countries_grouped.items() %}
+                            {% if continent != 'Global' %}
+                            <div class="country-continent-header">{{ continent }}</div>
+                            {% for c in country_list %}
+                            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ c.code }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item country-item {% if region == c.code %}active{% endif %}" data-country="{{ c.name | lower }} {{ c.code | lower }}">
+                                <span>{{ c.name }} <span class="country-code-pill">({{ c.code | upper }})</span></span>
+                                {% if region == c.code %}<span class="item-check">✓</span>{% endif %}
+                            </a>
+                            {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </details>
 
@@ -561,6 +544,8 @@
                         dropdowns.forEach(function(other) {
                             if (other !== d) other.removeAttribute('open');
                         });
+                        var filterInput = d.querySelector('.country-search-input');
+                        if (filterInput) setTimeout(function() { filterInput.focus(); }, 50);
                     }
                 });
             });
@@ -569,6 +554,23 @@
                     dropdowns.forEach(function(d) { d.removeAttribute('open'); });
                 }
             });
+
+            // Instant client-side filter for all countries of the world
+            var countryFilter = document.getElementById('countryQuickFilter');
+            if (countryFilter) {
+                countryFilter.addEventListener('input', function() {
+                    var term = this.value.toLowerCase().trim();
+                    var items = document.querySelectorAll('.country-item');
+                    var headers = document.querySelectorAll('.country-continent-header');
+                    items.forEach(function(el) {
+                        var text = (el.getAttribute('data-country') || el.textContent).toLowerCase();
+                        el.style.display = text.indexOf(term) !== -1 ? 'flex' : 'none';
+                    });
+                    headers.forEach(function(h) {
+                        h.style.display = term ? 'none' : 'block';
+                    });
+                });
+            }
         })();
         // @license-end
     </script>
