@@ -65,54 +65,128 @@
             </a>
         </nav>
 
-        <!-- Filters & Preferences Row -->
-        <div class="results-filters-row">
-            <div class="filter-group">
-                <span class="filter-label">Región:</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co&theme={{ theme }}" class="filter-link {% if region == 'co' %}active{% endif %}">Colombia (CO)</a>
-                <span class="filter-sep">|</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&theme={{ theme }}" class="filter-link {% if region == 'all' or not region %}active{% endif %}">Global</a>
-            </div>
-
-            <div class="filter-group">
-                <span class="filter-label">SafeSearch:</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}" class="filter-link {% if safe_search == 'off' or not safe_search %}active{% endif %}">Desactivado</a>
-                <span class="filter-sep">|</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate&theme={{ theme }}" class="filter-link {% if safe_search == 'moderate' %}active{% endif %}">Moderado</a>
-            </div>
-
-            <div class="filter-group filter-density-toggle">
-                <button type="button" id="densityBtn" class="density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
-                    <span id="densityLabel">Densidad: Cómoda</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- News Specific Filters: Sort & Time Range -->
-        {% if category == 'news' %}
-        <div class="news-filters-bar" role="toolbar" aria-label="Filtros de Noticias">
-            <div class="filter-group">
-                <span class="filter-label">Ordenar:</span>
-                <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-link {% if sort == 'date' or not sort %}active{% endif %}" title="Noticias más recientes primero">Más recientes</a>
-                <span class="filter-sep">|</span>
-                <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-link {% if sort == 'relevance' %}active{% endif %}" title="Ordenar por relevancia">Relevancia</a>
-            </div>
-
-            <div class="filter-group filter-time-group">
-                <span class="filter-label">Periodo:</span>
-                <div class="filter-time-pills">
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}" class="filter-link {% if not time_filter or time_filter == 'all' %}active{% endif %}">Cualquier fecha</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1h" class="filter-link {% if time_filter == '1h' %}active{% endif %}">Última hora</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1d" class="filter-link {% if time_filter == '1d' %}active{% endif %}">Últimas 24 horas</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1w" class="filter-link {% if time_filter == '1w' %}active{% endif %}">Última semana</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1m" class="filter-link {% if time_filter == '1m' %}active{% endif %}">Último mes</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=2m" class="filter-link {% if time_filter == '2m' %}active{% endif %}">Hace 2 meses</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=6m" class="filter-link {% if time_filter == '6m' %}active{% endif %}">Hace 6 meses</a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1y_plus" class="filter-link {% if time_filter == '1y_plus' %}active{% endif %}">Hace 1 año o más</a>
+        <!-- Minimalist Search Tools Toolbar (Google / Sovereign Minimalist Standard) -->
+        <div class="results-tools-bar" role="toolbar" aria-label="Herramientas y filtros de búsqueda">
+            {% if category == 'news' %}
+            <!-- Periodo Temporal Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if time_filter and time_filter != 'all' %}is-filtered{% endif %}">
+                    <span class="dropdown-btn-label">
+                        {% if time_filter == '1h' %}Última hora
+                        {% elif time_filter == '1d' %}Últimas 24 horas
+                        {% elif time_filter == '1w' %}Última semana
+                        {% elif time_filter == '1m' %}Último mes
+                        {% elif time_filter == '2m' %}Hace 2 meses
+                        {% elif time_filter == '6m' %}Hace 6 meses
+                        {% elif time_filter == '1y_plus' %}Hace 1 año o más
+                        {% else %}De cualquier fecha{% endif %}
+                    </span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
+                        <span>Cualquier fecha</span>
+                        {% if not time_filter or time_filter == 'all' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1h" class="filter-dropdown-item {% if time_filter == '1h' %}active{% endif %}">
+                        <span>Última hora</span>
+                        {% if time_filter == '1h' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1d" class="filter-dropdown-item {% if time_filter == '1d' %}active{% endif %}">
+                        <span>Últimas 24 horas</span>
+                        {% if time_filter == '1d' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1w" class="filter-dropdown-item {% if time_filter == '1w' %}active{% endif %}">
+                        <span>Última semana</span>
+                        {% if time_filter == '1w' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1m" class="filter-dropdown-item {% if time_filter == '1m' %}active{% endif %}">
+                        <span>Último mes</span>
+                        {% if time_filter == '1m' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=2m" class="filter-dropdown-item {% if time_filter == '2m' %}active{% endif %}">
+                        <span>Hace 2 meses</span>
+                        {% if time_filter == '2m' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=6m" class="filter-dropdown-item {% if time_filter == '6m' %}active{% endif %}">
+                        <span>Hace 6 meses</span>
+                        {% if time_filter == '6m' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1y_plus" class="filter-dropdown-item {% if time_filter == '1y_plus' %}active{% endif %}">
+                        <span>Hace 1 año o más</span>
+                        {% if time_filter == '1y_plus' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
                 </div>
-            </div>
+            </details>
+
+            <!-- Ordenar Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if sort == 'relevance' %}is-filtered{% endif %}">
+                    <span class="dropdown-btn-label">Ordenar: {% if sort == 'relevance' %}Relevancia{% else %}Más recientes{% endif %}</span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
+                        <span>Más recientes</span>
+                        {% if sort == 'date' or not sort %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'relevance' %}active{% endif %}">
+                        <span>Relevancia</span>
+                        {% if sort == 'relevance' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                </div>
+            </details>
+            {% endif %}
+
+            <!-- Región Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if region == 'co' %}is-filtered{% endif %}">
+                    <span class="dropdown-btn-label">Región: {% if region == 'co' %}Colombia (CO){% else %}Global{% endif %}</span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'all' or not region %}active{% endif %}">
+                        <span>Global</span>
+                        {% if region == 'all' or not region %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if region == 'co' %}active{% endif %}">
+                        <span>Colombia (CO)</span>
+                        {% if region == 'co' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                </div>
+            </details>
+
+            <!-- SafeSearch Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if safe_search == 'moderate' %}is-filtered{% endif %}">
+                    <span class="dropdown-btn-label">SafeSearch: {% if safe_search == 'moderate' %}Moderado{% else %}Desactivado{% endif %}</span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'off' or not safe_search %}active{% endif %}">
+                        <span>Desactivado</span>
+                        {% if safe_search == 'off' or not safe_search %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'moderate' %}active{% endif %}">
+                        <span>Moderado</span>
+                        {% if safe_search == 'moderate' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                </div>
+            </details>
+
+            <!-- Densidad Button -->
+            <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
+                <span id="densityLabel">Densidad: Cómoda</span>
+            </button>
         </div>
-        {% endif %}
     </div>
 
     <!-- Metadata stats -->
@@ -443,5 +517,27 @@
         <code>!gut</code> Gutenberg &bull;
         <code>!codeberg</code> Codeberg
     </div>
+
+    <script>
+        // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
+        (function() {
+            var dropdowns = document.querySelectorAll('.filter-dropdown');
+            dropdowns.forEach(function(d) {
+                d.addEventListener('toggle', function() {
+                    if (d.open) {
+                        dropdowns.forEach(function(other) {
+                            if (other !== d) other.removeAttribute('open');
+                        });
+                    }
+                });
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.filter-dropdown')) {
+                    dropdowns.forEach(function(d) { d.removeAttribute('open'); });
+                }
+            });
+        })();
+        // @license-end
+    </script>
 </div>
 {% endblock %}

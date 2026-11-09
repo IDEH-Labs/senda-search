@@ -588,55 +588,115 @@ body.homepage-view main.content-area {
   color: var(--border-strong);
 }
 
-/* News Specific Filters Toolbar */
-.news-filters-bar {
+/* Minimalist Tools Toolbar (Google / Sovereign Clean Design) */
+.results-tools-bar {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 0.6rem 0.4rem;
-  font-size: 0.8rem;
-  color: var(--text-faint);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.1rem;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  margin-top: 0.35rem;
 }
 
-.filter-time-group {
-  display: flex;
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-dropdown-btn {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.filter-time-pills {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-wrap: wrap;
-}
-
-.filter-time-pills .filter-link {
-  padding: 0.2rem 0.55rem;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-subtle);
-  font-size: 0.75rem;
+  color: var(--text-muted);
+  user-select: none;
+  transition: all var(--transition-fast);
   white-space: nowrap;
+  font-family: inherit;
 }
 
-.filter-time-pills .filter-link:hover {
+.filter-dropdown-btn::-webkit-details-marker {
+  display: none;
+}
+
+.filter-dropdown-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--border-strong);
   color: var(--text-main);
 }
 
-.filter-time-pills .filter-link.active {
-  background: rgba(74, 222, 128, 0.12);
-  border-color: rgba(74, 222, 128, 0.35);
+.filter-dropdown[open] .filter-dropdown-btn {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.filter-dropdown[open] .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown-btn.is-filtered {
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
   color: var(--text-accent);
   font-weight: 600;
+}
+
+.dropdown-chevron {
+  transition: transform 0.18s ease;
+  color: var(--text-faint);
+}
+
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 180px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  padding: 0.35rem 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.79rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+
+.filter-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+}
+
+.filter-dropdown-item.active {
+  color: var(--text-accent);
+  font-weight: 600;
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.item-check {
+  font-size: 0.85rem;
+  color: var(--text-accent);
+  margin-left: 0.75rem;
+  font-weight: bold;
 }
 
 .badge-time {
@@ -1404,11 +1464,14 @@ footer.app-footer a:hover {
     min-height: 40px;
   }
 
+  .results-tools-bar,
   .results-filters-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.5rem 0.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .filter-group {
