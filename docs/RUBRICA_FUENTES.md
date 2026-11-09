@@ -1,10 +1,10 @@
 # Rúbrica de Procedencia y Factores de Fuentes — Senda
 
-**Versión:** 1.0.0  
+**Versión:** 0.1  
 **Fecha de Publicación:** Noviembre 2026  
 **Licencia:** GPL-3.0-or-later  
 **Ámbito de Aplicación:** Evaluación y presentación de evidencias en el panel "¿Por qué veo esto?" de Senda.  
-**Identificador de Versión Semántica:** `senda-rubric-v1.0.0`  
+**Identificador de Versión Semántica:** `senda-rubric-v0.1`  
 
 ---
 
@@ -17,9 +17,7 @@
 
 ---
 
-## 2. Factores Verificables de la Rúbrica v1.0.0
-
-A continuación se detalla la matriz de factores que componen la rúbrica versionada de Senda. Cada factor especifica su definición técnica, la evidencia auditable que exige, las fuentes de datos utilizadas y sus limitaciones intrínsecas:
+## 2. Factores Verificables de la Rúbrica v0.1
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -170,12 +168,12 @@ A continuación se detalla la matriz de factores que componen la rúbrica versio
 
 ## 3. Resolución de Casos Límite en la Aplicación de la Rúbrica
 
-Para evitar sesgos estructurales y garantizar la equidad algorítmica, se establecen las siguientes reglas operativas para resolver casos límite:
+Para evitar sesgos estructurales y garantizar la equidad algorítmica, se resuelven de manera taxativa los siguientes 6 casos límite:
 
 ---
 
 ### Caso Límite 1: Medio Local Comunitario o Hiperlocal Pequeño
-- **Descripción:** Un periódico comunitario de barrio o municipio pequeño que opera con recursos mínimos, sin infraestructura corporativa, sin equipo de abogados y sin marcado Schema.org avanzado.
+- **Descripción:** Un periódico comunitario de barrio o municipio pequeño que opera con recursos mínimos, sin infraestructura corporativa, sin equipo legal y sin marcado Schema.org avanzado.
 - **Riesgo:** Que los algoritmos lo penalicen por carecer de sellos corporativos, páginas de transparencia complejas o certificados JTI.
 - **Resolución en Senda:**
   - La ausencia de marcado estructurado no genera penalización ni resta visibilidad al contenido.
@@ -218,9 +216,29 @@ Para evitar sesgos estructurales y garantizar la equidad algorítmica, se establ
 
 ---
 
+### Caso Límite 5: Medio sin Sitio Web ni Página Formal de Correcciones
+- **Descripción:** Un medio de comunicación consolidado en formato impreso, radial o digital básico que corrige errores fácticos directamente en el cuerpo de la nota o en emisiones posteriores, pero no mantiene una URL estática de `Política de Correcciones` accesible.
+- **Riesgo:** Que se presuma mala fe o falta de rigor profesional únicamente por no poseer una página corporativa dedicada.
+- **Resolución en Senda:**
+  - El factor `politica_correcciones` se reporta de forma neutra y literal: `"Política de correcciones: no localizada en URL pública (dato no disponible)"`.
+  - Nunca se agrega un calificativo negativo ni se le asigna penalización artificial en el cálculo de relevancia BM25.
+  - Si un artículo específico incluye una nota al pie de fe de erratas (ej. *"Nota del editor: se corrigió la fecha..."*), el extractor de Senda la captura y la muestra en el panel de evidencia bajo el campo `correcciones[]`.
+
+---
+
+### Caso Límite 6: Fuente Nueva o Dominio de Reciente Creación
+- **Descripción:** Un medio de investigación recién fundado, un proyecto periodístico colectivo o un blog lanzado hace menos de 6 meses con un dominio registrado recientemente.
+- **Riesgo:** Confundir la falta de historial técnico con dominios efímeros de malware, phishing o spam (*domain squatting*).
+- **Resolución en Senda:**
+  - El factor de antigüedad de dominio reporta el hecho objetivo sin estigmatizar: `"Historial de dominio: registrado en [Año] (< 1 año de antigüedad)"`.
+  - No se aplica bloqueo duro salvo que coincida con listas técnicas comprobadas de malware o phishing activo.
+  - Los factores de autoría identificada y citas a fuentes primarias permiten al lector ponderar la calidad del reporte con independencia de los meses de vida del dominio.
+
+---
+
 ## 4. Gobernanza, Versionado y Cambios a la Rúbrica
 
 - Cualquier modificación a los factores, pesos, umbrales o criterios de interpretación de esta rúbrica requiere:
-  1. Un incremento de versión semántica (ej. de `1.0.0` a `1.1.0` para ampliaciones compatibles, o a `2.0.0` para cambios estructurales).
+  1. Un incremento de versión semántica (ej. de `v0.1` a `v0.2`).
   2. Publicación previa del borrador de modificación en el repositorio público con un período mínimo de comentarios de la comunidad de 30 días.
   3. Historial de cambios (*CHANGELOG*) documentado públicamente en `docs/RUBRICA_FUENTES.md`.
