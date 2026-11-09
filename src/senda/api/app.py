@@ -40,6 +40,22 @@ class SearchItemModel(BaseModel):
     why_seen: str = ""
     is_sponsored: bool = False
 
+    # Verifiable provenance fields
+    canonical_url: Optional[str] = None
+    source_type: str = "desconocida"
+    content_type: str = "desconocido"
+    published_date: Optional[str] = None
+    updated_date: Optional[str] = None
+    authors: list[str] = Field(default_factory=list)
+    corrections: list[str] = Field(default_factory=list)
+    retraction: Optional[dict] = None
+    primary_citations: list[str] = Field(default_factory=list)
+    verifications: list[dict] = Field(default_factory=list)
+    security_signals: list[str] = Field(default_factory=list)
+    source_score: Optional[dict] = None
+    provider_origin: str = "Senda"
+    ai_provenance: Optional[dict] = None
+
 
 class SearchResponseModel(BaseModel):
     query: str
@@ -325,6 +341,42 @@ def create_app(
         formatted_items = []
         for it in items_list:
             domain_name = urllib.parse.urlparse(it.url).netloc
+            
+            # Map verifiable provenance fields safely
+            retraction_dict = None
+            if it.retraction:
+                retraction_dict = {
+                    "estado": it.retraction.status,
+                    "fuente": it.retraction.source,
+                    "fecha": it.retraction.date,
+                    "notice_url": it.retraction.notice_url,
+                }
+
+            verif_list = [
+                {
+                    "verificador": v.verifier,
+                    "veredicto_atribuido": v.attributed_verdict,
+                    "url": v.url,
+                    "fecha": v.date,
+                }
+                for v in (it.verifications or [])
+            ]
+
+            score_dict = None
+            if it.source_score:
+                score_dict = {
+                    "versión_rúbrica": it.source_score.rubric_version,
+                    "factores": it.source_score.factores,
+                    "nota": it.source_score.nota,
+                }
+
+            ai_dict = None
+            if it.ai_provenance:
+                ai_dict = {
+                    "señal_declarada": it.ai_provenance.declared_signal,
+                    "estado": it.ai_provenance.status,
+                }
+
             formatted_items.append(
                 SearchItemModel(
                     url=it.url,
@@ -338,6 +390,20 @@ def create_app(
                     source=it.source,
                     why_seen=it.why_seen,
                     is_sponsored=it.is_sponsored,
+                    canonical_url=it.canonical_url or it.url,
+                    source_type=it.source_type,
+                    content_type=it.content_type,
+                    published_date=it.published_date or it.date,
+                    updated_date=it.updated_date,
+                    authors=it.authors,
+                    corrections=it.corrections,
+                    retraction=retraction_dict,
+                    primary_citations=it.primary_citations,
+                    verifications=verif_list,
+                    security_signals=it.security_signals,
+                    source_score=score_dict,
+                    provider_origin=it.provider_origin,
+                    ai_provenance=ai_dict,
                 )
             )
 

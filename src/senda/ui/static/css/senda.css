@@ -758,8 +758,8 @@ body.compact-density .result-snippet {
   right: 0;
   top: calc(100% + 6px);
   z-index: 40;
-  width: 340px;
-  max-width: 90vw;
+  width: 440px;
+  max-width: 92vw;
   background: var(--bg-app);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
@@ -813,6 +813,94 @@ body.compact-density .result-snippet {
   color: var(--text-faint);
   border-top: 1px solid var(--border-subtle);
   padding-top: 0.4rem;
+}
+
+/* Badges semánticos de procedencia en resultados */
+.badge-alert-retraction {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="light"] .badge-alert-retraction {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.badge-content-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Panel estructurado de procedencia verificable */
+.provenance-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.65rem;
+  margin: 0.6rem 0;
+  font-size: 0.74rem;
+}
+
+[data-theme="light"] .provenance-panel {
+  background: #f8fafc;
+}
+
+.provenance-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--border-subtle);
+  line-height: 1.4;
+}
+
+.provenance-row:last-child {
+  border-bottom: none;
+}
+
+.provenance-key {
+  color: var(--text-faint);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.provenance-val {
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.text-retracted {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.text-unverified {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.why-seen-link {
+  color: var(--text-cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 [data-theme="light"] .why-seen-dropdown {

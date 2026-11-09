@@ -246,3 +246,41 @@ def test_onion_location_header(client, monkeypatch):
     resp_search = client.get("/search?q=freedom")
     assert resp_search.status_code == 200
     assert resp_search.headers.get("Onion-Location") == "http://sendatest1234567890abcdef.onion/search?q=freedom"
+
+
+def test_provenance_panel_renders_zero_js(client):
+    """Verify the Verifiable Provenance Panel renders semantic zero-JS disclosure and no-referrer links."""
+    resp = client.get("/search?q=Foundation")
+    assert resp.status_code == 200
+    html = resp.text
+
+    # Native zero-JS HTML5 details element
+    assert '<details class="why-seen-disclosure">' in html
+    assert '<summary class="why-seen-summary"' in html
+    assert "provenance-panel" in html
+    assert "Tipo de Fuente:" in html
+    assert "Estado de Retractación:" in html
+    assert "Procedencia de IA:" in html
+    assert "Cero Rastreo &bull; no-referrer" in html
+
+    # Privacy checks on outgoing links
+    assert 'referrerpolicy="no-referrer"' in html
+    assert 'rel="noopener noreferrer"' in html
+
+
+def test_provenance_json_negotiation(client):
+    """Verify JSON content negotiation serves verifiable provenance fields."""
+    resp = client.get("/search?q=Foundation&format=json")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "items" in data
+    assert len(data["items"]) >= 1
+
+    item = data["items"][0]
+    assert "canonical_url" in item
+    assert "source_type" in item
+    assert "content_type" in item
+    assert "retraction" in item
+    assert "primary_citations" in item
+    assert "verifications" in item
+    assert "ai_provenance" in item

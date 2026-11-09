@@ -121,26 +121,116 @@
                     <span class="result-cite-dot"></span>
                     <span class="result-domain">{{ item.domain }}</span>
                     <span class="result-source-badge">{{ item.source }}</span>
-                    {% if item.published_at %}
-                    <span class="result-date">&bull; {{ item.published_at }}</span>
+
+                    <!-- Semantic verifiable provenance tags -->
+                    {% if item.retraction and item.retraction.estado == 'retractada' %}
+                    <span class="badge-alert-retraction" title="Obra formalmente retractada registrada por {{ item.retraction.fuente }}">⚠️ Obra Retractada</span>
                     {% endif %}
 
-                    <!-- Transparencia nativa sin JS: "¿Por qué veo esto?" -->
+                    {% if item.content_type and item.content_type != 'desconocido' and item.content_type != 'otro' %}
+                    <span class="badge-content-pill">{{ item.content_type | capitalize }}</span>
+                    {% endif %}
+
+                    {% if item.published_date or item.published_at %}
+                    <span class="result-date">&bull; {{ item.published_date or item.published_at }}</span>
+                    {% endif %}
+
+                    <!-- Transparencia nativa sin JS: "Evidencia y Procedencia" -->
                     <details class="why-seen-disclosure">
-                        <summary class="why-seen-summary" title="Ver criterios de ordenación e inclusión">
+                        <summary class="why-seen-summary" title="Ver procedencia verificable, evidencia y factores de rúbrica">
                             <span>¿Por qué veo esto?</span>
                             <svg class="why-seen-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </summary>
-                        <div class="why-seen-dropdown" role="region" aria-label="Detalle de transparencia">
+                        <div class="why-seen-dropdown" role="region" aria-label="Panel de evidencia y procedencia verificable">
                             <div class="why-seen-badge-row">
-                                <span class="why-seen-source-tag">Proveedor: {{ item.source }}</span>
-                                <span class="why-seen-privacy-tag">Cero Rastreo</span>
+                                <span class="why-seen-source-tag">Origen: {{ item.provider_origin or item.source }}</span>
+                                <span class="why-seen-privacy-tag">Cero Rastreo &bull; no-referrer</span>
                             </div>
+
                             <p class="why-seen-text">{{ item.why_seen }}</p>
+
+                            <!-- Matriz de Procedencia Verificable -->
+                            <div class="provenance-panel">
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Tipo de Fuente:</span>
+                                    <span class="provenance-val">{{ item.source_type if item.source_type != 'desconocida' else 'Dato no disponible' }}</span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Tipo de Contenido:</span>
+                                    <span class="provenance-val">{{ item.content_type if item.content_type != 'desconocido' else 'Dato no disponible' }}</span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Autoría Identificada:</span>
+                                    <span class="provenance-val">
+                                        {% if item.authors %}
+                                            {{ item.authors | join(', ') }}
+                                        {% else %}
+                                            <span class="text-unverified">Dato no disponible / Sin firma identificada</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Fecha de Publicación:</span>
+                                    <span class="provenance-val">{{ item.published_date or item.published_at or 'Dato no disponible' }}</span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Correcciones Formales:</span>
+                                    <span class="provenance-val">
+                                        {% if item.corrections %}
+                                            {{ item.corrections | join('; ') }}
+                                        {% else %}
+                                            <span>Sin correcciones registradas</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Estado de Retractación:</span>
+                                    <span class="provenance-val">
+                                        {% if item.retraction and item.retraction.estado == 'retractada' %}
+                                            <strong class="text-retracted">RETRACTADA</strong> por {{ item.retraction.fuente }} {% if item.retraction.fecha %}({{ item.retraction.fecha }}){% endif %}
+                                        {% else %}
+                                            <span>Sin retractaciones registradas</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Citas a Primarias:</span>
+                                    <span class="provenance-val">
+                                        {% if item.primary_citations %}
+                                            {{ item.primary_citations | join(', ') }}
+                                        {% else %}
+                                            <span class="text-unverified">Sin citas primarias detectadas</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Verificaciones de Terceros:</span>
+                                    <span class="provenance-val">
+                                        {% if item.verifications %}
+                                            {% for v in item.verifications %}
+                                                <div>{{ v.verificador }} concluyó: <em>"{{ v.veredicto_atribuido }}"</em> {% if v.fecha %}({{ v.fecha }}){% endif %}</div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-unverified">Sin verificaciones de terceros registradas</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span class="provenance-key">Procedencia de IA:</span>
+                                    <span class="provenance-val">
+                                        {% if item.ai_provenance and item.ai_provenance.señal_declarada %}
+                                            Declarada: {{ item.ai_provenance.señal_declarada }}
+                                        {% else %}
+                                            <span class="text-unverified">Origen no determinado (sin detectores heurísticos)</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
                             <div class="why-seen-footer">
-                                <span>Inclusión y ranking deterministas &bull; Cero burbujas de filtro &bull; Sin perfilado</span>
+                                <span>Senda no emite veredictos propios. Muestra evidencia atribuida &bull; <a href="/how-it-works" class="why-seen-link" target="_blank" rel="noopener noreferrer">Cómo funciona</a></span>
                             </div>
                         </div>
                     </details>
