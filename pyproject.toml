@@ -47,6 +47,11 @@ senda = "senda.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"senda" = ["ui/static/**/*", "ui/templates/**/*"]
+
+
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
