@@ -3,7 +3,7 @@
 {% block title %}{{ query }} — Senda{% endblock %}
 
 {% block content %}
-<div class="results-layout">
+<div class="results-layout" id="resultsLayout">
     <!-- Top search bar in results view -->
     <div class="results-top-bar">
         <form class="results-search-form" action="/search" method="get" role="search">
@@ -27,6 +27,9 @@
                     aria-label="Buscar"
                 >
                 <input type="hidden" name="category" value="{{ category }}">
+                <input type="hidden" name="region" value="{{ region }}">
+                <input type="hidden" name="safe_search" value="{{ safe_search }}">
+                
                 <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -36,26 +39,56 @@
             </div>
         </form>
 
-        <!-- Category navigation -->
+        <!-- Category navigation tabs -->
         <nav class="results-tab-row" role="tablist" aria-label="Categorías">
-            <a href="/search?q={{ query | urlencode }}&category=all" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
                 <span data-i18n="tab_web">Web</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=images" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
                 <span data-i18n="tab_images">Imágenes</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=news" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
                 <span data-i18n="tab_news">Noticias</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=library" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
+                <span data-i18n="tab_videos">Videos</span>
+            </a>
+            <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
                 <span data-i18n="tab_library">Biblioteca</span>
             </a>
+            <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
+                <span>Mapas ↗</span>
+            </a>
         </nav>
+
+        <!-- Filters & Preferences Row -->
+        <div class="results-filters-row">
+            <div class="filter-group">
+                <span class="filter-label">Región:</span>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co" class="filter-link {% if region == 'co' %}active{% endif %}">Colombia (CO)</a>
+                <span class="filter-sep">|</span>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all" class="filter-link {% if region == 'all' or not region %}active{% endif %}">Global</a>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">SafeSearch:</span>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off" class="filter-link {% if safe_search == 'off' or not safe_search %}active{% endif %}">Desactivado</a>
+                <span class="filter-sep">|</span>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate" class="filter-link {% if safe_search == 'moderate' %}active{% endif %}">Moderado</a>
+            </div>
+
+            <div class="filter-group filter-density-toggle">
+                <button type="button" id="densityBtn" class="density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
+                    <span id="densityLabel">Densidad: Cómoda</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Metadata stats -->
     <div class="results-meta-row">
         <span>{{ results.total_matches }} <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)</span>
+        <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
     </div>
 
     <!-- Search results -->
@@ -71,7 +104,7 @@
                     <div class="image-caption">
                         <span class="image-title">{{ item.title }}</span>
                         <div class="image-meta">
-                            <span class="image-license-badge">{{ item.license or 'Cultura Libre' }}</span>
+                            <span class="image-source">{{ item.source }}</span>
                             <span class="image-domain">{{ item.domain }}</span>
                         </div>
                     </div>
@@ -86,38 +119,60 @@
                 <div class="result-cite">
                     <span class="result-cite-dot"></span>
                     <span class="result-domain">{{ item.domain }}</span>
-                    {% if item.doc_type == 'news' and item.published_at %}
+                    <span class="result-source-badge">{{ item.source }}</span>
+                    {% if item.published_at %}
                     <span class="result-date">&bull; {{ item.published_at }}</span>
                     {% endif %}
+
+                    <!-- Botón transparente: "¿Por qué veo esto?" -->
+                    <button type="button" class="why-seen-btn" data-why="{{ item.why_seen }}" title="Ver criterios de ordenación e inclusión">
+                        ¿Por qué veo esto?
+                    </button>
                 </div>
+                
                 <h2 class="result-heading">
                     <a href="{{ item.url }}" class="result-link" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{ item.title }}</a>
                 </h2>
+                
                 <p class="result-snippet">{{ item.snippet | safe }}</p>
             </li>
             {% endfor %}
         </ol>
         {% endif %}
 
+        <!-- Modal transparente "¿Por qué veo esto?" -->
+        <dialog id="whyDialog" class="why-dialog" aria-labelledby="whyDialogTitle">
+            <div class="why-dialog-content">
+                <div class="why-dialog-header">
+                    <h3 id="whyDialogTitle">Transparencia del Resultado</h3>
+                    <button type="button" id="closeWhyBtn" class="dialog-close-btn" aria-label="Cerrar">&times;</button>
+                </div>
+                <p id="whyDialogText" class="why-dialog-body"></p>
+                <div class="why-dialog-footer">
+                    <span>Senda no crea perfiles de usuario. La inclusión y ranking son deterministas.</span>
+                </div>
+            </div>
+        </dialog>
+
         <!-- Pagination -->
         {% if results.total_pages > 1 %}
         <nav class="pagination" role="navigation" aria-label="Páginas">
             {% if results.page > 1 %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page - 1 }}" class="page-btn">&lsaquo; Anterior</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ results.page - 1 }}" class="page-btn">&lsaquo; Anterior</a>
             {% endif %}
 
             {% for p in range(1, results.total_pages + 1) %}
                 {% if p == results.page %}
                     <span class="page-btn active" aria-current="page">{{ p }}</span>
                 {% elif p <= 5 or p > results.total_pages - 2 or (p >= results.page - 2 and p <= results.page + 2) %}
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ p }}" class="page-btn">{{ p }}</a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ p }}" class="page-btn">{{ p }}</a>
                 {% elif p == 6 or p == results.page - 3 %}
                     <span class="page-dots">&hellip;</span>
                 {% endif %}
             {% endfor %}
 
             {% if results.page < results.total_pages %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page + 1 }}" class="page-btn">Siguiente &rsaquo;</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ results.page + 1 }}" class="page-btn">Siguiente &rsaquo;</a>
             {% endif %}
         </nav>
         {% endif %}
@@ -126,9 +181,19 @@
         <div class="no-results-panel">
             <h2 class="no-results-title" data-i18n="no_results_title">No se encontraron resultados</h2>
             <p class="no-results-desc" data-i18n="no_results_desc">
-                Comprueba que las palabras estén bien escritas o prueba con términos más generales.
+                Comprueba la ortografía, prueba con términos más generales o desactiva filtros de fecha.
             </p>
         </div>
     {% endif %}
+
+    <!-- Bang shortcuts hint -->
+    <div class="bangs-hint-bar">
+        <span>Atajos directos:</span>
+        <code>!w</code> Wikipedia &bull;
+        <code>!osm</code> OpenStreetMap &bull;
+        <code>!ia</code> Internet Archive &bull;
+        <code>!gut</code> Gutenberg &bull;
+        <code>!codeberg</code> Codeberg
+    </div>
 </div>
 {% endblock %}

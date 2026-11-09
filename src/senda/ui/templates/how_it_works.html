@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Cómo funciona — Senda{% endblock %}
+
+{% block content %}
+<article class="info-card">
+    <h1>Cómo funciona Senda</h1>
+    <p>
+        Senda es un buscador web independiente y proxy ético diseñado para poner el control en manos de las personas.
+        Esta página describe con total transparencia qué hace el sistema, de dónde proceden los resultados y qué límites existen.
+    </p>
+
+    <h2>1. ¿De dónde provienen los resultados?</h2>
+    <p>Senda utiliza una arquitectura de proveedores intercambiables (<code>SearchProvider</code>):</p>
+    <ul>
+        <li><strong>Índice autónomo de Senda:</strong> Rastreador web propio alojado en servidores soberanos que indexa la web libre respetando estrictamente <code>robots.txt</code> (RFC 9309).</li>
+        <li><strong>SearXNG (Autoalojado):</strong> Metabuscador libre que consulta fuentes públicas sin identificadores.</li>
+        <li><strong>Proveedores independientes opcionales:</strong> Conectores para Brave Search API y Mojeek (cuando están configurados), normalizados a un formato único sin publicidad intrusiva.</li>
+    </ul>
+
+    <h2>2. ¿Qué datos se tratan y qué NO se hace jamás?</h2>
+    <ul>
+        <li><strong>Cero registro de consultas:</strong> Los términos de búsqueda se procesan en la memoria volátil del servidor durante los milisegundos que toma la respuesta y jamás se escriben en disco ni en bases de datos.</li>
+        <li><strong>Cero almacenamiento de IPs:</strong> La dirección IP del cliente no se registra en los registros de acceso de la aplicación ni del servidor web.</li>
+        <li><strong>Cero cookies de rastreo:</strong> No emitimos cookies de sesión ni de analítica. Tus preferencias (tema visual, idioma, lentes) se guardan exclusivamente en el almacenamiento local (<code>localStorage</code>) de tu dispositivo.</li>
+        <li><strong>Cero intermediarios comerciales:</strong> No compartimos, vendemos ni subastamos datos con intermediarios ni redes publicitarias.</li>
+    </ul>
+
+    <h2>3. Transparencia: "¿Por qué veo esto?"</h2>
+    <p>
+        Cada resultado en Senda incluye un botón informativo que te indica de forma honesta el proveedor de origen y los criterios de ordenamiento aplicados (por ejemplo, coincidencia léxica BM25 y densidad de texto libre de spam). Si no hay datos adicionales, el sistema lo declara explícitamente sin inventar explicaciones.
+    </p>
+
+    <h2>4. Control del usuario: Lentes personales (Goggles)</h2>
+    <p>
+        Puedes definir tus propias reglas para subir, bajar o bloquear dominios específicos en tus búsquedas. Estas listas se procesan localmente en tu navegador, pueden exportarse e importarse en formato JSON, y nunca se transmiten a nuestros servidores.
+    </p>
+
+    <h2>5. Marco Legal y Ético (Colombia y RGPD)</h2>
+    <p>
+        Senda se fundamenta en los principios de legalidad, finalidad, libertad, veracidad, transparencia, acceso y circulación restringida, seguridad y confidencialidad consagrados en el <strong>Régimen General de Protección de Datos Personales de Colombia (Ley Estatutaria 1581 de 2012)</strong> y en el <strong>Reglamento General de Protección de Datos (RGPD)</strong> de la Unión Europea. No recopilar datos es la garantía más sólida para su protección.
+    </p>
+
+    <h2>6. Código Abierto y Licencia</h2>
+    <p>
+        Todo el código fuente está disponible públicamente bajo la licencia <strong>GNU General Public License v3.0 o posterior (GPL-3.0-or-later)</strong>.
+    </p>
+</article>
+{% endblock %}

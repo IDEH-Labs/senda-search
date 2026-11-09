@@ -70,9 +70,19 @@ class SendaSettings(BaseSettings):
         description="Maximum directory path depth in URLs."
     )
 
+    # Provider settings
+    SEARXNG_URL: str = ""
+    BRAVE_API_KEY: str = ""
+    MOJEEK_API_KEY: str = ""
+
+    # Regional & Language Defaults (Colombia es-CO)
+    DEFAULT_REGION: str = "co"
+    DEFAULT_LANGUAGE: str = "es"
+
     # Web service
     SERVER_HOST: str = "127.0.0.1"
     SERVER_PORT: int = 8000
+
 
 
 settings = SendaSettings()

@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
 /**
- * Senda Dark Tech Core (i18n, Theme Manager, Command Bar)
- * Zero tracking, zero telemetry, zero cookies. 100% Client-Side.
+ * Senda Sovereign Client Core
+ * Multi-Language (es-CO, en), Theme Manager, Density Toggle, Why-Seen Dialog.
+ * Zero telemetry, zero tracking, zero cookies. 100% Client-Side.
  * GNU LibreJS Compliant: Declared Free Software under GNU GPL-3.0-or-later.
  */
 
@@ -16,10 +17,11 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Imágenes",
     tab_news: "Noticias",
+    tab_videos: "Videos",
     tab_library: "Biblioteca",
     results_found: "resultados (",
     no_results_title: "No se encontraron resultados",
-    no_results_desc: "Comprueba que las palabras estén bien escritas o prueba con términos más generales.",
+    no_results_desc: "Comprueba la ortografía o intenta con términos más generales.",
   },
   en: {
     nav_about: "About",
@@ -28,6 +30,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Images",
     tab_news: "News",
+    tab_videos: "Videos",
     tab_library: "Library",
     results_found: "results (",
     no_results_title: "No results found",
@@ -40,6 +43,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Images",
     tab_news: "Actualités",
+    tab_videos: "Vidéos",
     tab_library: "Bibliothèque",
     results_found: "résultats (",
     no_results_title: "Aucun résultat trouvé",
@@ -52,6 +56,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Bilder",
     tab_news: "Nachrichten",
+    tab_videos: "Videos",
     tab_library: "Bibliothek",
     results_found: "Ergebnisse (",
     no_results_title: "Keine Ergebnisse gefunden",
@@ -64,6 +69,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Imagens",
     tab_news: "Notícias",
+    tab_videos: "Vídeos",
     tab_library: "Biblioteca",
     results_found: "resultados (",
     no_results_title: "Nenhum resultado encontrado",
@@ -76,6 +82,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "Web",
     tab_images: "Immagini",
     tab_news: "Notizie",
+    tab_videos: "Video",
     tab_library: "Biblioteca",
     results_found: "risultati (",
     no_results_title: "Nessun risultato trovato",
@@ -88,6 +95,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "ウェブ",
     tab_images: "画像",
     tab_news: "ニュース",
+    tab_videos: "動画",
     tab_library: "ライブラリ",
     results_found: "件の検索結果 (",
     no_results_title: "一致する結果が見つかりませんでした",
@@ -100,6 +108,7 @@ const SENDA_TRANSLATIONS = {
     tab_web: "网页",
     tab_images: "图片",
     tab_news: "资讯",
+    tab_videos: "视频",
     tab_library: "文献库",
     results_found: "条结果 (",
     no_results_title: "未找到符合条件的结果",
@@ -143,7 +152,67 @@ function initThemeManager() {
 }
 
 /**
- * Command Bar & Keyboard Shortcuts
+ * Density Manager: Toggle comfortable / compact view modes.
+ */
+function initDensityManager() {
+  var densityBtn = document.getElementById('densityBtn');
+  var densityLabel = document.getElementById('densityLabel');
+  
+  try {
+    var saved = localStorage.getItem('senda_density');
+    if (saved === 'compact') {
+      document.body.classList.add('compact-density');
+      if (densityLabel) densityLabel.textContent = "Densidad: Compacta";
+    }
+  } catch(e) {}
+
+  if (densityBtn) {
+    densityBtn.addEventListener('click', function() {
+      var isCompact = document.body.classList.toggle('compact-density');
+      var mode = isCompact ? 'compact' : 'comfortable';
+      if (densityLabel) {
+        densityLabel.textContent = isCompact ? "Densidad: Compacta" : "Densidad: Cómoda";
+      }
+      try {
+        localStorage.setItem('senda_density', mode);
+      } catch(e) {}
+    });
+  }
+}
+
+/**
+ * Why Seen Dialog Handler
+ */
+function initWhySeenDialog() {
+  var dialog = document.getElementById('whyDialog');
+  var dialogText = document.getElementById('whyDialogText');
+  var closeBtn = document.getElementById('closeWhyBtn');
+
+  if (!dialog || !dialogText) return;
+
+  document.querySelectorAll('.why-seen-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var explanation = btn.getAttribute('data-why') || "Resultado orgánico obtenido según relevancia léxica BM25.";
+      dialogText.textContent = explanation;
+      dialog.showModal();
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      dialog.close();
+    });
+  }
+
+  dialog.addEventListener('click', function(e) {
+    if (e.target === dialog) {
+      dialog.close();
+    }
+  });
+}
+
+/**
+ * Command Bar & Shortcuts
  */
 function initCommandBar() {
   var searchInput = document.getElementById('search-input');
@@ -210,6 +279,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   applyTranslations(initialLang);
   initThemeManager();
+  initDensityManager();
+  initWhySeenDialog();
   initCommandBar();
 });
 

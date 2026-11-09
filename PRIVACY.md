@@ -1,27 +1,69 @@
-# Senda — Privacy Policy and Architecture
+# Senda — Política y Arquitectura de Privacidad (Privacy Architecture)
 
-SPDX-License-Identifier: GPL-3.0-or-later
+**Identificador de Licencia SPDX:** `GPL-3.0-or-later`  
+**Idioma Primario de Referencia:** Español (Colombia)  
+**Fecha de Actualización:** Noviembre 2026  
 
-## 1. Privacy by Design
+---
 
-Privacy is not a marketing promise; in Senda, it is an immutable architectural constraint.
+## 1. Declaración de Principios y Marco Ético
 
-### 1.1 What We Do NOT Collect
-- **No Search Query Logging:** Queries entered into Senda are processed in volatile memory to retrieve results and are never written to disk, databases, or log files.
-- **No IP Address Recording:** Server connection logs strip or discard client IP addresses.
-- **No Behavioral Profiling:** Senda does not build user profiles, track repeat visitors, or correlate searches over time.
-- **No Search History:** No search history is stored on the server.
-- **No Cookies:** Senda does not set tracking, session, or advertising cookies.
-- **No Third-Party Analytics:** Senda contains zero Google Analytics, zero trackers, zero beacons, zero external telemetry.
-- **No External CDNs:** All stylesheets, fonts, and assets are hosted locally on the server. No connections to external CDNs occur when rendering Senda.
-- **No Referrer Leakage:** Senda transmits `Referrer-Policy: no-referrer`. Destination websites you click on cannot see the search terms you entered or that you came from Senda.
-- **No Click Tracking:** Links to external sites navigate directly to the target URL (`rel="noopener noreferrer"`) without routing through tracking redirectors.
+La privacidad en **Senda** no es una promesa comercial ni una declaración de intenciones: es una **restricción arquitectónica inmutable**. El sistema ha sido diseñado desde cero bajo los principios de Privacidad por Diseño y por Defecto (*Privacy by Design & by Default*), alineado con la filosofía de software libre de la Free Software Foundation (FSF) y los principios rectores del tratamiento de datos personales de la **Ley Estatutaria 1581 de 2012 de Colombia** y el **Reglamento General de Protección de Datos (RGPD / GDPR - Reglamento UE 2016/679)**.
 
-### 1.2 Local Preferences
-User interface preferences (such as light/dark theme and language selection) are stored exclusively on your local device in browser `localStorage`. They are never transmitted to or stored by Senda servers.
+> **Aviso de transparencia legal:** El cumplimiento descrito a continuación constituye una especificación técnica y arquitectónica de ingeniería de software; no constituye asesoría jurídica formal.
 
-### 1.3 Search Query Privacy via POST
-In addition to standard GET requests, Senda natively supports HTTP `POST /search`. Submitting queries via POST ensures that search terms do not appear in the browser URL address bar, local browser navigation history, or intermediary HTTP proxy access logs, preventing query leakage on shared or monitored devices.
+---
 
-### 1.4 Auditability
-The entirety of Senda's source code is public and licensed under GNU GPL-3.0-or-later. Anyone can inspect, build, run, and audit the application independently to verify these commitments.
+## 2. Lo que Senda HACE
+
+1. **Anonimización y Limpieza de Cabeceras en el Proxy:**
+   Cuando Senda consulta adaptadores externos configurados por el administrador (instancia local de SearXNG, Brave Search API o Mojeek API), actúa como un proxy ciego. Elimina cabeceras identificadoras del usuario final (`X-Forwarded-For`, `Client-IP`, `User-Agent` del cliente, cookies) y sustituye la petición por una petición genérica de servidor.
+2. **Normalización Transparente de Resultados:**
+   Cada resultado devuelto al usuario es normalizado bajo un esquema neutral:
+   `{ título, url, fragmento, fuente, fecha, idioma, tipo, es_patrocinado, por_qué_veo_esto }`.
+3. **Botón de Transparencia "¿Por qué veo esto?":**
+   Cada enlace muestra el proveedor de origen (Índice Soberano FTS5, SearXNG, Brave, Mojeek), la fecha de indexación si está disponible, y si ha intervenido algún filtro o lente local aplicado por el usuario. Si no hay datos adicionales de ordenamiento, el sistema lo indica explícitamente sin inventar explicaciones.
+4. **Almacenamiento Estrictamente Local en el Dispositivo del Usuario:**
+   Toda preferencia (modo visual claro/oscuro/alto contraste, densidad compacta/cómoda, idioma de interfaz, filtros de región y lentes personalizados de reordenamiento de dominios) se almacena única y exclusivamente en el navegador del usuario (`localStorage`). Jamás se envían al servidor ni se guardan en bases de datos remotas.
+5. **Autocompletado Local:**
+   Las sugerencias de búsqueda se generan a partir de la memoria local del navegador o índices estáticos descargados, **sin enviar cada pulsación de teclado a servidores de terceros**.
+6. **Política de Referencia Estricta (`no-referrer`):**
+   Al hacer clic en un resultado orgánico, el navegador no transmite la URL de origen ni los términos de búsqueda ingresados al sitio de destino (`rel="noopener noreferrer"` y cabecera `Referrer-Policy: no-referrer`).
+7. **Soporte de Búsqueda por POST:**
+   Senda admite el envío de búsquedas a través de solicitudes HTTP `POST /search`, evitando que las palabras de búsqueda queden registradas en el historial local del navegador o en los logs de proxies intermediarios de la red.
+8. **Funcionalidad Completa sin JavaScript:**
+   La consulta básica, los resultados paginados, los filtros y los atajos funcionan al 100% mediante HTML semántico y CSS estándar, garantizando accesibilidad y resistencia ante entornos con scripts deshabilitados por seguridad.
+
+---
+
+## 3. Lo que Senda NO HACE
+
+- ❌ **NO registra consultas de búsqueda (*Zero Query Logging*):** Las consultas se procesan en la memoria volátil del proceso durante el ciclo de vida de la petición HTTP y nunca se escriben en disco, bases de datos o archivos de registro.
+- ❌ **NO almacena direcciones IP:** Las direcciones IP de conexión son descartadas o enmascaradas inmediatamente a nivel de servidor web y aplicación.
+- ❌ **NO crea perfiles de comportamiento:** Senda no rastrea sesiones repetidas, no crea identidades de usuario, ni correlaciona búsquedas a lo largo del tiempo.
+- ❌ **NO utiliza cookies de seguimiento ni no esenciales:** Cero cookies de sesión de rastreo, cero cookies analíticas, cero cookies de terceros.
+- ❌ **NO incluye analítica de terceros ni balizas (*web beacons*):** Cero Google Analytics, cero píxeles de Meta, cero scripts de telemetría remota.
+- ❌ **NO depende de CDNs externas:** Todos los estilos, tipografías SVG y scripts se sirven localmente desde el propio servidor de Senda, impidiendo que terceros rastreen las descargas de recursos.
+- ❌ **NO realiza redirecciones de rastreo de clics:** Los enlaces apuntan directamente a la URL de destino final sin pasar por pasarelas intermedias de medición de tasa de clics (CTR).
+- ❌ **NO aplica burbujas de filtro ni personalización oculta:** El orden de los resultados responde a criterios objetivos (BM25 y relevancia lexical del proveedor) y a las reglas configuradas explícitamente por el usuario (lentes/goggles). No existen sesgos algorítmicos basados en suposiciones sobre el perfil del usuario.
+- ❌ **NO presenta contenido publicitario disfrazado ni personalizado:** Por defecto, los resultados no contienen anuncios. Si un proveedor externo incluye un resultado patrocinado, este se etiqueta de forma inequívoca como `[Anuncio]`, separado visualmente del contenido orgánico y sin rastreo conductual.
+- ❌ **NO hace scraping de motores de búsqueda que lo prohíban en sus Términos de Servicio:** Senda solo utiliza fuentes soberanas locales o APIs oficiales respetando las cuotas y condiciones de uso.
+
+---
+
+## 4. Límites Honestos del Sistema
+
+La honestidad hacia el usuario exige transparentar los límites técnicos de cualquier arquitectura:
+
+1. **Tratamiento por Proveedores Externos:**
+   Cuando el administrador habilita proveedores externos como Brave Search o Mojeek, la consulta textual (los términos buscados) debe ser transmitida a través de la API correspondiente para obtener los resultados. Aunque Senda elimina la dirección IP y los datos del navegador del usuario final (actuando como escudo intermedio), el proveedor externo recibe la consulta procedente de la IP de nuestro servidor proxy.
+2. **Navegación Saliente:**
+   Una vez que el usuario hace clic en un resultado y abandona Senda para ingresar al sitio web de destino, la política de privacidad de dicho sitio web entra en vigor. Senda no puede proteger la privacidad del usuario dentro de plataformas de terceros, si bien utiliza `rel="noopener noreferrer"` para no revelar de qué búsqueda proviene.
+3. **Redirecciones Directas (Bangs y Mapas):**
+   Cuando el usuario invoca un atajo tipográfico (ej. `!osm`, `!w`, `!fsf`), Senda efectúa una redirección directa HTTP 307 al servicio correspondiente. A partir de ese momento, la interacción ocurre directamente entre el usuario y la plataforma destino elegida.
+
+---
+
+## 5. Auditoría y Código Abierto
+
+Todo el código de Senda está publicado bajo la licencia **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`). Cualquier usuario o auditor independiente tiene la libertad de inspeccionar, compilar, ejecutar y verificar que estas afirmaciones se correspondan estrictamente con la implementación en código.

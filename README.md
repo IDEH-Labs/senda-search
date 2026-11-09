@@ -1,98 +1,163 @@
-# Senda — The Independent, Ethical Web Search Engine
+# Senda — Motor de Búsqueda Web Ético, Rápido y Transparente
 
-[![License: GPL v3+](https://img.shields.io/badge/License-GPL%20v3%2B-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Licencia: GPL v3+](https://img.shields.io/badge/Licencia-GPL%20v3%2B-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python: 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Privacy: Zero Tracking](https://img.shields.io/badge/Privacy-Zero%20Tracking-brightgreen.svg)](PRIVACY.md)
-[![Tests: 53 Passed](https://img.shields.io/badge/Tests-53%20Passed%20(90%25%20cov)-success.svg)](tests/)
+[![Privacidad: Cero Rastreo](https://img.shields.io/badge/Privacidad-Cero%20Rastreo-brightgreen.svg)](PRIVACY.md)
+[![Pruebas: 70 Aprobadas](https://img.shields.io/badge/Pruebas-70%20Aprobadas-success.svg)](tests/)
+[![Accesibilidad: WCAG 2.2 AA](https://img.shields.io/badge/Accesibilidad-WCAG%202.2%20AA-purple.svg)](docs/ACCESSIBILITY.md)
 
-> **Senda** is an independent, auditable, and sovereign web search engine developed by **IDEH Labs**. Built from scratch to protect the rights of users and third parties alike, Senda delivers neutral, transparent search results without behavioral profiling, ad tracking, or query retention.
-
----
-
-## Key Principles & Features
-
-- **Zero Tracking by Design:** No user profiling, no query history stored on disk, no IP address logging, and zero advertising trackers or cookies.
-- **Independent Index:** Powered by an embedded SQLite FTS5 full-text search engine with BM25 lexical ranking and configurable semantic field weighting.
-- **Strict Network & SSRF Protections:** Built-in network guard that pre-resolves DNS and strictly rejects private RFC 1918, loopback, link-local, and multicast IP addresses, mitigating DNS rebinding and internal network probing.
-- **RFC 9309 Politeness:** Strictly respects `robots.txt`, enforces domain-level rate limiting (`crawl-delay`), and caps per-host concurrency.
-- **Third-Party Rights & Takedown:** Indexes structured metadata (titles, canonical links, bounded text excerpts) rather than full-page piracy mirrors. Provides administrative commands (`purge-domain`, `purge-url`) for immediate domain removal.
-- **Multilingual (i18n):** Native interface support with English as primary default, plus Spanish, French, and German.
-- **Lightweight & Fully Accessible:** 100% functional without JavaScript. WCAG AAA color contrast, native light/dark themes.
+> **Senda** es una interfaz y motor de búsqueda web rápida, limpia, privada y transparente que devuelve el control total de la información al usuario. Desarrollado por **IDEH Labs** bajo la filosofía del Software Libre (FSF).
 
 ---
 
-## Architecture Overview
+## 🎯 Jerarquía de Valores de Senda
+
+1. **Honestidad hacia el usuario:** Sin datos ocultos, sin explicaciones inventadas, sin sesgos disimulados.
+2. **Privacidad estricta:** Cero registro de consultas, cero almacenamiento de IP, cero cookies de seguimiento.
+3. **Utilidad de los resultados:** Fusión soberana y multi-proveedor con esquema normalizado.
+4. **Accesibilidad universal:** Cumplimiento estricto WCAG 2.2 nivel AA, soporte lector de pantalla, navegación 100% por teclado, funcional sin JavaScript.
+5. **Velocidad y ligereza:** Presupuesto frontend <100 KB JS comprimido, LCP < 1,5 s en 4G.
+6. **Estética minimalista atemporal:** Jerarquía visual clara, densidad ajustable (cómoda/compacta), sin imitar marcas comerciales.
+
+---
+
+## 🏗️ Arquitectura y Estructura del Proyecto
+
+Senda implementa un frontend ultraligero con mejora progresiva y un backend proxy delgado con la interfaz `SearchProvider` intercambiable.
 
 ```
-src/senda/
-├── crawler/      # Polite async fetcher, RFC 9309 robots parser, Anti-SSRF network guard, runner
-├── frontier/     # Canonical URL normalization, priority queue, spider trap defense
-├── extractor/    # Safe DOM parser, metadata extraction, text sanitization, SHA-256 deduplication
-├── indexer/      # SQLite FTS5 engine, document storage, content deduplication
-├── ranking/      # BM25 lexical ranking, structural field weighting, snippet generator
-├── api/          # FastAPI REST endpoints (/search, /health, /stats, /takedown) & security headers
-├── ui/           # Semantic HTML5/CSS interface with local i18n switcher
-└── cli/          # Administrative CLI tools (crawl, search, purge-domain, purge-url, stats, serve)
+senda-search/
+├── src/
+│   └── senda/
+│       ├── api/               # API REST FastAPI, enrutamiento, seguridad HTTP y proxy
+│       │   ├── app.py         # Endpoints: /, /search, /how-it-works, /about, /health
+│       │   └── ...
+│       ├── providers/         # Adaptadores intercambiables de SearchProvider
+│       │   ├── __init__.py    # Exportación unificada de proveedores
+│       │   ├── base.py        # Esquema SearchResultItem y clase abstracta SearchProvider
+│       │   ├── internal.py    # Adaptador SQLite FTS5 soberano local
+│       │   ├── searxng.py     # Adaptador SearXNG autoalojado
+│       │   ├── brave.py       # Adaptador Brave Search API (oficial, sin rastreo)
+│       │   ├── mojeek.py      # Adaptador Mojeek API (buscador independiente)
+│       │   └── aggregator.py  # Agregador asíncrono, lentes de usuario y atajos bang
+│       ├── crawler/           # Rastreador ético asíncrono RFC 9309, anti-SSRF
+│       ├── extractor/         # Extractor semántico DOM y deduplicación SHA-256
+│       ├── frontier/          # Cola de prioridades, anti-trampas de araña
+│       ├── indexer/           # Motor de almacenamiento SQLite FTS5 con BM25
+│       ├── ranking/           # Ponderación lexical y generador de fragmentos
+│       ├── ui/                # Frontend minimalista sin dependencias pesadas
+│       │   ├── templates/     # Plantillas Jinja2 semánticas (index, results, how_it_works, base)
+│       │   └── static/        # CSS puro sin frameworks y scripts sin dependencias externas
+│       │       ├── css/senda.css   # Tokens de diseño, modo claro/oscuro/alto contraste, densidad
+│       │       ├── js/i18n.js      # Internacionalización local, lentes y atajos
+│       │       └── img/            # Logotipos y favicons vectoriales SVG
+│       └── config.py          # Configuración de variables de entorno y defaults
+├── tests/                     # Suite de pruebas unitarias y de integración (70 pruebas)
+│   ├── test_providers.py      # Pruebas de normalización, agregador, lentes y bangs
+│   ├── test_indexer.py        # Pruebas FTS5
+│   └── ...
+├── docker-compose.yml         # Despliegue conjunto de Senda y SearXNG
+├── PRIVACY.md                 # Declaración de lo que el sistema hace y NO hace
+├── README.md                  # Manual y documentación principal
+└── pyproject.toml             # Especificación de paquete y dependencias auditables
 ```
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full technical documentation and data-flow diagrams.
 
 ---
 
-## Quickstart
+## 🚀 Despliegue Rápido
+
+### Opción 1: Entorno de Desarrollo Local
 
 ```bash
-# Clone the repository
+# Clonar el repositorio
 git clone https://github.com/IDEH-Labs/senda-search.git
 cd senda-search
 
-# Create and activate a clean virtual environment
+# Crear entorno virtual e instalar dependencias
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies in editable mode
 pip install -e ".[dev]"
 
-# Run test suite
-pytest -v --cov=senda
+# Ejecutar la suite completa de pruebas
+pytest -v
 
-# Crawl initial seed pages
-senda crawl https://fsf.org --max-pages 5 --max-depth 1
-
-# Launch the sovereign web interface
+# Iniciar servidor web
 senda serve --host 127.0.0.1 --port 8000
+```
+
+### Opción 2: Despliegue con SearXNG vía Docker
+
+Para habilitar resultados federados autoalojados utilizando SearXNG como proveedor complementario:
+
+```bash
+# 1. Ejecutar SearXNG en un contenedor Docker aislado
+docker run -d \
+  --name senda-searxng \
+  -p 8888:8080 \
+  -e "SEARXNG_BASE_URL=http://localhost:8888" \
+  -e "SEARXNG_SECRET=$(openssl rand -hex 32)" \
+  --restart unless-stopped \
+  searxng/searxng:latest
+
+# 2. Configurar la URL de SearXNG en las variables de entorno de Senda
+export SENDA_SEARXNG_URL="http://127.0.0.1:8888"
+
+# 3. (Opcional) Configurar claves para Brave Search o Mojeek
+export SENDA_BRAVE_API_KEY="tu_clave_brave_aqui"
+export SENDA_MOJEEK_API_KEY="tu_clave_mojeek_aqui"
+
+# 4. Iniciar Senda
+senda serve --host 0.0.0.0 --port 8000
 ```
 
 ---
 
-## CLI Reference
+## ⚙️ Variables de Configuración
 
-| Command | Description |
-|---|---|
-| `senda crawl <seed_url> [--max-pages N] [--max-depth D]` | Crawl and index starting from seed URL |
-| `senda search "<query>" [--page P] [--limit L]` | Query local FTS5 index directly from terminal |
-| `senda stats` | Show index size, document count, and domain count |
-| `senda purge-domain <domain>` | Completely remove all indexed documents of a domain |
-| `senda purge-url <url>` | Completely remove a single URL from the index |
-| `senda serve [--host H] [--port P]` | Start the Web search interface and REST API |
+Las siguientes variables de entorno permiten controlar los adaptadores de búsqueda y comportamiento regional:
 
----
-
-## Project Documentation
-
-- **[Installation Manual](docs/INSTALL.md):** Setup instructions for Gentoo Linux, OpenRC, systemd, and POSIX systems.
-- **[Administration Guide](docs/ADMIN.md):** Database maintenance, backups, WAL checkpoints, and takedown procedures.
-- **[Technical Architecture](docs/ARCHITECTURE.md):** Detailed design, pipeline contracts, and security models.
-- **[Security Policy](SECURITY.md):** Threat model, anti-SSRF protections, and vulnerability reporting.
-- **[Privacy Architecture](PRIVACY.md):** Verifiable zero-knowledge and zero-logging policy.
-- **[Contributing Guide](CONTRIBUTING.md):** Code conventions, FSF 4 Freedoms, and contribution rules.
-- **[Changelog](CHANGELOG.md):** Release history and version notes.
-- **[SBOM](SBOM.md):** Software Bill of Materials and license audit.
+| Variable | Descripción | Valor por Defecto |
+|---|---|---|
+| `SENDA_DEFAULT_REGION` | Región geográfica por defecto | `co` (Colombia) |
+| `SENDA_DEFAULT_LANGUAGE` | Idioma de interfaz y filtrado preferente | `es` (Español) |
+| `SENDA_SEARXNG_URL` | URL de la instancia local de SearXNG | `None` (desactivado si no se define) |
+| `SENDA_BRAVE_API_KEY` | Clave API oficial de Brave Search | `None` (desactivado si no se define) |
+| `SENDA_MOJEEK_API_KEY` | Clave API oficial de Mojeek | `None` (desactivado si no se define) |
+| `SENDA_SAFE_SEARCH` | Nivel de SafeSearch (`strict`, `moderate`, `off`) | `moderate` |
+| `SENDA_STORAGE_PATH` | Ruta de la base de datos SQLite FTS5 | `~/.senda/index.db` |
 
 ---
 
-## License & Authors
+## ⚡ Atajos de Búsqueda Tipo Bang (`!bangs`)
 
-This project is licensed under the **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`). See the [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md) files for complete terms and copyright notices.
+Senda permite redirigir directamente la consulta a recursos libres y de conocimiento público sin rastreo intermedio:
 
-An **[IDEH Labs](https://ideh.top)** project · [Codeberg](https://codeberg.org/IDEH-Labs)
+| Atajo | Destino | Ejemplo |
+|---|---|---|
+| `!w` | Wikipedia (Español) | `!w Gabriel García Márquez` |
+| `!osm` | OpenStreetMap | `!osm Plaza de Bolívar Bogotá` |
+| `!ia` | Internet Archive Wayback Machine | `!ia fsf.org` |
+| `!gut` | Proyecto Gutenberg | `!gut Don Quijote` |
+| `!fsf` | Free Software Foundation | `!fsf GNU General Public License` |
+| `!codeberg`| Repositorios en Codeberg | `!codeberg senda` |
+| `!arch` | Wiki de Arch Linux | `!arch udev rules` |
+| `!ddg` | DuckDuckGo HTML | `!ddg privacy tools` |
+
+---
+
+## 🔍 Funciones Éticas Clave
+
+- **Botón "¿Por qué veo esto?":** Cada resultado tiene un botón informativo nativo (`<dialog>`) que expone con exactitud la fuente de indexación, fecha conocida y si el resultado fue modificado por filtros personales.
+- **Lentes de Usuario (Goggles):** Configuración en formato JSON guardada exclusivamente en el navegador (`localStorage`) que permite subir de posición (`boost`), bajar (`bury`) o bloquear (`block`) dominios específicos según el criterio de cada usuario.
+- **Filtro "Sin Anuncios" Activo por Defecto:** Los resultados patrocinados se descartan por defecto. Si se activa la visualización, se presentan bajo etiqueta inequívoca `[Anuncio]` sin rastreo de perfil.
+- **Modo Cómodo / Compacto:** Permite adaptar la densidad de información a pantallas de diferentes resoluciones y necesidades visuales.
+- **Navegación por Teclado:** Presione `/` para enfocar la barra de búsqueda, `Esc` para limpiar o cerrar modales, y tabule fluidamente por todos los elementos interactivos con foco de alto contraste.
+
+---
+
+## ⚖️ Licencia y Justificación
+
+Senda se distribuye bajo la licencia **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`).
+
+### Justificación de la Licencia
+Se eligió la licencia recíproca `GPL-3.0-or-later` para garantizar que cualquier modificación, mejora o redistribución de esta tecnología de búsqueda conserve obligatoriamente las 4 libertades esenciales del Software Libre proclamadas por la Free Software Foundation (FSF). Esto previene que intermediarios privativos privaticen las mejoras de privacidad y transparencia implementadas en beneficio de la comunidad.
