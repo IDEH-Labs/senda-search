@@ -30,8 +30,6 @@
                 <input type="hidden" name="region" value="{{ region }}">
                 <input type="hidden" name="safe_search" value="{{ safe_search }}">
                 <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
-                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
-                {% if time_filter %}<input type="hidden" name="time_filter" value="{{ time_filter }}">{% endif %}
                 
                 <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -389,10 +387,17 @@
                     <line x1="8" y1="11" x2="14" y2="11"></line>
                 </svg>
             </div>
-            <h2 class="no-results-title">No se encontraron resultados locales</h2>
+            <h2 class="no-results-title">No se encontraron resultados</h2>
             <p class="no-results-desc">
-                El índice soberano local no contiene documentos coincidentes para «<strong>{{ query }}</strong>».
+                No hay resultados para «<strong>{{ query }}</strong>»{% if time_filter %} en el filtro de tiempo actual{% endif %}.
             </p>
+            {% if time_filter %}
+            <p class="no-results-desc" style="margin-top: 0.75rem;">
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}" class="filter-link active" style="font-size: 0.9rem; text-decoration: underline;">
+                    Probar buscando en «Cualquier fecha» ↗
+                </a>
+            </p>
+            {% endif %}
             
             <div class="no-results-suggestions">
                 <span class="suggestions-label">Explorar la web pública con atajos directos sin rastreo:</span>

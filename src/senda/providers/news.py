@@ -28,10 +28,23 @@ def _clean_text(text: Optional[str]) -> str:
     return " ".join(clean.split())
 
 
+def _expand_news_query(query: str) -> str:
+    """Intelligently expand discovery and science terms for comprehensive press retrieval."""
+    q_lower = query.lower().strip()
+    discovery_terms = {
+        "descubren", "descubrimiento", "descubrimientos", "descubrieron", "descubre",
+        "hallazgo", "hallazgos", "hallan"
+    }
+    if q_lower in discovery_terms:
+        return "(descubren OR descubrimiento OR descubrimientos OR hallazgo OR hallazgos)"
+    return query
+
+
 def _resolve_time_query(query: str, time_filter: Optional[str]) -> str:
     """Map user temporal filter to syndicated feed operators (when: or before:)."""
+    expanded_q = _expand_news_query(query)
     if not time_filter or time_filter.lower() in ("all", "cualquiera", "none", ""):
-        return query
+        return expanded_q
     tf = time_filter.lower().strip()
     mapping = {
         "1h": "when:1h",
@@ -54,11 +67,11 @@ def _resolve_time_query(query: str, time_filter: Optional[str]) -> str:
         "year": "when:1y",
     }
     if tf in mapping:
-        return f"{query} {mapping[tf]}".strip()
+        return f"{expanded_q} {mapping[tf]}".strip()
     if tf in ("1y_plus", "older_1y", "1y+"):
         one_year_ago = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d")
-        return f"{query} before:{one_year_ago}".strip()
-    return query
+        return f"{expanded_q} before:{one_year_ago}".strip()
+    return expanded_q
 
 
 class RealTimeNewsProvider(SearchProvider):

@@ -144,7 +144,11 @@ async def test_aggregator_federates_all_verified_sources_in_general_search():
 
 def test_realtime_news_time_filters():
     """Verify time filter resolution for 1h, 1d, 1w, 1m, 2m, 6m, 1y, and 1y_plus."""
-    from senda.providers.news import _resolve_time_query
+    from senda.providers.news import _resolve_time_query, _expand_news_query
+
+    assert "descubrimiento" in _expand_news_query("descubren")
+    assert "descubrimiento" in _expand_news_query("hallazgo")
+    assert _expand_news_query("shakira") == "shakira"
 
     assert "when:1h" in _resolve_time_query("atentado", "1h")
     assert "when:1d" in _resolve_time_query("atentado", "1d")
@@ -154,7 +158,7 @@ def test_realtime_news_time_filters():
     assert "when:180d" in _resolve_time_query("atentado", "6m")
     assert "when:1y" in _resolve_time_query("atentado", "1y")
     assert "before:" in _resolve_time_query("atentado", "1y_plus")
-    assert _resolve_time_query("atentado", "all") == "atentado"
+    assert "descubrimiento" in _resolve_time_query("descubren", "all")
 
 
 @pytest.mark.asyncio
