@@ -4,20 +4,20 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 Senda — Free Software under GNU GPL-3.0-or-later
 -->
-<html lang="en" data-theme="auto">
+<html lang="es" data-theme="auto">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <meta name="color-scheme" content="light dark">
-    <meta name="description" content="Senda — Minimalist, ethical, and libre web search engine with zero query logs and zero profiling.">
-    <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0a0e17" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)">
     
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Senda">
     <link rel="jslicense" href="/javascript">
     
-    <title>{% block title %}Senda — Buscador Libre{% endblock %}</title>
+    <title>{% block title %}Senda{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/senda.css">
     
     <script>
@@ -35,54 +35,50 @@ Senda — Free Software under GNU GPL-3.0-or-later
         // @license-end
     </script>
 </head>
-<body>
-    <a href="#main-content" class="skip-link" data-i18n="skip_to_content">Skip to content</a>
+<body class="{% block body_class %}{% endblock %}">
+    <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
     <header class="app-header" role="banner">
-        <a href="/" class="brand" aria-label="Senda Home">
-            <svg class="brand-logo" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.8" opacity="0.35"/>
-                <path d="M16 4 L19.5 12.5 L28 16 L19.5 19.5 L16 28 L12.5 19.5 L4 16 L12.5 12.5 Z" fill="currentColor"/>
-                <circle cx="16" cy="16" r="2.5" fill="var(--bg-surface)"/>
+        {% block header_brand %}
+        <a href="/" class="brand" aria-label="Senda">
+            <svg class="brand-logo" width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                <path d="M16 5 L19 13 L27 16 L19 19 L16 27 L13 19 L5 16 L13 13 Z" fill="currentColor"/>
             </svg>
             <span class="brand-text">Senda</span>
         </a>
+        {% endblock %}
 
-        <nav class="main-nav" role="navigation" aria-label="Main Navigation">
-            <a href="/" class="nav-link" data-i18n="nav_home">Search</a>
-            <a href="/about" class="nav-link" data-i18n="nav_about">About</a>
-            <a href="/privacy" class="nav-link" data-i18n="nav_privacy">Privacy</a>
-            
-            <div class="header-controls">
-                <!-- Theme Switcher -->
-                <button type="button" id="themeToggle" class="control-btn theme-toggle" aria-label="Toggle color theme" title="Cambiar tema (Claro / Oscuro / Auto)">
-                    <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M12 2v2"></path><path d="M12 20v2"></path>
-                        <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
-                        <path d="M2 12h2"></path><path d="M20 12h2"></path>
-                        <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
-                    </svg>
-                    <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                    </svg>
-                </button>
+        <div class="header-tools">
+            <nav class="header-nav" aria-label="Navegación secundaria">
+                <a href="/about" class="header-link" data-i18n="nav_about">Acerca de</a>
+                <a href="/privacy" class="header-link" data-i18n="nav_privacy">Privacidad</a>
+            </nav>
 
-                <!-- Language Selector -->
-                <div class="lang-selector-wrapper">
-                    <select id="langSelector" class="lang-select" aria-label="Select Language">
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="pt">Português</option>
-                        <option value="it">Italiano</option>
-                        <option value="ja">日本語</option>
-                        <option value="zh">简体中文</option>
-                    </select>
-                </div>
-            </div>
-        </nav>
+            <button type="button" id="themeToggle" class="theme-btn" aria-label="Cambiar tema visual" title="Cambiar tema">
+                <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path><path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path><path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+            </button>
+
+            <select id="langSelector" class="lang-selector" aria-label="Idioma">
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="pt">PT</option>
+                <option value="it">IT</option>
+                <option value="ja">JA</option>
+                <option value="zh">ZH</option>
+            </select>
+        </div>
     </header>
 
     <main id="main-content" class="content-area" role="main">
@@ -90,23 +86,19 @@ Senda — Free Software under GNU GPL-3.0-or-later
     </main>
 
     <footer class="app-footer" role="contentinfo">
-        <div class="footer-content">
-            <div class="footer-meta">
-                <span data-i18n="footer_text">Senda es software libre bajo la licencia GNU GPL-3.0-o-posterior.</span>
-                <span class="footer-sep">&bull;</span>
-                <a href="https://ideh.top" target="_blank" rel="noopener noreferrer">IDEH Labs</a>
-                <span class="footer-sep">&bull;</span>
-                <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GPLv3+</a>
-                <span class="footer-sep">&bull;</span>
-                <a href="/javascript" rel="jslicense">LibreJS Web Labels</a>
-            </div>
-            <div class="footer-forges">
-                <a href="https://codeberg.org/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="Codeberg Libre Forge">Codeberg</a>
-                <span class="footer-sep">&bull;</span>
-                <a href="https://gitlab.com/ideh-labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="GitLab Mirror">GitLab</a>
-                <span class="footer-sep">&bull;</span>
-                <a href="https://github.com/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer" class="forge-link" title="GitHub Mirror">GitHub</a>
-            </div>
+        <div class="footer-left">
+            <span>Senda</span>
+            <span class="footer-dot">&bull;</span>
+            <a href="/about" data-i18n="nav_about">Acerca de</a>
+            <span class="footer-dot">&bull;</span>
+            <a href="/privacy" data-i18n="nav_privacy">Privacidad</a>
+            <span class="footer-dot">&bull;</span>
+            <a href="/javascript" rel="jslicense">LibreJS</a>
+        </div>
+        <div class="footer-right">
+            <a href="https://ideh.top" target="_blank" rel="noopener noreferrer">IDEH Labs</a>
+            <span class="footer-dot">&bull;</span>
+            <a href="https://codeberg.org/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer">Código Libre (GPLv3+)</a>
         </div>
     </footer>
 

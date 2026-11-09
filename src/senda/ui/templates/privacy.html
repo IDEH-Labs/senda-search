@@ -1,35 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Privacy Policy - Senda Sovereign Search{% endblock %}
+{% block title %}Privacy — Senda{% endblock %}
 
 {% block content %}
 <article class="info-card">
-    <h1>Verifiable Privacy Policy</h1>
+    <h1 data-i18n="privacy_title">Verifiable Privacy Policy</h1>
     <p>
-        Privacy in Senda is an architectural constraint, not an advertising claim.
-        The system is designed with zero-knowledge operational principles.
+        In Senda, privacy is an architectural constraint. We do not profile users, log searches, or track behavior.
     </p>
 
-    <h2>What We Never Collect</h2>
+    <h2>Commitments</h2>
     <ul>
-        <li><strong>No Query Logs:</strong> User search terms are processed in volatile memory for the lifetime of the request and never written to disk or audit logs.</li>
-        <li><strong>No IP Storage:</strong> Client IP addresses are never recorded or associated with search activity.</li>
-        <li><strong>No Profiling:</strong> Senda does not build user personas, behavioral graphs, or search history profiles.</li>
-        <li><strong>No Cookies or Local Tracking Identifiers:</strong> Senda sets zero tracking cookies. Language selection is stored purely in client-side <code>localStorage</code> on your device.</li>
-        <li><strong>No Third-Party Transmission:</strong> Queries and metadata are never shared, sold, or proxied to advertising networks or third-party brokers.</li>
+        <li><strong>No Query Logs:</strong> Searches are processed in memory and never stored on disk.</li>
+        <li><strong>No IP Logging:</strong> Client IP addresses are never recorded in connection with searches.</li>
+        <li><strong>Zero Cookies &amp; Telemetry:</strong> No tracking cookies, no third-party analytics.</li>
+        <li><strong>Referrer Protection:</strong> All responses enforce <code>Referrer-Policy: no-referrer</code>.</li>
     </ul>
 
-    <h2>Data in Transit &amp; Referrer Defense</h2>
+    <h2>Content Removal</h2>
     <p>
-        Senda serves HTTP responses with <code>Referrer-Policy: no-referrer</code>. When you click on any search result link,
-        your browser is instructed not to send the referring search URL or search terms to the destination website.
-    </p>
-
-    <h2>Takedown &amp; Domain Purging</h2>
-    <p>
-        Site owners who wish to remove their domains or specific URLs from the Senda index can submit takedown notices
-        or block <code>SendaBot</code> via RFC 9309 <code>robots.txt</code>. Takedown requests purge all matching records
-        and FTS indices immediately.
+        Webmasters wishing to exclude their sites from our index can specify it via <code>robots.txt</code> or contact IDEH Labs.
     </p>
 </article>
 {% endblock %}

@@ -1,38 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}About - Senda Sovereign Search{% endblock %}
+{% block title %}About — Senda{% endblock %}
 
 {% block content %}
 <article class="info-card">
-    <h1>About Senda</h1>
+    <h1 data-i18n="about_title">About Senda</h1>
     <p>
-        <strong>Senda</strong> is an independent, auditable, and ethical web search engine built from the ground up
-        to defend user autonomy, information sovereignty, and the Free Software movement.
+        <strong>Senda</strong> is an independent, libre, and verifiable web search engine built from the ground up to protect user privacy and digital autonomy.
     </p>
 
-    <h2>Ethical Foundation: The 4 Freedoms</h2>
-    <p>
-        Senda adheres strictly to the four essential software freedoms formulated by the Free Software Foundation:
-    </p>
+    <h2>Principles</h2>
     <ul>
-        <li><strong>Freedom 0:</strong> The freedom to run the program as you wish, for any purpose.</li>
-        <li><strong>Freedom 1:</strong> The freedom to study how the program works, and change it so it does your computing as you wish.</li>
-        <li><strong>Freedom 2:</strong> The freedom to redistribute copies so you can help others.</li>
-        <li><strong>Freedom 3:</strong> The freedom to distribute copies of your modified versions to others.</li>
+        <li><strong>Free Software:</strong> Governed by the GNU GPL-3.0-or-later license. Auditable and verifiable.</li>
+        <li><strong>Independent Crawler:</strong> Autonomous index strictly respecting <code>robots.txt</code> (RFC 9309).</li>
+        <li><strong>Zero Profiling:</strong> No user tracking, no search history retention, and zero cookies.</li>
+        <li><strong>Transparent Ranking:</strong> Deterministic BM25 retrieval across authentic web documents.</li>
     </ul>
 
-    <h2>Architectural Principles</h2>
-    <ul>
-        <li><strong>Sovereign Crawling:</strong> Senda operates its own independent crawler respecting RFC 9309 <code>robots.txt</code> and strict domain politeness intervals.</li>
-        <li><strong>Defense in Depth:</strong> Anti-SSRF (Server-Side Request Forgery) IP verification blocks any access to private, loopback, or cloud metadata endpoints.</li>
-        <li><strong>No Telemetry:</strong> No third-party trackers, no tracking pixels, no behavioral analytics.</li>
-        <li><strong>Transparent Ranking:</strong> Deterministic BM25 retrieval with open, auditable field weightings and zero sponsored manipulation.</li>
-    </ul>
-
-    <h2>Open Source &amp; Licensing</h2>
+    <h2>Project</h2>
     <p>
-        Licensed under the <strong>GNU General Public License v3.0 or later (GPL-3.0-or-later)</strong>.
-        Source code and reproducible documentation are authored by <a href="https://ideh.top" target="_blank" rel="noopener">IDEH Labs</a>.
+        Engineered and maintained by <a href="https://ideh.top" target="_blank" rel="noopener noreferrer">IDEH Labs</a>.
     </p>
 </article>
 {% endblock %}
