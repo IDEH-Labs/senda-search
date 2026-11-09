@@ -75,3 +75,17 @@ def test_extractor_deduplication_hash():
 
     # Cleaned body and title match, so content_hash must match
     assert doc1.content_hash == doc2.content_hash
+
+
+def test_extractor_anti_seo_text_density():
+    # 1. High density text page (minimal HTML, lots of prose)
+    high_density_html = "<html><body><p>" + ("Deep philosophical analysis of sovereign software. " * 50) + "</p></body></html>"
+    doc_high = DocumentExtractor.extract("https://example.com/essay", high_density_html)
+
+    # 2. Low density / commercial bloated page (huge JS, CSS, divs, tiny text)
+    low_density_html = "<html><head><style>" + ("div { color: red; }" * 100) + "</style></head><body>" + ("<div><span>" * 20) + "Buy now" + ("</span></div>" * 20) + "</body></html>"
+    doc_low = DocumentExtractor.extract("https://example.com/shop", low_density_html)
+
+    assert doc_high.text_density > 0.8
+    assert doc_low.text_density < 0.1
+    assert doc_high.text_density > doc_low.text_density

@@ -128,3 +128,44 @@ def test_morphological_stemmer():
     # Short words preserved
     assert MorphologicalStemmer.get_root_prefix("sol") == "sol"
 
+
+def test_anti_seo_text_density_ranking_boost(tmp_path):
+    storage = StorageEngine(db_path=tmp_path / "density_rank_test.db")
+
+    # Document 1: Commercial / bloated page (low text density 0.05)
+    storage.upsert_document(
+        ExtractedDocument(
+            url="https://commercial-spam.com/post",
+            title="Sovereign protocol notes",
+            description="Notes on protocol.",
+            language="en",
+            headings="Protocol specification",
+            body_text="Here is the protocol discussion for distributed sovereign networks.",
+            content_hash="h_spam",
+            text_density=0.05,
+        )
+    )
+
+    # Document 2: High density handcrafted essay (high text density 0.90)
+    storage.upsert_document(
+        ExtractedDocument(
+            url="https://sovereign-lab.org/protocol-essay",
+            title="Sovereign protocol notes",
+            description="Notes on protocol.",
+            language="en",
+            headings="Protocol specification",
+            body_text="Here is the protocol discussion for distributed sovereign networks.",
+            content_hash="h_lab",
+            text_density=0.90,
+        )
+    )
+
+    retriever = SearchRetriever(storage)
+    results = retriever.search("protocol")
+
+    assert results.total_matches == 2
+    # The high text density document must be ranked first!
+    assert results.items[0].url == "https://sovereign-lab.org/protocol-essay"
+    assert results.items[1].url == "https://commercial-spam.com/post"
+    assert results.items[0].relevance_score > results.items[1].relevance_score
+

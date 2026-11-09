@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS documents (
     content_hash TEXT NOT NULL,
     first_indexed_at TEXT NOT NULL,
     last_crawled_at TEXT NOT NULL,
-    status_code INTEGER DEFAULT 200
+    status_code INTEGER DEFAULT 200,
+    text_density REAL DEFAULT 0.0
 );
 
 CREATE INDEX IF NOT EXISTS idx_documents_domain ON documents(domain);
@@ -119,6 +120,11 @@ class StorageEngine:
         """Create schema, tables, triggers, and indices if they do not exist."""
         with self.get_connection() as conn:
             conn.executescript(SCHEMA_SQL)
+            # Automatic schema migration for text_density
+            try:
+                conn.execute("ALTER TABLE documents ADD COLUMN text_density REAL DEFAULT 0.0;")
+            except sqlite3.OperationalError:
+                pass  # Column already exists
             conn.commit()
 
     def upsert_document(
@@ -164,6 +170,7 @@ class StorageEngine:
                         headings = ?,
                         body = ?,
                         content_hash = ?,
+                        text_density = ?,
                         last_crawled_at = ?,
                         status_code = ?
                     WHERE id = ?
@@ -176,6 +183,7 @@ class StorageEngine:
                         doc.headings,
                         doc.body_text,
                         doc.content_hash,
+                        doc.text_density,
                         now,
                         status_code,
                         doc_id
@@ -188,9 +196,9 @@ class StorageEngine:
                     """
                     INSERT INTO documents (
                         url, domain, title, description, language,
-                        headings, body, content_hash, first_indexed_at,
+                        headings, body, content_hash, text_density, first_indexed_at,
                         last_crawled_at, status_code
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         doc.url,
@@ -201,6 +209,7 @@ class StorageEngine:
                         doc.headings,
                         doc.body_text,
                         doc.content_hash,
+                        doc.text_density,
                         now,
                         now,
                         status_code

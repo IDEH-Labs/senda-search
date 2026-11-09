@@ -91,3 +91,55 @@ async def test_crawler_runner_indexes_seed_and_outgoing(tmp_path):
 
     doc2 = storage.get_document_by_url("https://example.com/about")
     assert doc2["title"] == "About Senda"
+
+
+@pytest.mark.asyncio
+async def test_crawler_runner_concurrent_multi_domain(tmp_path):
+    storage = StorageEngine(db_path=tmp_path / "multi_runner_test.db")
+    fetcher_mock = MagicMock()
+
+    robots_txt = "User-agent: *\nAllow: /\n"
+
+    async def mock_fetch(url):
+        if "robots.txt" in url:
+            return FetchedDocument(
+                url=url,
+                status_code=200,
+                headers={"Content-Type": "text/plain"},
+                content=robots_txt.encode("utf-8"),
+                text=robots_txt,
+                content_type="text/plain",
+                encoding="utf-8"
+            )
+        # Dynamic response for distinct domains
+        domain_name = url.split("//")[1].split("/")[0]
+        html = f"<html><head><title>Title for {domain_name}</title></head><body><p>Content of {domain_name}</p></body></html>"
+        return FetchedDocument(
+            url=url,
+            status_code=200,
+            headers={"Content-Type": "text/html"},
+            content=html.encode("utf-8"),
+            text=html,
+            content_type="text/html",
+            encoding="utf-8"
+        )
+
+    fetcher_mock.fetch = AsyncMock(side_effect=mock_fetch)
+    fetcher_mock.user_agent = "SendaBot/0.1"
+
+    runner = CrawlerRunner(storage=storage, fetcher=fetcher_mock)
+    runner.frontier.default_crawl_delay = 0.0
+
+    seeds = [
+        "https://fsf.org/",
+        "https://gnu.org/",
+        "https://kernel.org/",
+        "https://gentoo.org/",
+    ]
+
+    indexed_count = await runner.crawl_seeds(seeds, max_pages=4, max_depth=0, concurrency=4)
+
+    assert indexed_count == 4
+    assert storage.get_stats()["total_documents"] == 4
+    assert storage.get_document_by_url("https://fsf.org/")["title"] == "Title for fsf.org"
+    assert storage.get_document_by_url("https://gentoo.org/")["title"] == "Title for gentoo.org"

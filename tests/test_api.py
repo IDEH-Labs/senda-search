@@ -61,6 +61,29 @@ def test_api_html_search(client):
     assert "Free Software Foundation Updates" in response.text
 
 
+def test_api_post_search_privacy(client):
+    """POST /search protects user privacy by avoiding query persistence in browser history."""
+    # HTML response via form POST
+    response = client.post(
+        "/search",
+        data={"q": "Foundation", "p": "1"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert response.status_code == 200
+    assert "Free Software Foundation Updates" in response.text
+
+    # JSON content negotiation via POST
+    response_json = client.post(
+        "/search?format=json",
+        data={"q": "sovereignty"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert response_json.status_code == 200
+    data = response_json.json()
+    assert data["total_matches"] == 1
+    assert data["items"][0]["url"] == "https://fsf.org/news"
+
+
 def test_api_content_negotiation_json(client):
     # Format parameter
     r1 = client.get("/search?q=Foundation&format=json")

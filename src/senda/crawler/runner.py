@@ -69,6 +69,7 @@ class CrawlerRunner:
         seed_url: str,
         max_pages: int = 10,
         max_depth: int = 2,
+        concurrency: int = 5,
         on_page_indexed: Optional[Callable[[str, str, int], None]] = None,
     ) -> int:
         """Execute a breadth-first crawl starting from a single seed_url."""
@@ -76,6 +77,7 @@ class CrawlerRunner:
             seed_urls=[seed_url],
             max_pages=max_pages,
             max_depth=max_depth,
+            concurrency=concurrency,
             on_page_indexed=on_page_indexed,
         )
 
@@ -84,10 +86,13 @@ class CrawlerRunner:
         seed_urls: list[str],
         max_pages: int = 10,
         max_depth: int = 2,
+        concurrency: int = 5,
         on_page_indexed: Optional[Callable[[str, str, int], None]] = None,
     ) -> int:
-        """Execute a breadth-first crawl starting from multiple seed_urls.
+        """Execute a concurrent, multi-domain polite crawl across seed_urls.
 
+        Uses an asynchronous worker pool distributed across distinct host domains,
+        strictly respecting per-domain RFC 9309 delays with single-connection domain isolation.
         Returns total number of successfully indexed documents.
         """
         self.frontier.max_depth = max_depth
@@ -107,63 +112,90 @@ class CrawlerRunner:
                 self.frontier.add_url(row["url"], depth=row["depth"])
 
         indexed_count = 0
+        stop_event = asyncio.Event()
+        lock = asyncio.Lock()
 
-        while self.frontier.pending_count() > 0 and indexed_count < max_pages:
-            item = self.frontier.get_next()
-            if not item:
-                # All pending URLs are waiting on politeness delays; sleep briefly
-                await asyncio.sleep(0.2)
-                continue
+        async def worker(worker_id: int):
+            nonlocal indexed_count
+            consecutive_idles = 0
 
-            current_url = item.url
-            current_depth = item.depth
-            parsed = urlparse(current_url)
-            domain = parsed.netloc.lower()
-            scheme = parsed.scheme.lower() or "https"
+            while not stop_event.is_set():
+                async with lock:
+                    if indexed_count >= max_pages:
+                        stop_event.set()
+                        break
 
-            # 1. Fetch & evaluate robots.txt
-            await self._fetch_robots_if_needed(domain, scheme)
+                item = self.frontier.get_next()
+                if not item:
+                    # Check if frontier has any pending work or active workers left
+                    if self.frontier.pending_count() == 0:
+                        stop_event.set()
+                        break
+                    consecutive_idles += 1
+                    await asyncio.sleep(min(0.1 * consecutive_idles, 0.5))
+                    continue
 
-            if not self.robots_manager.is_allowed(current_url, user_agent=self.fetcher.user_agent):
-                logger.info(f"Robots disallows: {current_url}")
-                self.storage.mark_frontier_url_failed(current_url)
-                continue
+                consecutive_idles = 0
+                current_url = item.url
+                current_depth = item.depth
+                domain = item.domain
+                parsed = urlparse(current_url)
+                scheme = parsed.scheme.lower() or "https"
 
-            # Update frontier delay if robots declared Crawl-delay
-            declared_delay = self.robots_manager.get_crawl_delay(domain, user_agent=self.fetcher.user_agent)
-            if declared_delay:
-                self.frontier.set_domain_delay(domain, max(declared_delay, settings.DEFAULT_CRAWL_DELAY_SECONDS))
+                try:
+                    # 1. Fetch & evaluate robots.txt
+                    await self._fetch_robots_if_needed(domain, scheme)
 
-            # 2. Safely fetch document
-            try:
-                doc = await self.fetcher.fetch(current_url)
-            except (FetchError, SSRFSecurityViolation) as e:
-                logger.warning(f"Failed to fetch {current_url}: {e}")
-                self.storage.mark_frontier_url_failed(current_url)
-                continue
+                    if not self.robots_manager.is_allowed(current_url, user_agent=self.fetcher.user_agent):
+                        logger.info(f"Robots disallows: {current_url}")
+                        self.storage.mark_frontier_url_failed(current_url)
+                        continue
 
-            if doc.status_code != 200:
-                self.storage.mark_frontier_url_failed(current_url)
-                continue
+                    # Update frontier delay if robots declared Crawl-delay
+                    declared_delay = self.robots_manager.get_crawl_delay(domain, user_agent=self.fetcher.user_agent)
+                    if declared_delay:
+                        self.frontier.set_domain_delay(domain, max(declared_delay, settings.DEFAULT_CRAWL_DELAY_SECONDS))
 
-            # 3. Extract content and metadata
-            extracted = DocumentExtractor.extract(doc.url, doc.text)
+                    # 2. Safely fetch document
+                    try:
+                        doc = await self.fetcher.fetch(current_url)
+                    except (FetchError, SSRFSecurityViolation) as e:
+                        logger.warning(f"Failed to fetch {current_url}: {e}")
+                        self.storage.mark_frontier_url_failed(current_url)
+                        continue
 
-            # 4. Store and index
-            was_indexed = self.storage.upsert_document(extracted, status_code=doc.status_code)
-            self.storage.mark_frontier_url_completed(current_url)
+                    if doc.status_code != 200:
+                        self.storage.mark_frontier_url_failed(current_url)
+                        continue
 
-            if was_indexed:
-                indexed_count += 1
-                if on_page_indexed:
-                    on_page_indexed(extracted.url, extracted.title, indexed_count)
+                    # 3. Extract content and metadata
+                    extracted = DocumentExtractor.extract(doc.url, doc.text)
 
-            # 5. Enqueue outgoing links if depth permits
-            if current_depth < max_depth:
-                for link in extracted.outgoing_links:
-                    parsed_link = urlparse(link)
-                    link_domain = parsed_link.netloc.lower()
-                    if self.frontier.add_url(link, depth=current_depth + 1):
-                        self.storage.enqueue_frontier_url(link, link_domain, depth=current_depth + 1)
+                    # 4. Store and index
+                    was_indexed = self.storage.upsert_document(extracted, status_code=doc.status_code)
+                    self.storage.mark_frontier_url_completed(current_url)
 
+                    if was_indexed:
+                        async with lock:
+                            indexed_count += 1
+                            current_total = indexed_count
+                        if on_page_indexed:
+                            on_page_indexed(extracted.url, extracted.title, current_total)
+
+                    # 5. Enqueue outgoing links if depth permits
+                    if current_depth < max_depth:
+                        for link in extracted.outgoing_links:
+                            parsed_link = urlparse(link)
+                            link_domain = parsed_link.netloc.lower()
+                            if self.frontier.add_url(link, depth=current_depth + 1):
+                                self.storage.enqueue_frontier_url(link, link_domain, depth=current_depth + 1)
+                finally:
+                    self.frontier.release_domain(domain)
+
+        worker_tasks = [
+            asyncio.create_task(worker(i))
+            for i in range(max(1, concurrency))
+        ]
+
+        await asyncio.gather(*worker_tasks)
         return indexed_count

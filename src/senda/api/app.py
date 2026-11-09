@@ -5,6 +5,7 @@
 
 from pathlib import Path
 from typing import Optional
+import urllib.parse
 from fastapi import FastAPI, Request, Query, Header, HTTPException, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -138,6 +139,37 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
             name="results.html",
             context={
                 "query": clean_q,
+                "results": results,
+            }
+        )
+
+    @app.post("/search")
+    async def post_search(
+        request: Request,
+        format: Optional[str] = Query(default=None),
+        accept: Optional[str] = Header(default=None),
+    ):
+        """Search endpoint for POST requests (prevents search queries from lingering in browser history)."""
+        body_bytes = await request.body()
+        form_data = urllib.parse.parse_qs(body_bytes.decode("utf-8", errors="replace"))
+
+        q = form_data.get("q", [""])[0].strip()
+        try:
+            p = max(1, int(form_data.get("p", ["1"])[0]))
+        except ValueError:
+            p = 1
+
+        results = app_retriever.search(q, page=p, page_size=10)
+
+        # Content negotiation
+        if format == "json" or (accept and "application/json" in accept and not ("text/html" in accept)):
+            return results
+
+        return templates.TemplateResponse(
+            request=request,
+            name="results.html",
+            context={
+                "query": q,
                 "results": results,
             }
         )

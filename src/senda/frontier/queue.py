@@ -39,6 +39,9 @@ class FrontierQueue:
         # Per-domain FIFO queues
         self._domain_queues: dict[str, collections.deque[CrawlItem]] = collections.defaultdict(collections.deque)
 
+        # Domains currently being crawled by active workers
+        self._active_domains: set[str] = set()
+
         # Domain last access timestamps
         self._domain_last_crawled: dict[str, float] = {}
 
@@ -96,7 +99,7 @@ class FrontierQueue:
         now = time.time()
 
         for domain, queue in list(self._domain_queues.items()):
-            if not queue:
+            if not queue or domain in self._active_domains:
                 continue
 
             last_time = self._domain_last_crawled.get(domain, 0.0)
@@ -104,6 +107,7 @@ class FrontierQueue:
 
             if now - last_time >= required_delay:
                 item = queue.popleft()
+                self._active_domains.add(domain)
                 self._domain_last_crawled[domain] = now
                 if not queue:
                     del self._domain_queues[domain]
@@ -111,8 +115,13 @@ class FrontierQueue:
 
         return None
 
+    def release_domain(self, domain: str) -> None:
+        """Release active domain lock after crawl worker finishes processing it."""
+        self._active_domains.discard(domain)
+        self._domain_last_crawled[domain] = time.time()
+
     def pending_count(self) -> int:
-        return sum(len(q) for q in self._domain_queues.values())
+        return sum(len(q) for q in self._domain_queues.values()) + len(self._active_domains)
 
     def seen_count(self) -> int:
         return len(self._seen_hashes)

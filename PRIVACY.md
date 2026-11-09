@@ -20,5 +20,8 @@ Privacy is not a marketing promise; in Senda, it is an immutable architectural c
 ### 1.2 Local Preferences
 User interface preferences (such as light/dark theme and language selection) are stored exclusively on your local device in browser `localStorage`. They are never transmitted to or stored by Senda servers.
 
-### 1.3 Auditability
+### 1.3 Search Query Privacy via POST
+In addition to standard GET requests, Senda natively supports HTTP `POST /search`. Submitting queries via POST ensures that search terms do not appear in the browser URL address bar, local browser navigation history, or intermediary HTTP proxy access logs, preventing query leakage on shared or monitored devices.
+
+### 1.4 Auditability
 The entirety of Senda's source code is public and licensed under GNU GPL-3.0-or-later. Anyone can inspect, build, run, and audit the application independently to verify these commitments.

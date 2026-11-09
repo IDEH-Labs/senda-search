@@ -29,6 +29,7 @@ class ExtractedDocument:
     headings: str
     body_text: str
     content_hash: str
+    text_density: float = 0.0
     outgoing_links: list[str] = field(default_factory=list)
 
 
@@ -139,6 +140,11 @@ class DocumentExtractor:
         hash_input = f"{title}\n{body_text}".encode("utf-8")
         content_hash = hashlib.sha256(hash_input).hexdigest()
 
+        # 8. Anti-SEO text density metric: text_length / max(raw_html_length, 1)
+        raw_len = len(html_content)
+        text_len = len(body_text)
+        text_density = round(min(1.0, text_len / max(raw_len, 1)), 4)
+
         return ExtractedDocument(
             url=url,
             title=title,
@@ -147,5 +153,6 @@ class DocumentExtractor:
             headings=headings_combined,
             body_text=body_text,
             content_hash=content_hash,
+            text_density=text_density,
             outgoing_links=sorted(outgoing_links_set),
         )

@@ -230,13 +230,14 @@ class SearchRetriever:
 
             total_pages = (total_matches + page_size - 1) // page_size
 
-            # 2. Retrieve ranked rows with BM25, snippets, and filters
+            # 2. Retrieve ranked rows with BM25, anti-SEO text density boost, snippets, and filters
             query_sql = """
                 SELECT
                     d.url,
                     d.domain,
                     d.title,
                     d.description,
+                    COALESCE(d.text_density, 0.0) AS text_density,
                     snippet(documents_fts, -1, '<mark>', '</mark>', '...', 28) AS fts_snippet,
                     bm25(documents_fts, ?, ?, ?, ?) AS bm25_score
                 FROM documents_fts
@@ -244,7 +245,7 @@ class SearchRetriever:
                 WHERE documents_fts MATCH ?
                   AND (? IS NULL OR d.domain = ? OR d.domain LIKE '%.' || ?)
                   AND (? IS NULL OR d.language = ?)
-                ORDER BY bm25_score ASC
+                ORDER BY (bm25(documents_fts, ?, ?, ?, ?) * (1.0 + COALESCE(d.text_density, 0.0))) ASC
                 LIMIT ? OFFSET ?
             """
 
@@ -261,6 +262,10 @@ class SearchRetriever:
                     parsed.domain_filter,
                     parsed.lang_filter,
                     parsed.lang_filter,
+                    self.WEIGHT_TITLE,
+                    self.WEIGHT_HEADINGS,
+                    self.WEIGHT_DESCRIPTION,
+                    self.WEIGHT_BODY,
                     page_size,
                     offset
                 )
@@ -272,13 +277,17 @@ class SearchRetriever:
                 if not snippet_text or snippet_text.strip() == "...":
                     snippet_text = row["description"] or ""
 
+                # Compute weighted relevance factoring anti-SEO text density
+                density_factor = 1.0 + float(row["text_density"])
+                final_score = round(-float(row["bm25_score"]) * density_factor, 8)
+
                 items.append(
                     SearchResultItem(
                         url=row["url"],
                         domain=row["domain"],
                         title=row["title"],
                         snippet=snippet_text,
-                        relevance_score=round(-float(row["bm25_score"]), 8),
+                        relevance_score=final_score,
                     )
                 )
 
