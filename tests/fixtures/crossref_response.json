@@ -1,0 +1,278 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 2075309,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              11,
+              6
+            ]
+          ],
+          "date-time": "2025-11-06T06:15:57Z",
+          "timestamp": 1762409757614
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "isbn-type": [
+          {
+            "value": "9780198854227",
+            "type": "print"
+          },
+          {
+            "value": "9780191888649",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        },
+        "abstract": "<p>A remarkable application of quantum mechanical concepts of coherent superposition and quantum entanglement is a quantum computer which can solve certain problems at speeds unbelievably faster than the conventional computer. In this chapter, the basic principles and the conditions for the implementation of the quantum computer are introduced and the limitations imposed by the probabilistic nature of quantum mechanics and the inevitable decoherence phenomenon are discussed. Next the basic building blocks, the quantum logic gates, are introduced. These include the Hadamard, the CNOT, and the quantum phase gates. After these preliminaries, the implementation of the Deutsch algorithm, quantum teleportation, and quantum dense coding in terms of the quantum logic gates are discussed. It is also shown how the Bell states can be produced and measured using a sequence of quantum logic gates.</p>",
+        "DOI": "10.1093/oso/9780198854227.003.0015",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2020,
+              6,
+              18
+            ]
+          ],
+          "date-time": "2020-06-18T04:27:27Z",
+          "timestamp": 1592454447000
+        },
+        "page": "229-244",
+        "source": "Crossref",
+        "is-referenced-by-count": 1,
+        "title": [
+          "Quantum Computing I"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "M. Suhail",
+            "family": "Zubairy",
+            "sequence": "first",
+            "affiliation": [],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          }
+        ],
+        "member": "286",
+        "published-online": {
+          "date-parts": [
+            [
+              2020,
+              6,
+              18
+            ]
+          ]
+        },
+        "container-title": [
+          "Quantum Mechanics for Beginners"
+        ],
+        "original-title": [
+          "Quantum Computing I"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              2
+            ]
+          ],
+          "date-time": "2022-08-02T20:16:14Z",
+          "timestamp": 1659471374000
+        },
+        "score": 18.56022,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/36992/chapter/322327533"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780198854227",
+          "9780191888649"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/oso/9780198854227.003.0015",
+        "published": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              11
+            ]
+          ],
+          "date-time": "2024-05-11T19:53:50Z",
+          "timestamp": 1715457230278
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "isbn-type": [
+          {
+            "value": "9780198854227",
+            "type": "print"
+          },
+          {
+            "value": "9780191888649",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        },
+        "abstract": "<p>This chapter deals with some of the most prominent successes of quantum computing. The most well-known quantum computing algorithm, Shor\u2019s algorithm for factoring a number in its prime factors, is discussed in details. The key to Shor\u2019s algorithm is the quantum Fourier transform that is explained with the help of simple examples. The role of quantum entanglement is also discussed. The next important quantum computing algorithm is Grover\u2019s algorithm that helps in searching an item in an unsorted database. This algorithm is motivated by first discussing a quantum shell game in which a pea hidden under one of the four shells is found in one measurement with certainty each time. This amazing result is then generalized to an arbitrary number of objects and Grover\u2019s algorithm.</p>",
+        "DOI": "10.1093/oso/9780198854227.003.0016",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2020,
+              6,
+              18
+            ]
+          ],
+          "date-time": "2020-06-18T04:19:28Z",
+          "timestamp": 1592453968000
+        },
+        "page": "245-262",
+        "source": "Crossref",
+        "is-referenced-by-count": 1,
+        "title": [
+          "Quantum Computing II"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "M. Suhail",
+            "family": "Zubairy",
+            "sequence": "first",
+            "affiliation": [],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          }
+        ],
+        "member": "286",
+        "published-online": {
+          "date-parts": [
+            [
+              2020,
+              6,
+              18
+            ]
+          ]
+        },
+        "container-title": [
+          "Quantum Mechanics for Beginners"
+        ],
+        "original-title": [
+          "Quantum Computing II"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              2
+            ]
+          ],
+          "date-time": "2022-08-02T20:16:14Z",
+          "timestamp": 1659471374000
+        },
+        "score": 18.502869,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/36992/chapter/322327725"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780198854227",
+          "9780191888649"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/oso/9780198854227.003.0016",
+        "published": {
+          "date-parts": [
+            [
+              2020,
+              5,
+              7
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 2,
+    "query": {
+      "start-index": 0,
+      "search-terms": "quantum computing"
+    }
+  }
+}

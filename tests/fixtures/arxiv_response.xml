@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/ndubrUZv9ZX5TOCUeQxK8HIXL2g</id>
+  <title>arXiv Query: search_query=all:quantum&amp;id_list=&amp;start=0&amp;max_results=2</title>
+  <updated>2026-11-09T16:09:32Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=all:quantum&amp;start=0&amp;max_results=2&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>2</opensearch:itemsPerPage>
+  <opensearch:totalResults>487612</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2512.10504v2</id>
+    <title>Tianyan: Cloud services with quantum advantage</title>
+    <updated>2025-12-16T01:28:55Z</updated>
+    <link href="https://arxiv.org/abs/2512.10504v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2512.10504v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Tianyan Quantum Cloud Platform offers cloud services demonstrating quantum advantage capabilities with a Zuchongzhi 3.0-like superconducting quantum processor. This cloud-accessible superconducting quantum prototype, named Tianyan-287, features 105 qubits and achieves high operational fidelities, with single-qubit gates, two-qubit gates, and readout fidelity at 99.90%, 99.56%, 98.7%, respectively. For a specific benchmark task involving random circuit sampling on a 74-qubit system over 24 cycles, the platform completes one million samples in just 18.4 minutes. In contrast, state-of-the-art classical supercomputers would require approximately 16,000 years to complete the equivalent calculation. To facilitate this, the platform provides access via Cqlib, an open-source SDK designed for working with quantum systems at the level of extended quantum circuits, operators, and primitives. The cloud service aims to democratize access to high-performance quantum hardware, enabling the community to validate and explore practical quantum advantages.</summary>
+    <category term="quant-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-12-11T10:23:39Z</published>
+    <arxiv:primary_category term="quant-ph"/>
+    <author>
+      <name> Tianyan Quantum Group</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2307.02593v2</id>
+    <title>Superpositions of thermalisations in relativistic quantum field theory</title>
+    <updated>2025-02-04T23:33:19Z</updated>
+    <link href="https://arxiv.org/abs/2307.02593v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2307.02593v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent results in relativistic quantum information and quantum thermodynamics have independently shown that in the quantum regime, a system may fail to thermalise when subject to quantum-controlled application of the same, single thermalisation channel. For example, an accelerating system with fixed proper acceleration is known to thermalise to an acceleration-dependent temperature, known as the Unruh temperature. However, the same system in a superposition of spatially translated trajectories that share the same proper acceleration fails to thermalise. Here, we provide an explanation of these results using the framework of quantum field theory in relativistic noninertial reference frames. We show how a probe that accelerates in a superposition of spatial translations interacts with incommensurate sets of field modes. In special cases where the modes are orthogonal (for example, when the Rindler wedges are translated in a direction orthogonal to the plane of motion), thermalisation does indeed result, corroborating the here provided explanation. We then discuss how this description relates to an information-theoretic approach aimed at studying quantum aspects of temperature through quantum-controlled thermalisations. The present work draws a connection between research in quantum information, relativistic physics, and quantum thermodynamics, in particular showing that relativistic quantum effects can provide a natural realisation of quantum thermodynamical scenarios.</summary>
+    <category term="quant-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="gr-qc" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-07-05T18:42:17Z</published>
+    <arxiv:comment>Accepted for publication in Quantum</arxiv:comment>
+    <arxiv:primary_category term="quant-ph"/>
+    <arxiv:journal_ref>Quantum 9, 1629 (2025)</arxiv:journal_ref>
+    <author>
+      <name>Joshua Foo</name>
+    </author>
+    <author>
+      <name>Magdalena Zych</name>
+    </author>
+    <arxiv:doi>10.22331/q-2025-02-11-1629</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.22331/q-2025-02-11-1629" title="doi"/>
+  </entry>
+</feed>

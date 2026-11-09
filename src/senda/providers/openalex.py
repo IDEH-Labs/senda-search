@@ -15,7 +15,8 @@ import time
 from typing import Optional, List, Dict, Any, Tuple
 import httpx
 from senda.config import settings
-from senda.providers.base import SearchProvider, SearchResultItem
+from senda.providers.base import SearchProvider, SearchResultItem, RetractionInfo
+from senda.security.retractions import retraction_registry
 
 logger = logging.getLogger(__name__)
 
@@ -254,35 +255,61 @@ class OpenAlexProvider(SearchProvider):
             else:
                 author_summary = "Autores académicos"
 
+            # Retraction detection via OpenAlex flag or RetractionRegistry
+            doi = work.get("doi")
+            is_retracted = work.get("is_retracted", False)
+            reg_retraction = retraction_registry.check(doi) if doi else None
+
+            retraction_info = None
+            if is_retracted or reg_retraction:
+                retraction_info = reg_retraction or RetractionInfo(
+                    status="retractada",
+                    source="OpenAlex / Retraction Watch",
+                    date=str(year) if year else None,
+                    notice_url=best_url,
+                )
+
             # Construct informative, honest snippet
             year_str = f"({year}) " if year else ""
             has_pdf = bool(oa_data.get("oa_url") or prim_loc.get("pdf_url"))
             badge_pdf = "[PDF Abierto] " if has_pdf else ""
+            retract_badge = "[OBRA RETRACTADA] " if (retraction_info and retraction_info.status == "retractada") else ""
             
             # Format: [Tipo | Versión | Estado de revisión]
             metadata_header = f"[{type_label} | {version_label} | {peer_review_status}]"
-            snippet = f"{metadata_header} {badge_pdf}{year_str}{journal_name} — {author_summary}."
+            snippet = f"{retract_badge}{metadata_header} {badge_pdf}{year_str}{journal_name} — {author_summary}."
 
             why = (
                 f"Publicación académica ({type_label}, {version_label}, {peer_review_status}). "
                 f"Obtenida a través de OpenAlex ({journal_name}). Consulta anónima canalizada por Senda."
             )
+            if retraction_info and retraction_info.status == "retractada":
+                why += f" AVISO: Obra formalmente retractada registrada por {retraction_info.source}."
 
             # Assign score: in 'library' vertical give priority
             base_score = 45.0 if category == "library" else 15.0
+
+            content_type_val = "preprint" if raw_type == "preprint" else ("tesis" if "dissertation" in raw_type else "artículo")
 
             items.append(
                 SearchResultItem(
                     title=title,
                     url=best_url,
+                    canonical_url=doi if doi else best_url,
                     snippet=snippet,
                     source="Ciencia Abierta (OpenAlex)",
                     date=str(year) if year else None,
                     doc_type="library",
+                    source_type="académica",
+                    content_type=content_type_val,
+                    published_date=str(year) if year else None,
+                    authors=author_names,
+                    retraction=retraction_info,
                     media_url=None,
                     is_sponsored=False,
                     score=base_score,
                     why_seen=why,
+                    provider_origin="OpenAlex",
                 )
             )
 

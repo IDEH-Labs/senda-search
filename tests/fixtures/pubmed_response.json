@@ -1,0 +1,240 @@
+{
+  "header": {
+    "type": "esummary",
+    "version": "0.3"
+  },
+  "result": {
+    "uids": [
+      "32000001",
+      "32000002"
+    ],
+    "32000001": {
+      "uid": "32000001",
+      "pubdate": "2020 Apr",
+      "epubdate": "2020 Jan 17",
+      "source": "Environ Res",
+      "authors": [
+        {
+          "name": "Shrestha S",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Neupane S",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Mohanasundaram S",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Pandey VP",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Pandey VP",
+      "title": "Mapping groundwater resiliency under climate change scenarios: A case study of Kathmandu Valley, Nepal.",
+      "sorttitle": "mapping groundwater resiliency under climate change scenarios a case study of kathmandu valley nepal",
+      "volume": "183",
+      "issue": "",
+      "pages": "109149",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "0147621",
+      "issn": "0013-9351",
+      "essn": "1096-0953",
+      "pubtype": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "256",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "32000001"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1016/j.envres.2020.109149"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "S0013-9351(20)30041-4"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2019/11/24 00:00"
+        },
+        {
+          "pubstatus": "revised",
+          "date": "2020/01/15 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2020/01/16 00:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2020/01/31 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2020/09/12 06:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2020/01/31 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": "",
+      "fulljournalname": "Environmental research",
+      "elocationid": "doi: 10.1016/j.envres.2020.109149",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2020/04/01 00:00",
+      "sortfirstauthor": "Shrestha S",
+      "vernaculartitle": ""
+    },
+    "32000002": {
+      "uid": "32000002",
+      "pubdate": "2020 Apr",
+      "epubdate": "2020 Jan 17",
+      "source": "Environ Res",
+      "authors": [
+        {
+          "name": "Huang CC",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Pan SC",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Chen BY",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Guo YL",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Guo YL",
+      "title": "Periconceptional exposure to air pollution and congenital hypospadias among full-term infants.",
+      "sorttitle": "periconceptional exposure to air pollution and congenital hypospadias among full term infants",
+      "volume": "183",
+      "issue": "",
+      "pages": "109151",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "0147621",
+      "issn": "0013-9351",
+      "essn": "1096-0953",
+      "pubtype": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "256",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "32000002"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1016/j.envres.2020.109151"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "S0013-9351(20)30043-8"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2019/11/06 00:00"
+        },
+        {
+          "pubstatus": "revised",
+          "date": "2020/01/09 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2020/01/16 00:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2020/01/31 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2020/09/12 06:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2020/01/31 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": "",
+      "fulljournalname": "Environmental research",
+      "elocationid": "doi: 10.1016/j.envres.2020.109151",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2020/04/01 00:00",
+      "sortfirstauthor": "Huang CC",
+      "vernaculartitle": ""
+    }
+  }
+}
