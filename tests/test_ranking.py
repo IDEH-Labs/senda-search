@@ -104,3 +104,27 @@ def test_ranking_empty_results(populated_search_engine):
     results = populated_search_engine.search("nonexistenttermxyz123")
     assert results.total_matches == 0
     assert len(results.items) == 0
+
+
+def test_ranking_operators_and_filtering(populated_search_engine):
+    # 1. Test site: operator (should match only fsf.org, not example.com)
+    site_results = populated_search_engine.search("site:fsf.org freedom")
+    assert site_results.total_matches == 1
+    assert site_results.items[0].url == "https://fsf.org/philosophy"
+
+    # 2. Test negative operator -term (exclude example.com by excluding 'society')
+    neg_results = populated_search_engine.search("freedom -society")
+    assert neg_results.total_matches == 1
+    assert neg_results.items[0].url == "https://fsf.org/philosophy"
+
+
+def test_morphological_stemmer():
+    from senda.ranking.stemmer import MorphologicalStemmer
+
+    assert MorphologicalStemmer.get_root_prefix("desarrolladores") == "desarroll"
+    assert MorphologicalStemmer.get_root_prefix("libertades") == "liberta"
+    assert MorphologicalStemmer.get_root_prefix("freedoms") == "freedom"
+    assert MorphologicalStemmer.get_root_prefix("computing") == "comput"
+    # Short words preserved
+    assert MorphologicalStemmer.get_root_prefix("sol") == "sol"
+

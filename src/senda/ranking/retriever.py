@@ -4,7 +4,8 @@
 """Information Retrieval and Ranking Engine for Senda.
 
 Executes sanitized BM25 scoring with ethical field weighting (Title > Headings > Description > Body),
-contextual snippet extraction with highlighting, and pagination.
+contextual snippet extraction with highlighting, query operators (site:, lang:, -term),
+morphological stem expansion, and pagination.
 """
 
 from dataclasses import dataclass, field
@@ -14,6 +15,7 @@ import time
 from typing import Optional
 
 from senda.indexer.storage import StorageEngine
+from senda.ranking.stemmer import MorphologicalStemmer
 
 
 @dataclass(frozen=True)
@@ -39,24 +41,53 @@ class SearchResultSet:
     items: list[SearchResultItem] = field(default_factory=list)
 
 
-class QuerySanitizer:
-    """Safely sanitizes raw user search queries for SQLite FTS5 syntax."""
+@dataclass(frozen=True)
+class ParsedQuery:
+    """Structured representation of a user query with extracted operators and FTS5 expression."""
+    raw_query: str
+    fts_expression: str
+    domain_filter: Optional[str] = None
+    lang_filter: Optional[str] = None
 
-    # Characters with special syntax meaning in FTS5 that could trigger syntax errors
+
+class QuerySanitizer:
+    """Safely sanitizes raw user search queries and extracts structured operators."""
+
     SPECIAL_CHARS = re.compile(r'[*^{}+~:()]')
     PHRASE_PATTERN = re.compile(r'"([^"]*)"')
+    SITE_PATTERN = re.compile(r'\b(?:site|domain):([a-zA-Z0-9.-]+)\b', re.IGNORECASE)
+    LANG_PATTERN = re.compile(r'\blang:([a-zA-Z-]+)\b', re.IGNORECASE)
 
     @classmethod
-    def sanitize(cls, raw_query: str) -> str:
-        """Transform user query into an injection-safe, valid FTS5 MATCH expression."""
+    def parse(cls, raw_query: str) -> ParsedQuery:
+        """Parse raw query into structured filters and safe SQLite FTS5 MATCH expression."""
         if not raw_query:
-            return ""
+            return ParsedQuery(raw_query="", fts_expression="")
 
         query = raw_query.strip()
         if not query:
-            return ""
+            return ParsedQuery(raw_query=raw_query, fts_expression="")
 
-        # Extract exact quoted phrases
+        domain_filter: Optional[str] = None
+        lang_filter: Optional[str] = None
+
+        # 1. Extract site:/domain: operator
+        def extract_domain(match):
+            nonlocal domain_filter
+            domain_filter = match.group(1).lower()
+            return " "
+
+        query = cls.SITE_PATTERN.sub(extract_domain, query)
+
+        # 2. Extract lang: operator
+        def extract_lang(match):
+            nonlocal lang_filter
+            lang_filter = match.group(1).lower()
+            return " "
+
+        query = cls.LANG_PATTERN.sub(extract_lang, query)
+
+        # 3. Extract exact quoted phrases
         phrases: list[str] = []
         def extract_phrase(match):
             cleaned = cls.SPECIAL_CHARS.sub(" ", match.group(1)).strip()
@@ -66,32 +97,61 @@ class QuerySanitizer:
 
         remainder = cls.PHRASE_PATTERN.sub(extract_phrase, query)
 
-        # Remove special characters from remainder
-        clean_remainder = cls.SPECIAL_CHARS.sub(" ", remainder)
+        # 4. Extract negative terms (-unwanted) and positive terms
+        clean_tokens = [t.strip() for t in remainder.split() if t.strip()]
 
-        # Split remaining words
-        tokens = [token.strip() for token in clean_remainder.split() if token.strip()]
+        positive_clauses: list[str] = list(phrases)
+        negative_clauses: list[str] = []
 
-        # Filter out standalone SQLite FTS5 operators that could break syntax
-        safe_tokens: list[str] = []
-        for t in tokens:
-            t_upper = t.upper()
-            if t_upper in ("AND", "OR", "NOT", "NEAR"):
+        for token in clean_tokens:
+            is_negative = token.startswith("-") and len(token) > 1
+            raw_token = token[1:] if is_negative else token
+
+            # Strip special characters
+            clean_token = cls.SPECIAL_CHARS.sub("", raw_token).replace('"', '').strip()
+            if not clean_token:
                 continue
-            # Escape double quotes if any remained
-            clean_token = t.replace('"', '')
-            if clean_token:
-                # Append prefix matching for better typing experience if token is alphanumeric
-                if clean_token.isalnum() and len(clean_token) >= 3:
-                    safe_tokens.append(f'"{clean_token}"*')
+
+            # Skip standalone reserved operators
+            if clean_token.upper() in ("AND", "OR", "NOT", "NEAR"):
+                continue
+
+            if is_negative:
+                negative_clauses.append(f'"{clean_token}"')
+            else:
+                # Morphological stem expansion for multilingual richness
+                root = MorphologicalStemmer.get_root_prefix(clean_token)
+                if root and root != clean_token and len(root) >= 3:
+                    # Match exact word or morphological root prefix
+                    positive_clauses.append(f'("{clean_token}" OR "{root}"*)')
+                elif clean_token.isalnum() and len(clean_token) >= 3:
+                    positive_clauses.append(f'"{clean_token}"*')
                 else:
-                    safe_tokens.append(f'"{clean_token}"')
+                    positive_clauses.append(f'"{clean_token}"')
 
-        all_clauses = phrases + safe_tokens
-        if not all_clauses:
-            return ""
+        # Combine into valid SQLite FTS5 expression
+        fts_parts: list[str] = []
+        if positive_clauses:
+            fts_parts.append(" ".join(positive_clauses))
 
-        return " ".join(all_clauses)
+        if negative_clauses:
+            # FTS5 syntax: expr1 NOT expr2
+            for neg in negative_clauses:
+                fts_parts.append(f"NOT {neg}")
+
+        fts_expression = " ".join(fts_parts).strip()
+
+        return ParsedQuery(
+            raw_query=raw_query,
+            fts_expression=fts_expression,
+            domain_filter=domain_filter,
+            lang_filter=lang_filter
+        )
+
+    @classmethod
+    def sanitize(cls, raw_query: str) -> str:
+        """Backward-compatible helper returning raw FTS expression."""
+        return cls.parse(raw_query).fts_expression
 
 
 class SearchRetriever:
@@ -112,15 +172,15 @@ class SearchRetriever:
         page: int = 1,
         page_size: int = 10
     ) -> SearchResultSet:
-        """Execute a ranked full-text search with BM25 and contextual snippets."""
+        """Execute a ranked full-text search with BM25, query operators, and contextual snippets."""
         start_time = time.perf_counter()
 
         page = max(1, page)
         page_size = min(max(1, page_size), 50)
         offset = (page - 1) * page_size
 
-        sanitized_fts = QuerySanitizer.sanitize(query)
-        if not sanitized_fts:
+        parsed = QuerySanitizer.parse(query)
+        if not parsed.fts_expression:
             duration = (time.perf_counter() - start_time) * 1000.0
             return SearchResultSet(
                 query=query,
@@ -134,13 +194,24 @@ class SearchRetriever:
             )
 
         with self.storage.get_connection() as conn:
-            # 1. Count total matching rows
-            count_cur = conn.execute(
-                """
+            # 1. Count total matching rows filtered by domain and language
+            count_sql = """
                 SELECT COUNT(*) FROM documents_fts
+                JOIN documents d ON d.id = documents_fts.rowid
                 WHERE documents_fts MATCH ?
-                """,
-                (sanitized_fts,)
+                  AND (? IS NULL OR d.domain = ? OR d.domain LIKE '%.' || ?)
+                  AND (? IS NULL OR d.language = ?)
+            """
+            count_cur = conn.execute(
+                count_sql,
+                (
+                    parsed.fts_expression,
+                    parsed.domain_filter,
+                    parsed.domain_filter,
+                    parsed.domain_filter,
+                    parsed.lang_filter,
+                    parsed.lang_filter
+                )
             )
             total_matches = count_cur.fetchone()[0]
 
@@ -148,7 +219,7 @@ class SearchRetriever:
                 duration = (time.perf_counter() - start_time) * 1000.0
                 return SearchResultSet(
                     query=query,
-                    sanitized_query=sanitized_fts,
+                    sanitized_query=parsed.fts_expression,
                     total_matches=0,
                     page=page,
                     page_size=page_size,
@@ -159,9 +230,7 @@ class SearchRetriever:
 
             total_pages = (total_matches + page_size - 1) // page_size
 
-            # 2. Retrieve ranked rows with BM25 and highlight snippet
-            # BM25 weights: title=10.0, headings=5.0, description=3.0, body=1.0
-            # Lower BM25 score means more relevant
+            # 2. Retrieve ranked rows with BM25, snippets, and filters
             query_sql = """
                 SELECT
                     d.url,
@@ -173,6 +242,8 @@ class SearchRetriever:
                 FROM documents_fts
                 JOIN documents d ON d.id = documents_fts.rowid
                 WHERE documents_fts MATCH ?
+                  AND (? IS NULL OR d.domain = ? OR d.domain LIKE '%.' || ?)
+                  AND (? IS NULL OR d.language = ?)
                 ORDER BY bm25_score ASC
                 LIMIT ? OFFSET ?
             """
@@ -184,7 +255,12 @@ class SearchRetriever:
                     self.WEIGHT_HEADINGS,
                     self.WEIGHT_DESCRIPTION,
                     self.WEIGHT_BODY,
-                    sanitized_fts,
+                    parsed.fts_expression,
+                    parsed.domain_filter,
+                    parsed.domain_filter,
+                    parsed.domain_filter,
+                    parsed.lang_filter,
+                    parsed.lang_filter,
                     page_size,
                     offset
                 )
@@ -202,7 +278,7 @@ class SearchRetriever:
                         domain=row["domain"],
                         title=row["title"],
                         snippet=snippet_text,
-                        relevance_score=round(-float(row["bm25_score"]), 8),  # Negate so higher is better
+                        relevance_score=round(-float(row["bm25_score"]), 8),
                     )
                 )
 
@@ -210,7 +286,7 @@ class SearchRetriever:
 
         return SearchResultSet(
             query=query,
-            sanitized_query=sanitized_fts,
+            sanitized_query=parsed.fts_expression,
             total_matches=total_matches,
             page=page,
             page_size=page_size,
