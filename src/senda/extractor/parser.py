@@ -45,6 +45,10 @@ class ExtractedDocument:
     published_at: Optional[str] = None
     images: list[ExtractedImage] = field(default_factory=list)
     outgoing_links: list[str] = field(default_factory=list)
+    canonical_url: Optional[str] = None
+    is_indexable: bool = True
+    authors: list[str] = field(default_factory=list)
+    primary_links: list[str] = field(default_factory=list)
 
 
 class DocumentExtractor:
@@ -79,6 +83,28 @@ class DocumentExtractor:
         """Parse HTML string and extract structured indexable fields."""
         soup = BeautifulSoup(html_content, "html.parser")
 
+        # 0. Meta robots check (noindex / nofollow)
+        meta_robots = (
+            soup.find("meta", attrs={"name": re.compile(r"^robots$", re.I)})
+            or soup.find("meta", attrs={"name": re.compile(r"^googlebot$", re.I)})
+        )
+        robots_directives = set()
+        if meta_robots and meta_robots.get("content"):
+            robots_directives = {
+                d.strip().lower() for d in str(meta_robots["content"]).split(",") if d.strip()
+            }
+        is_indexable = "noindex" not in robots_directives
+        is_followable = "nofollow" not in robots_directives
+
+        # Canonical URL detection
+        canonical_tag = soup.find("link", rel=re.compile(r"^canonical$", re.I))
+        canonical_url = None
+        if canonical_tag and canonical_tag.get("href"):
+            raw_canonical = str(canonical_tag["href"]).strip()
+            if raw_canonical:
+                resolved_canonical = urljoin(url, raw_canonical)
+                canonical_url = canonicalize_url(resolved_canonical)
+
         # 1. Extract Language
         lang = ""
         html_tag = soup.find("html")
@@ -112,26 +138,39 @@ class DocumentExtractor:
 
         # 4. Extract Outgoing Links before decomposing elements
         outgoing_links_set: Set[str] = set()
-        for a_tag in soup.find_all("a", href=True):
-            # Check rel attribute for nofollow
-            rel = a_tag.get("rel", [])
-            if isinstance(rel, list):
-                rel_set = {r.lower() for r in rel}
-            else:
-                rel_set = {r.lower() for r in rel.split()}
+        if is_followable:
+            for a_tag in soup.find_all("a", href=True):
+                # Check rel attribute for nofollow
+                rel = a_tag.get("rel", [])
+                if isinstance(rel, list):
+                    rel_set = {r.lower() for r in rel}
+                else:
+                    rel_set = {r.lower() for r in rel.split()}
 
-            if "nofollow" in rel_set:
-                continue
+                if "nofollow" in rel_set:
+                    continue
 
-            raw_href = a_tag["href"].strip()
-            if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:", "data:")):
-                continue
+                raw_href = a_tag["href"].strip()
+                if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:", "data:")):
+                    continue
 
-            # Resolve relative to base URL
-            absolute_url = urljoin(url, raw_href)
-            canonical = canonicalize_url(absolute_url)
-            if canonical and canonical != url and not is_spider_trap(canonical):
-                outgoing_links_set.add(canonical)
+                # Resolve relative to base URL
+                absolute_url = urljoin(url, raw_href)
+                canonical = canonicalize_url(absolute_url)
+                if canonical and canonical != url and not is_spider_trap(canonical):
+                    outgoing_links_set.add(canonical)
+
+        # 4.1 Primary Outbound Citations
+        primary_tlds = (".gov", ".gob.", ".edu", ".mil")
+        primary_domains = {"doi.org", "zenodo.org", "arxiv.org", "w3.org", "rfc-editor.org", "archive.org"}
+        primary_links_list: list[str] = []
+        for link_url in outgoing_links_set:
+            parsed_l = urlparse(link_url)
+            netloc = parsed_l.netloc.lower()
+            if any(netloc.endswith(tld) or tld in netloc for tld in primary_tlds) or any(
+                netloc == pd or netloc.endswith("." + pd) for pd in primary_domains
+            ):
+                primary_links_list.append(link_url)
 
         # 5. Extract Headings (h1..h6) for relevance weighting
         headings_list: list[str] = []
@@ -229,6 +268,20 @@ class DocumentExtractor:
             if content_val and len(str(content_val)) >= 10:
                 published_at = str(content_val)[:10]
 
+        # 8.1 Extract Authors
+        authors_list: list[str] = []
+        author_meta = (
+            soup.find("meta", attrs={"name": re.compile(r"^author$", re.I)})
+            or soup.find("meta", property=re.compile(r"^(article:author|og:author)$", re.I))
+            or soup.find("span", attrs={"itemprop": re.compile(r"^author$", re.I)})
+        )
+        if author_meta:
+            val = author_meta.get("content") or author_meta.get_text()
+            if val:
+                cleaned_auth = cls.clean_text(str(val))
+                if cleaned_auth and len(cleaned_auth) <= 80:
+                    authors_list.append(cleaned_auth)
+
         # 9. Decompose non-content tags for clean body text
         for tag_name in cls.NON_CONTENT_TAGS:
             for element in soup.find_all(tag_name):
@@ -260,4 +313,8 @@ class DocumentExtractor:
             published_at=published_at,
             images=extracted_images,
             outgoing_links=sorted(outgoing_links_set),
+            canonical_url=canonical_url,
+            is_indexable=is_indexable,
+            authors=authors_list,
+            primary_links=sorted(primary_links_list),
         )

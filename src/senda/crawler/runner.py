@@ -15,6 +15,7 @@ from senda.crawler.robots import RobotsPolicyManager
 from senda.extractor.parser import DocumentExtractor
 from senda.frontier.queue import FrontierQueue
 from senda.indexer.storage import StorageEngine
+from senda.security.threat_guard import threat_guard
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,13 @@ class CrawlerRunner:
                 scheme = parsed.scheme.lower() or "https"
 
                 try:
+                    # 0. Objective Harm Safety Gate
+                    is_blocked, cat, exp = threat_guard.check_url(current_url)
+                    if is_blocked:
+                        logger.warning(f"CrawlerRunner: URL bloqueada por daño objetivo ({cat}): {current_url}.")
+                        self.storage.mark_frontier_url_failed(current_url)
+                        continue
+
                     # 1. Fetch & evaluate robots.txt
                     await self._fetch_robots_if_needed(domain, scheme)
 
@@ -170,6 +178,12 @@ class CrawlerRunner:
 
                     # 3. Extract content and metadata
                     extracted = DocumentExtractor.extract(doc.url, doc.text)
+
+                    # 3.1 Respect meta robots noindex directive
+                    if not extracted.is_indexable:
+                        logger.info(f"CrawlerRunner: Respetando meta robots noindex en: {current_url}")
+                        self.storage.mark_frontier_url_completed(current_url)
+                        continue
 
                     # 4. Store and index
                     was_indexed = self.storage.upsert_document(extracted, status_code=doc.status_code)

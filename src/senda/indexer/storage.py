@@ -167,7 +167,8 @@ class StorageEngine:
             for col_sql in [
                 "ALTER TABLE documents ADD COLUMN text_density REAL DEFAULT 0.0;",
                 "ALTER TABLE documents ADD COLUMN doc_type TEXT DEFAULT 'web';",
-                "ALTER TABLE documents ADD COLUMN published_at TEXT;"
+                "ALTER TABLE documents ADD COLUMN published_at TEXT;",
+                "ALTER TABLE documents ADD COLUMN canonical_url TEXT;"
             ]:
                 try:
                     conn.execute(col_sql)
@@ -176,6 +177,7 @@ class StorageEngine:
 
             try:
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_documents_doc_type ON documents(doc_type);")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_documents_canonical ON documents(canonical_url);")
             except sqlite3.OperationalError:
                 pass
             conn.commit()
@@ -211,10 +213,11 @@ class StorageEngine:
                 except Exception:
                     pass
 
-            # 2. Check existing document
+            # 2. Check existing document by URL or canonical URL deduplication
+            effective_canonical = doc.canonical_url or doc.url
             cur = conn.execute(
-                "SELECT id, content_hash FROM documents WHERE url = ?",
-                (doc.url,)
+                "SELECT id, url, content_hash, canonical_url FROM documents WHERE url = ? OR (canonical_url IS NOT NULL AND canonical_url = ?)",
+                (doc.url, effective_canonical)
             )
             row = cur.fetchone()
 
@@ -224,8 +227,8 @@ class StorageEngine:
                 if existing_hash == doc.content_hash:
                     # Content unchanged; just update last_crawled_at
                     conn.execute(
-                        "UPDATE documents SET last_crawled_at = ?, status_code = ? WHERE id = ?",
-                        (now, status_code, doc_id)
+                        "UPDATE documents SET last_crawled_at = ?, status_code = ?, canonical_url = ? WHERE id = ?",
+                        (now, status_code, effective_canonical, doc_id)
                     )
                     conn.commit()
                     return False
@@ -244,6 +247,7 @@ class StorageEngine:
                         text_density = ?,
                         doc_type = ?,
                         published_at = ?,
+                        canonical_url = ?,
                         last_crawled_at = ?,
                         status_code = ?
                     WHERE id = ?
@@ -259,6 +263,7 @@ class StorageEngine:
                         doc.text_density,
                         doc.doc_type,
                         doc.published_at,
+                        effective_canonical,
                         now,
                         status_code,
                         doc_id
@@ -272,8 +277,8 @@ class StorageEngine:
                     INSERT INTO documents (
                         url, domain, title, description, language,
                         headings, body, content_hash, text_density, doc_type,
-                        published_at, first_indexed_at, last_crawled_at, status_code
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        published_at, canonical_url, first_indexed_at, last_crawled_at, status_code
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         doc.url,
@@ -287,6 +292,7 @@ class StorageEngine:
                         doc.text_density,
                         doc.doc_type,
                         doc.published_at,
+                        effective_canonical,
                         now,
                         now,
                         status_code
