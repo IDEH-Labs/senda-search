@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}JavaScript Web Labels - Senda (GNU LibreJS Compliant){% endblock %}
+
+{% block content %}
+<div class="info-card">
+    <h1>JavaScript Licenses (GNU LibreJS)</h1>
+    <p>
+        Senda adheres strictly to the Free Software Foundation's criteria for Free JavaScript.
+        The search engine is 100% operational with JavaScript disabled.
+    </p>
+
+    <table id="jslicense-labels1" style="width: 100%; border-collapse: collapse; margin-top: 1.5rem;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem;">Script</th>
+                <th style="padding: 0.75rem;">License</th>
+                <th style="padding: 0.75rem;">Source Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.75rem;"><a href="/static/js/i18n.js">i18n.js</a></td>
+                <td style="padding: 0.75rem;"><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPLv3 or later</a></td>
+                <td style="padding: 0.75rem;"><a href="/static/js/i18n.js">/static/js/i18n.js</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

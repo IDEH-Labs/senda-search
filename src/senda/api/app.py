@@ -109,6 +109,11 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         """Render verifiable privacy policy."""
         return templates.TemplateResponse(request=request, name="privacy.html", context={})
 
+    @app.get("/javascript", response_class=HTMLResponse)
+    async def javascript_licenses(request: Request):
+        """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
+        return templates.TemplateResponse(request=request, name="javascript.html", context={})
+
     @app.get("/opensearch.xml")
     async def opensearch(request: Request):
         """OpenSearch 1.1 Description Document for auto-discovery by web browsers."""

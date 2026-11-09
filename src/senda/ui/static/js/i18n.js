@@ -1,9 +1,11 @@
+// @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
 /**
  * Sovereign i18n client translator for Senda Search.
  * Respects user privacy: no cookies, no remote telemetry, purely client-side.
+ * GNU LibreJS Compliant: Declared Free Software under GNU GPL-3.0-or-later.
  */
 
 const SENDA_TRANSLATIONS = {
@@ -147,3 +149,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+// @license-end

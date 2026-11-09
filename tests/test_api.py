@@ -48,6 +48,11 @@ def test_api_static_pages(client):
     assert r_privacy.status_code == 200
     assert "Verifiable Privacy Policy" in r_privacy.text
 
+    r_js = client.get("/javascript")
+    assert r_js.status_code == 200
+    assert "jslicense-labels1" in r_js.text
+    assert "GNU LibreJS" in r_js.text
+
     r_opensearch = client.get("/opensearch.xml")
     assert r_opensearch.status_code == 200
     assert "application/opensearchdescription+xml" in r_opensearch.headers["content-type"]
