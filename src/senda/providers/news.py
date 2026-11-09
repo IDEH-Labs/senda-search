@@ -7,7 +7,7 @@ Aggregates breaking and current news from verified editorial outlets in real tim
 without cookies, tracking, or algorithmic filter bubbles.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 import html
 import re
@@ -26,6 +26,39 @@ def _clean_text(text: Optional[str]) -> str:
     clean = re.sub(r"<[^>]+>", " ", text)
     clean = html.unescape(clean)
     return " ".join(clean.split())
+
+
+def _resolve_time_query(query: str, time_filter: Optional[str]) -> str:
+    """Map user temporal filter to syndicated feed operators (when: or before:)."""
+    if not time_filter or time_filter.lower() in ("all", "cualquiera", "none", ""):
+        return query
+    tf = time_filter.lower().strip()
+    mapping = {
+        "1h": "when:1h",
+        "hour": "when:1h",
+        "1d": "when:1d",
+        "24h": "when:1d",
+        "day": "when:1d",
+        "1w": "when:7d",
+        "7d": "when:7d",
+        "week": "when:7d",
+        "1m": "when:30d",
+        "30d": "when:30d",
+        "month": "when:30d",
+        "2m": "when:60d",
+        "60d": "when:60d",
+        "6m": "when:180d",
+        "180d": "when:180d",
+        "1y": "when:1y",
+        "365d": "when:1y",
+        "year": "when:1y",
+    }
+    if tf in mapping:
+        return f"{query} {mapping[tf]}".strip()
+    if tf in ("1y_plus", "older_1y", "1y+"):
+        one_year_ago = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d")
+        return f"{query} before:{one_year_ago}".strip()
+    return query
 
 
 class RealTimeNewsProvider(SearchProvider):
@@ -51,6 +84,19 @@ class RealTimeNewsProvider(SearchProvider):
     def is_configured(self) -> bool:
         return self.enabled
 
+    @staticmethod
+    def _item_datetime(item: SearchResultItem) -> datetime:
+        """Parse publication date into comparable UTC datetime."""
+        if item.published_date:
+            try:
+                dt = datetime.fromisoformat(item.published_date)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt
+            except Exception:
+                pass
+        return datetime.min.replace(tzinfo=timezone.utc)
+
     async def search(
         self,
         query: str,
@@ -58,6 +104,7 @@ class RealTimeNewsProvider(SearchProvider):
         page: int = 1,
         page_size: int = 10,
         time_filter: Optional[str] = None,
+        sort: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
     ) -> List[SearchResultItem]:
@@ -70,7 +117,8 @@ class RealTimeNewsProvider(SearchProvider):
         if gl_code == "ALL" or len(gl_code) != 2:
             gl_code = "CO"
 
-        encoded_q = urllib.parse.quote_plus(clean_q)
+        query_with_time = _resolve_time_query(clean_q, time_filter)
+        encoded_q = urllib.parse.quote_plus(query_with_time)
         feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}&gl={gl_code}&ceid={gl_code}:{self.lang}"
 
         headers = {
@@ -83,7 +131,17 @@ class RealTimeNewsProvider(SearchProvider):
                 resp = await client.get(feed_url, headers=headers)
                 if resp.status_code != 200:
                     return []
-                return self.parse_feed(resp.text)[:page_size]
+                items = self.parse_feed(resp.text)
+
+                # Sorting: default in news or if sort == 'date', sort by publication date descending
+                if sort == "relevance":
+                    pass
+                else:
+                    items.sort(key=self._item_datetime, reverse=True)
+
+                start_idx = max(0, (page - 1) * page_size)
+                end_idx = start_idx + page_size
+                return items[start_idx:end_idx]
         except Exception:
             return []
 

@@ -3,6 +3,7 @@
 
 """FastAPI Web Application and Sovereign REST API for Senda Search Engine."""
 
+from datetime import datetime, timezone
 from pathlib import Path
 import time
 from typing import Optional, List
@@ -75,6 +76,8 @@ class SearchResponseModel(BaseModel):
     total_pages: int
     duration_ms: float
     category: str = "all"
+    sort: Optional[str] = None
+    time_filter: Optional[str] = None
     items: list[SearchItemModel]
     grounded_synthesis: Optional[dict] = None
     entity_card: Optional[dict] = None
@@ -114,6 +117,43 @@ def create_app(
 
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
     templates = Jinja2Templates(directory=str(templates_dir))
+
+    def format_human_date(value: Optional[str]) -> str:
+        """Format ISO 8601 publication dates into friendly human recency strings."""
+        if not value:
+            return ""
+        try:
+            dt = datetime.fromisoformat(value)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            delta = now - dt
+            seconds = delta.total_seconds()
+            if seconds < 0:
+                return "Hace instantes"
+            if seconds < 60:
+                return "Hace segundos"
+            if seconds < 3600:
+                minutes = max(1, int(seconds // 60))
+                return f"Hace {minutes} min"
+            if seconds < 86400:
+                hours = max(1, int(seconds // 3600))
+                return f"Hace {hours} h"
+            if seconds < 86400 * 7:
+                days = max(1, int(seconds // 86400))
+                return f"Hace {days} d"
+            if seconds < 86400 * 30:
+                weeks = max(1, int(seconds // (86400 * 7)))
+                return f"Hace {weeks} sem"
+            if seconds < 86400 * 365:
+                months = max(1, int(seconds // (86400 * 30)))
+                return f"Hace {months} m"
+            years = max(1, int(seconds // (86400 * 365)))
+            return f"Hace {years} a"
+        except Exception:
+            return str(value)[:10]
+
+    templates.env.filters["human_date"] = format_human_date
 
     # Initialize storage, retrieval and multi-provider aggregator
     app_storage = storage or StorageEngine()
@@ -322,6 +362,7 @@ def create_app(
         format: Optional[str] = Query(default=None),
         accept: Optional[str] = Header(default=None),
         time_filter: Optional[str] = Query(default=None),
+        sort: Optional[str] = Query(default=None),
         region: Optional[str] = Query(default=settings.DEFAULT_REGION),
         safe_search: str = Query(default="off"),
         no_ads: bool = Query(default=True),
@@ -337,6 +378,7 @@ def create_app(
         current_page = max(p_val, page_val)
         reg = region if isinstance(region, str) else settings.DEFAULT_REGION
         tf = time_filter if isinstance(time_filter, str) else None
+        sort_val = sort.lower().strip() if isinstance(sort, str) and sort.strip() else None
         ss = safe_search if isinstance(safe_search, str) else "off"
         na = no_ads if isinstance(no_ads, bool) else True
         ac = academic if isinstance(academic, bool) else False
@@ -358,6 +400,10 @@ def create_app(
         if cat not in ("all", "web", "news", "images", "videos", "library", "social"):
             cat = "all"
 
+        # News defaults to freshest date sorting unless user explicitly opted for relevance
+        if cat == "news" and not sort_val:
+            sort_val = "date"
+
         page_sz = 12 if cat == "images" else 10
         start_t = time.perf_counter()
 
@@ -368,6 +414,7 @@ def create_app(
             page=current_page,
             page_size=page_sz,
             time_filter=tf,
+            sort=sort_val,
             region=reg,
             safe_search=ss,
             no_ads=na,
@@ -474,6 +521,8 @@ def create_app(
             total_pages=total_pages,
             duration_ms=duration_ms,
             category=cat,
+            sort=sort_val,
+            time_filter=tf,
             items=formatted_items,
             grounded_synthesis=grounded_data,
             entity_card=entity_data,
@@ -492,6 +541,7 @@ def create_app(
                 "results": results_data,
                 "region": reg,
                 "time_filter": tf,
+                "sort": sort_val,
                 "safe_search": ss,
                 "grounded_synthesis": grounded_data,
                 "entity_card": entity_data,
@@ -520,6 +570,10 @@ def create_app(
             p = 1
 
         theme = form_data.get("theme", [None])[0]
+        time_filter = form_data.get("time_filter", [None])[0]
+        sort = form_data.get("sort", [None])[0]
+        region = form_data.get("region", [settings.DEFAULT_REGION])[0]
+        safe_search = form_data.get("safe_search", ["off"])[0]
         academic = form_data.get("academic", ["false"])[0].lower() in ("true", "1")
         social = form_data.get("social", ["false"])[0].lower() in ("true", "1")
         synthesis = form_data.get("synthesis", ["false"])[0].lower() in ("true", "1")
@@ -531,6 +585,10 @@ def create_app(
             p=p,
             format=format,
             accept=accept,
+            time_filter=time_filter,
+            sort=sort,
+            region=region,
+            safe_search=safe_search,
             academic=academic,
             social=social,
             synthesis=synthesis,

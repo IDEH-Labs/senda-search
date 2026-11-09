@@ -588,6 +588,65 @@ body.homepage-view main.content-area {
   color: var(--border-strong);
 }
 
+/* News Specific Filters Toolbar */
+.news-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.6rem 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  margin-top: 0.35rem;
+}
+
+.filter-time-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.filter-time-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.filter-time-pills .filter-link {
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.filter-time-pills .filter-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.filter-time-pills .filter-link.active {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.badge-time {
+  color: var(--text-accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
 .density-btn {
   background: transparent;
   border: 1px solid var(--border-subtle);

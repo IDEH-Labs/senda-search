@@ -30,6 +30,8 @@
                 <input type="hidden" name="region" value="{{ region }}">
                 <input type="hidden" name="safe_search" value="{{ safe_search }}">
                 <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
+                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+                {% if time_filter %}<input type="hidden" name="time_filter" value="{{ time_filter }}">{% endif %}
                 
                 <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,6 +89,32 @@
                 </button>
             </div>
         </div>
+
+        <!-- News Specific Filters: Sort & Time Range -->
+        {% if category == 'news' %}
+        <div class="news-filters-bar" role="toolbar" aria-label="Filtros de Noticias">
+            <div class="filter-group">
+                <span class="filter-label">Ordenar:</span>
+                <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-link {% if sort == 'date' or not sort %}active{% endif %}" title="Noticias más recientes primero">Más recientes</a>
+                <span class="filter-sep">|</span>
+                <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-link {% if sort == 'relevance' %}active{% endif %}" title="Ordenar por relevancia">Relevancia</a>
+            </div>
+
+            <div class="filter-group filter-time-group">
+                <span class="filter-label">Periodo:</span>
+                <div class="filter-time-pills">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}" class="filter-link {% if not time_filter or time_filter == 'all' %}active{% endif %}">Cualquier fecha</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1h" class="filter-link {% if time_filter == '1h' %}active{% endif %}">Última hora</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1d" class="filter-link {% if time_filter == '1d' %}active{% endif %}">Últimas 24 horas</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1w" class="filter-link {% if time_filter == '1w' %}active{% endif %}">Última semana</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1m" class="filter-link {% if time_filter == '1m' %}active{% endif %}">Último mes</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=2m" class="filter-link {% if time_filter == '2m' %}active{% endif %}">Hace 2 meses</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=6m" class="filter-link {% if time_filter == '6m' %}active{% endif %}">Hace 6 meses</a>
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1y_plus" class="filter-link {% if time_filter == '1y_plus' %}active{% endif %}">Hace 1 año o más</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Metadata stats -->
@@ -215,7 +243,7 @@
                     {% endif %}
 
                     {% if item.published_date or item.published_at %}
-                    <span class="result-date">&bull; {{ item.published_date or item.published_at }}</span>
+                    <time class="result-date badge-time" datetime="{{ item.published_date or item.published_at }}" title="{{ item.published_date or item.published_at }}">&bull; {{ (item.published_date or item.published_at) | human_date }}</time>
                     {% endif %}
 
                     <!-- Transparencia nativa sin JS: "Evidencia y Procedencia" -->

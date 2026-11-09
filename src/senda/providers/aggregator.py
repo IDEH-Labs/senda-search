@@ -95,6 +95,7 @@ class ProviderAggregator:
         page: int = 1,
         page_size: int = 10,
         time_filter: Optional[str] = None,
+        sort: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
         no_ads: bool = True,
@@ -133,7 +134,7 @@ class ProviderAggregator:
                 tasks.append(
                     self.news.search(
                         query, category="news", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, sort=sort, region=region, safe_search=safe_search
                     )
                 )
             tasks.append(
@@ -191,13 +192,6 @@ class ProviderAggregator:
                 tasks.append(
                     self.wikipedia_search.search(
                         query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
-                    )
-                )
-            if self.news and self.news.is_configured:
-                tasks.append(
-                    self.news.search(
-                        query, category="news", page=page, page_size=3,
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )
                 )
