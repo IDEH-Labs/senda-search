@@ -4,15 +4,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 Senda — Free Software under GNU GPL-3.0-or-later
 -->
-<html lang="es" data-theme="auto">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="dark light">
     <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#080c14">
     
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Senda">
     <link rel="jslicense" href="/javascript">
@@ -25,10 +24,10 @@ Senda — Free Software under GNU GPL-3.0-or-later
         (function() {
             try {
                 var saved = localStorage.getItem('senda_theme');
-                if (saved === 'dark' || saved === 'light') {
-                    document.documentElement.setAttribute('data-theme', saved);
+                if (saved === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
                 } else {
-                    document.documentElement.setAttribute('data-theme', 'auto');
+                    document.documentElement.setAttribute('data-theme', 'dark');
                 }
             } catch(e) {}
         })();
@@ -39,15 +38,23 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
     <header class="app-header" role="banner">
-        {% block header_brand %}
         <a href="/" class="brand" aria-label="Senda">
-            <svg class="brand-logo" width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="2" opacity="0.3"/>
-                <path d="M16 5 L19 13 L27 16 L19 19 L16 27 L13 19 L5 16 L13 13 Z" fill="currentColor"/>
-            </svg>
+            <div class="brand-logo-wrapper" aria-hidden="true">
+                <svg class="brand-logo" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#10b981"/>
+                            <stop offset="60%" stop-color="#06b6d4"/>
+                            <stop offset="100%" stop-color="#3b82f6"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="3" y="3" width="26" height="26" rx="8" stroke="url(#logoGrad)" stroke-width="1.8" fill="rgba(16,185,129,0.06)"/>
+                    <path d="M16 7 L18.8 13.2 L25 16 L18.8 18.8 L16 25 L13.2 18.8 L7 16 L13.2 13.2 Z" fill="url(#logoGrad)"/>
+                    <circle cx="16" cy="16" r="2.2" fill="#ffffff"/>
+                </svg>
+            </div>
             <span class="brand-text">Senda</span>
         </a>
-        {% endblock %}
 
         <div class="header-tools">
             <nav class="header-nav" aria-label="Navegación secundaria">
@@ -55,7 +62,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
                 <a href="/privacy" class="header-link" data-i18n="nav_privacy">Privacidad</a>
             </nav>
 
-            <button type="button" id="themeToggle" class="theme-btn" aria-label="Cambiar tema visual" title="Cambiar tema">
+            <button type="button" id="themeToggle" class="theme-btn" aria-label="Cambiar tema" title="Cambiar tema claro/oscuro">
                 <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2"></path><path d="M12 20v2"></path>

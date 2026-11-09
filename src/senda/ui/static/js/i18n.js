@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
 /**
- * Senda Minimalist Core (i18n, Theme Manager)
+ * Senda Dark Tech Core (i18n, Theme Manager, Command Bar)
  * Zero tracking, zero telemetry, zero cookies. 100% Client-Side.
  * GNU LibreJS Compliant: Declared Free Software under GNU GPL-3.0-or-later.
  */
@@ -13,9 +13,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "Acerca de",
     nav_privacy: "Privacidad",
     search_placeholder: "Buscar en la web libre...",
-    search_btn: "Buscar con Senda",
-    lucky_btn: "Explorar la red libre",
-    tab_web: "Todo",
+    tab_web: "Web",
     tab_images: "Imágenes",
     tab_news: "Noticias",
     tab_library: "Biblioteca",
@@ -27,9 +25,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "About",
     nav_privacy: "Privacy",
     search_placeholder: "Search the libre web...",
-    search_btn: "Senda Search",
-    lucky_btn: "Explore the libre web",
-    tab_web: "All",
+    tab_web: "Web",
     tab_images: "Images",
     tab_news: "News",
     tab_library: "Library",
@@ -41,9 +37,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "À propos",
     nav_privacy: "Confidentialité",
     search_placeholder: "Rechercher sur le web libre...",
-    search_btn: "Recherche Senda",
-    lucky_btn: "Explorer le web libre",
-    tab_web: "Tout",
+    tab_web: "Web",
     tab_images: "Images",
     tab_news: "Actualités",
     tab_library: "Bibliothèque",
@@ -55,9 +49,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "Über uns",
     nav_privacy: "Datenschutz",
     search_placeholder: "Im freien Web suchen...",
-    search_btn: "Senda Suche",
-    lucky_btn: "Freies Web erkunden",
-    tab_web: "Alle",
+    tab_web: "Web",
     tab_images: "Bilder",
     tab_news: "Nachrichten",
     tab_library: "Bibliothek",
@@ -69,9 +61,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "Sobre",
     nav_privacy: "Privacidade",
     search_placeholder: "Pesquisar na web livre...",
-    search_btn: "Pesquisar com Senda",
-    lucky_btn: "Explorar a web livre",
-    tab_web: "Tudo",
+    tab_web: "Web",
     tab_images: "Imagens",
     tab_news: "Notícias",
     tab_library: "Biblioteca",
@@ -83,9 +73,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "Info",
     nav_privacy: "Privacy",
     search_placeholder: "Cerca nel web libero...",
-    search_btn: "Cerca con Senda",
-    lucky_btn: "Esplora il web libero",
-    tab_web: "Tutti",
+    tab_web: "Web",
     tab_images: "Immagini",
     tab_news: "Notizie",
     tab_library: "Biblioteca",
@@ -97,9 +85,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "概要",
     nav_privacy: "プライバシー",
     search_placeholder: "自由なウェブを検索...",
-    search_btn: "Senda 検索",
-    lucky_btn: "自由なウェブを探索",
-    tab_web: "すべて",
+    tab_web: "ウェブ",
     tab_images: "画像",
     tab_news: "ニュース",
     tab_library: "ライブラリ",
@@ -111,9 +97,7 @@ const SENDA_TRANSLATIONS = {
     nav_about: "关于",
     nav_privacy: "隐私政策",
     search_placeholder: "在自由网络中搜索...",
-    search_btn: "Senda 搜索",
-    lucky_btn: "探索自由网络",
-    tab_web: "全部",
+    tab_web: "网页",
     tab_images: "图片",
     tab_news: "资讯",
     tab_library: "文献库",
@@ -142,20 +126,15 @@ function applyTranslations(lang) {
 }
 
 /**
- * Theme Manager: Toggle light/dark/auto themes with localStorage.
+ * Theme Manager: Toggle light/dark themes with localStorage.
  */
 function initThemeManager() {
   var toggleBtn = document.getElementById('themeToggle');
   if (!toggleBtn) return;
 
   toggleBtn.addEventListener('click', function() {
-    var current = document.documentElement.getAttribute('data-theme') || 'auto';
-    var next = 'dark';
-    if (current === 'dark') {
-      next = 'light';
-    } else if (current === 'light') {
-      next = 'auto';
-    }
+    var current = document.documentElement.getAttribute('data-theme') || 'dark';
+    var next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     try {
       localStorage.setItem('senda_theme', next);
@@ -164,9 +143,9 @@ function initThemeManager() {
 }
 
 /**
- * Search Input Clear Button
+ * Command Bar & Keyboard Shortcuts
  */
-function initSearchBox() {
+function initCommandBar() {
   var searchInput = document.getElementById('search-input');
   var clearBtn = document.getElementById('clearSearchBtn');
 
@@ -183,6 +162,26 @@ function initSearchBox() {
       searchInput.focus();
     });
   }
+
+  // Keyboard shortcut '/' or Ctrl+K / Cmd+K to focus search input
+  window.addEventListener('keydown', function(e) {
+    var isInputActive = document.activeElement === searchInput || 
+                        document.activeElement.tagName === 'INPUT' || 
+                        document.activeElement.tagName === 'TEXTAREA' || 
+                        document.activeElement.tagName === 'SELECT';
+
+    if (!isInputActive && (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key === 'k'))) {
+      if (searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.blur();
+    }
+  });
 }
 
 // Lifecycle Initialization
@@ -211,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   applyTranslations(initialLang);
   initThemeManager();
-  initSearchBox();
+  initCommandBar();
 });
 
 // @license-end

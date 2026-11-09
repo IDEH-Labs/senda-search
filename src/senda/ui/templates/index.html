@@ -1,32 +1,46 @@
 {% extends "base.html" %}
 
 {% block body_class %}homepage-view{% endblock %}
-{% block header_brand %}{% endblock %}
 
 {% block content %}
-<div class="home-center">
-    <div class="home-hero">
-        <svg class="home-logo" width="44" height="44" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.6" opacity="0.25"/>
-            <path d="M16 4 L19.5 12.5 L28 16 L19.5 19.5 L16 28 L12.5 19.5 L4 16 L12.5 12.5 Z" fill="currentColor"/>
+<div class="home-container">
+    <div class="home-emblem-wrap">
+        <svg class="home-emblem" width="60" height="60" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="heroGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#10b981"/>
+                    <stop offset="50%" stop-color="#06b6d4"/>
+                    <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+            </defs>
+            <rect x="2" y="2" width="28" height="28" rx="9" stroke="url(#heroGrad)" stroke-width="1.8" fill="rgba(16,185,129,0.06)"/>
+            <path d="M16 6 L19.2 12.8 L26 16 L19.2 19.2 L16 26 L12.8 19.2 L6 16 L12.8 12.8 Z" fill="url(#heroGrad)" filter="url(#glow)"/>
+            <circle cx="16" cy="16" r="2.5" fill="#ffffff"/>
         </svg>
-        <h1 class="home-title">Senda</h1>
+        <h1 class="home-brand-title">Senda</h1>
     </div>
 
+    <!-- Linear / Raycast Style Search Command Bar -->
     <form class="home-search-form" action="/search" method="get" role="search">
-        <input type="hidden" name="category" value="all">
-        <div class="search-box">
-            <span class="search-box-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <input type="hidden" name="category" id="search-category" value="all">
+        
+        <div class="command-bar">
+            <span class="command-bar-icon" aria-hidden="true">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
             </span>
+
             <input
                 type="text"
                 name="q"
                 id="search-input"
-                class="search-box-input"
+                class="command-bar-input"
                 placeholder="Buscar en la web libre..."
                 data-i18n="search_placeholder"
                 required
@@ -36,31 +50,44 @@
                 spellcheck="false"
                 aria-label="Buscar"
             >
-            <button type="button" id="clearSearchBtn" class="search-clear-btn" aria-label="Limpiar" style="display: none;">
+
+            <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar" style="display: none;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
+
+            <kbd class="command-shortcut" title="Presiona '/' para buscar">/</kbd>
         </div>
 
-        <div class="home-actions">
-            <button type="submit" class="home-btn" data-i18n="search_btn">Buscar con Senda</button>
-            <button type="button" class="home-btn home-btn-subtle" onclick="exploreLibreWeb()" data-i18n="lucky_btn">Explorar la red libre</button>
+        <!-- Sleek Minimalist Category Navigation -->
+        <div class="home-category-row" role="tablist" aria-label="Categorías">
+            <button type="button" role="tab" class="cat-chip active" data-cat="all" onclick="selectCategory('all', this)">
+                <span data-i18n="tab_web">Web</span>
+            </button>
+            <button type="button" role="tab" class="cat-chip" data-cat="images" onclick="selectCategory('images', this)">
+                <span data-i18n="tab_images">Imágenes</span>
+            </button>
+            <button type="button" role="tab" class="cat-chip" data-cat="news" onclick="selectCategory('news', this)">
+                <span data-i18n="tab_news">Noticias</span>
+            </button>
+            <button type="button" role="tab" class="cat-chip" data-cat="library" onclick="selectCategory('library', this)">
+                <span data-i18n="tab_library">Biblioteca</span>
+            </button>
         </div>
     </form>
 </div>
 
 <script>
     // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
-    function exploreLibreWeb() {
-        var topics = ['Debian', 'Free Software', 'Linux', 'Wikipedia', 'KDE', 'Alpine Linux', 'GPL', 'LibrePlanet'];
-        var chosen = topics[Math.floor(Math.random() * topics.length)];
-        var input = document.getElementById('search-input');
-        if (input) {
-            input.value = chosen;
-            input.form.submit();
-        }
+    function selectCategory(cat, btn) {
+        var input = document.getElementById('search-category');
+        if (input) input.value = cat;
+        document.querySelectorAll('.cat-chip').forEach(function(el) {
+            el.classList.remove('active');
+        });
+        if (btn) btn.classList.add('active');
     }
     // @license-end
 </script>
