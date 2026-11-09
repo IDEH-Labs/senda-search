@@ -116,30 +116,57 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         )
         return response
 
+    def resolve_theme(request: Request, query_theme: Optional[str] = None) -> str:
+        """Resolve theme: query parameter > cookie > default ('dark')."""
+        if query_theme in ("light", "dark"):
+            return query_theme
+        cookie_val = request.cookies.get("senda_theme")
+        if cookie_val in ("light", "dark"):
+            return cookie_val
+        return "dark"
+
+    def render_with_theme(name: str, request: Request, context: dict, query_theme: Optional[str] = None) -> Response:
+        """Render template with theme and optionally set functional preference cookie."""
+        current_theme = resolve_theme(request, query_theme)
+        ctx = dict(context)
+        ctx["theme"] = current_theme
+        ctx["settings"] = settings
+        resp = templates.TemplateResponse(request=request, name=name, context=ctx)
+        if query_theme in ("light", "dark"):
+            resp.set_cookie(
+                key="senda_theme",
+                value=current_theme,
+                max_age=31536000,
+                samesite="lax",
+                path="/",
+                httponly=False,
+            )
+        return resp
+
     @app.get("/", response_class=HTMLResponse)
-    async def home(request: Request):
+    async def home(request: Request, theme: Optional[str] = Query(default=None)):
         """Render search homepage."""
-        return templates.TemplateResponse(request=request, name="index.html", context={})
+        return render_with_theme("index.html", request, {}, theme)
 
     @app.get("/about", response_class=HTMLResponse)
-    async def about(request: Request):
+    async def about(request: Request, theme: Optional[str] = Query(default=None)):
         """Render about and ethics page."""
-        return templates.TemplateResponse(request=request, name="about.html", context={})
+        return render_with_theme("about.html", request, {}, theme)
 
     @app.get("/how-it-works", response_class=HTMLResponse)
-    async def how_it_works(request: Request):
+    async def how_it_works(request: Request, theme: Optional[str] = Query(default=None)):
         """Render plain language How It Works transparency page."""
-        return templates.TemplateResponse(request=request, name="how_it_works.html", context={})
+        return render_with_theme("how_it_works.html", request, {}, theme)
 
     @app.get("/privacy", response_class=HTMLResponse)
-    async def privacy(request: Request):
+    async def privacy(request: Request, theme: Optional[str] = Query(default=None)):
         """Render verifiable privacy policy."""
-        return templates.TemplateResponse(request=request, name="privacy.html", context={})
+        return render_with_theme("privacy.html", request, {}, theme)
 
     @app.get("/javascript", response_class=HTMLResponse)
-    async def javascript_licenses(request: Request):
+    async def javascript_licenses(request: Request, theme: Optional[str] = Query(default=None)):
         """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
-        return templates.TemplateResponse(request=request, name="javascript.html", context={})
+        return render_with_theme("javascript.html", request, {}, theme)
 
     @app.get("/opensearch.xml")
     async def opensearch(request: Request):
@@ -208,6 +235,7 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         region: Optional[str] = Query(default=settings.DEFAULT_REGION),
         safe_search: str = Query(default="off"),
         no_ads: bool = Query(default=True),
+        theme: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
         clean_q = q.strip()
@@ -292,19 +320,18 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         if format == "json" or (accept and "application/json" in accept and not ("text/html" in accept)):
             return results_data
 
-        return templates.TemplateResponse(
-            request=request,
-            name="results.html",
-            context={
+        return render_with_theme(
+            "results.html",
+            request,
+            {
                 "query": clean_q,
                 "category": cat,
                 "results": results_data,
                 "region": reg,
                 "time_filter": tf,
                 "safe_search": ss,
-                "settings": settings,
-            }
-
+            },
+            theme,
         )
 
     @app.post("/search")
@@ -327,7 +354,9 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
         except ValueError:
             p = 1
 
-        return await search(request, q=q, category=cat, p=p, format=format, accept=accept)
+        theme = form_data.get("theme", [None])[0]
+
+        return await search(request, q=q, category=cat, p=p, format=format, accept=accept, theme=theme)
 
     @app.get("/api/v1/search", response_model=SearchResponseModel)
     async def api_search(

@@ -37,6 +37,7 @@
     <!-- Linear / Raycast Style Search Command Bar -->
     <form class="home-search-form" action="/search" method="get" role="search">
         <input type="hidden" name="category" id="search-category" value="all">
+        <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
         
         <div class="command-bar">
             <span class="command-bar-icon" aria-hidden="true">

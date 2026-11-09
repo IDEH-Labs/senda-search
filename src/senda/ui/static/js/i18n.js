@@ -135,20 +135,69 @@ function applyTranslations(lang) {
 }
 
 /**
- * Theme Manager: Toggle light/dark themes with localStorage.
+ * Tor & Privacy Sandbox Storage Guards (GNU LibreJS Compliant)
+ */
+function safeGetStorage(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return null;
+  }
+}
+
+function safeSetStorage(key, val) {
+  try {
+    localStorage.setItem(key, val);
+  } catch (e) {}
+}
+
+/**
+ * Theme Manager: Toggle light/dark themes with dual-layer fallback.
+ * Works seamlessly in Tor Browser (Standard, Safer, Safest) and with LibreJS.
  */
 function initThemeManager() {
   var toggleBtn = document.getElementById('themeToggle');
   if (!toggleBtn) return;
 
-  toggleBtn.addEventListener('click', function() {
+  function updateToggleState(theme) {
+    var next = theme === 'dark' ? 'light' : 'dark';
+    toggleBtn.setAttribute('href', '?theme=' + next);
+    toggleBtn.setAttribute('title', next === 'dark' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+    toggleBtn.setAttribute('aria-label', next === 'dark' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+
+    // Update hidden inputs in search forms
+    document.querySelectorAll('input[name="theme"]').forEach(function(inp) {
+      inp.value = theme;
+    });
+  }
+
+  toggleBtn.addEventListener('click', function(e) {
+    e.preventDefault();
     var current = document.documentElement.getAttribute('data-theme') || 'dark';
     var next = current === 'dark' ? 'light' : 'dark';
+
     document.documentElement.setAttribute('data-theme', next);
+    if (next === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+    }
+
+    safeSetStorage('senda_theme', next);
+
+    // Set functional cookie for zero-JS fallback continuity
     try {
-      localStorage.setItem('senda_theme', next);
-    } catch(e) {}
+      document.cookie = "senda_theme=" + next + ";path=/;max-age=31536000;SameSite=Lax";
+    } catch (err) {}
+
+    updateToggleState(next);
   });
+
+  // Initial sync with current DOM theme
+  var initial = document.documentElement.getAttribute('data-theme') || 'dark';
+  updateToggleState(initial);
 }
 
 /**

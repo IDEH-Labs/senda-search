@@ -29,6 +29,7 @@
                 <input type="hidden" name="category" value="{{ category }}">
                 <input type="hidden" name="region" value="{{ region }}">
                 <input type="hidden" name="safe_search" value="{{ safe_search }}">
+                <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
                 
                 <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -41,19 +42,19 @@
 
         <!-- Category navigation tabs -->
         <nav class="results-tab-row" role="tablist" aria-label="Categorías">
-            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
                 <span data-i18n="tab_web">Web</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
                 <span data-i18n="tab_images">Imágenes</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
                 <span data-i18n="tab_news">Noticias</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
                 <span data-i18n="tab_videos">Videos</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
                 <span data-i18n="tab_library">Biblioteca</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
@@ -65,16 +66,16 @@
         <div class="results-filters-row">
             <div class="filter-group">
                 <span class="filter-label">Región:</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co" class="filter-link {% if region == 'co' %}active{% endif %}">Colombia (CO)</a>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=co&theme={{ theme }}" class="filter-link {% if region == 'co' %}active{% endif %}">Colombia (CO)</a>
                 <span class="filter-sep">|</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all" class="filter-link {% if region == 'all' or not region %}active{% endif %}">Global</a>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&theme={{ theme }}" class="filter-link {% if region == 'all' or not region %}active{% endif %}">Global</a>
             </div>
 
             <div class="filter-group">
                 <span class="filter-label">SafeSearch:</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off" class="filter-link {% if safe_search == 'off' or not safe_search %}active{% endif %}">Desactivado</a>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}" class="filter-link {% if safe_search == 'off' or not safe_search %}active{% endif %}">Desactivado</a>
                 <span class="filter-sep">|</span>
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate" class="filter-link {% if safe_search == 'moderate' %}active{% endif %}">Moderado</a>
+                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate&theme={{ theme }}" class="filter-link {% if safe_search == 'moderate' %}active{% endif %}">Moderado</a>
             </div>
 
             <div class="filter-group filter-density-toggle">
@@ -159,21 +160,21 @@
         {% if results.total_pages > 1 %}
         <nav class="pagination" role="navigation" aria-label="Páginas">
             {% if results.page > 1 %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ results.page - 1 }}" class="page-btn">&lsaquo; Anterior</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page - 1 }}" class="page-btn">&lsaquo; Anterior</a>
             {% endif %}
 
             {% for p in range(1, results.total_pages + 1) %}
                 {% if p == results.page %}
                     <span class="page-btn active" aria-current="page">{{ p }}</span>
                 {% elif p <= 5 or p > results.total_pages - 2 or (p >= results.page - 2 and p <= results.page + 2) %}
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ p }}" class="page-btn">{{ p }}</a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ p }}" class="page-btn">{{ p }}</a>
                 {% elif p == 6 or p == results.page - 3 %}
                     <span class="page-dots">&hellip;</span>
                 {% endif %}
             {% endfor %}
 
             {% if results.page < results.total_pages %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&page={{ results.page + 1 }}" class="page-btn">Siguiente &rsaquo;</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page + 1 }}" class="page-btn">Siguiente &rsaquo;</a>
             {% endif %}
         </nav>
         {% endif %}

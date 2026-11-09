@@ -4,7 +4,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 Senda — Free Software under GNU GPL-3.0-or-later
 -->
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="{{ theme | default('dark') }}" class="{{ 'light' if theme == 'light' else 'dark' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,11 +30,24 @@ Senda — Free Software under GNU GPL-3.0-or-later
         // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
         (function() {
             try {
-                var saved = localStorage.getItem('senda_theme');
+                var urlParams = new URLSearchParams(window.location.search);
+                var qTheme = urlParams.get('theme');
+                var saved = qTheme;
+                if (!saved) {
+                    try { saved = localStorage.getItem('senda_theme'); } catch(e) {}
+                }
+                if (!saved) {
+                    var match = document.cookie.match(/(^|; )senda_theme=([^;]+)/);
+                    if (match) saved = match[2];
+                }
                 if (saved === 'light') {
                     document.documentElement.setAttribute('data-theme', 'light');
-                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                } else if (saved === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.classList.remove('light');
+                    document.documentElement.classList.add('dark');
                 }
             } catch(e) {}
         })();
@@ -70,7 +83,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
                 <a href="/privacy" class="header-link" data-i18n="nav_privacy">Privacidad</a>
             </nav>
 
-            <button type="button" id="themeToggle" class="theme-btn" aria-label="Cambiar tema" title="Cambiar tema claro/oscuro">
+            <a href="?theme={{ 'light' if theme != 'light' else 'dark' }}" id="themeToggle" class="theme-btn" role="button" aria-label="Cambiar tema" title="Cambiar tema (Claro / Oscuro)">
                 <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2"></path><path d="M12 20v2"></path>
@@ -81,7 +94,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
                 <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
                 </svg>
-            </button>
+            </a>
 
             <select id="langSelector" class="lang-selector" aria-label="Idioma">
                 <option value="es">ES</option>

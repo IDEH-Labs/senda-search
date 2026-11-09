@@ -171,3 +171,30 @@ def test_api_brand_assets_and_manifest(client):
     r_og = client.get("/static/img/senda-og.png")
     assert r_og.status_code == 200
     assert r_og.headers.get("content-type") == "image/png"
+
+
+def test_theme_toggle_zero_js_and_cookie(client):
+    """Verify theme switching works via query parameter and functional cookie (Tor/LibreJS compatible)."""
+    # 1. Default should be dark
+    r_default = client.get("/")
+    assert r_default.status_code == 200
+    assert 'data-theme="dark"' in r_default.text
+    assert '?theme=light' in r_default.text
+
+    # 2. Switch to light via query param (Zero JS)
+    r_light = client.get("/?theme=light")
+    assert r_light.status_code == 200
+    assert 'data-theme="light"' in r_light.text
+    assert '?theme=dark' in r_light.text
+    # Check functional cookie is set
+    assert "senda_theme=light" in r_light.headers.get("set-cookie", "")
+
+    # 3. Subsequent request with cookie keeps light mode
+    r_cookie = client.get("/", cookies={"senda_theme": "light"})
+    assert r_cookie.status_code == 200
+    assert 'data-theme="light"' in r_cookie.text
+
+    # 4. Search results with light theme
+    r_search_light = client.get("/search?q=freedom&theme=light")
+    assert r_search_light.status_code == 200
+    assert 'data-theme="light"' in r_search_light.text

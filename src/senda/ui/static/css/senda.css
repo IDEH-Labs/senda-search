@@ -49,7 +49,8 @@
 }
 
 /* Light Theme Override */
-[data-theme="light"] {
+[data-theme="light"],
+html.light {
   --bg-app: #f8fafc;
   --bg-glow: radial-gradient(circle at 50% -10%, rgba(5, 150, 105, 0.08) 0%, rgba(2, 132, 199, 0.04) 35%, transparent 70%);
   --bg-card: #ffffff;
@@ -239,10 +240,15 @@ header.app-header {
   background: var(--bg-chip-hover);
 }
 
-.theme-btn .icon-moon { display: block; }
-.theme-btn .icon-sun { display: none; }
-[data-theme="light"] .theme-btn .icon-sun { display: block; }
-[data-theme="light"] .theme-btn .icon-moon { display: none; }
+/* Theme Button Icons:
+   In dark mode, show SUN (switch to light mode).
+   In light mode, show MOON (switch to dark mode). */
+.theme-btn .icon-sun { display: block; }
+.theme-btn .icon-moon { display: none; }
+[data-theme="light"] .theme-btn .icon-sun,
+html.light .theme-btn .icon-sun { display: none; }
+[data-theme="light"] .theme-btn .icon-moon,
+html.light .theme-btn .icon-moon { display: block; }
 
 .lang-selector {
   background: var(--bg-chip);
