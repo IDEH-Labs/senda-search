@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+# Senda Sovereign Search — Periodic Crawl & Maintenance Cron Jobs
+
+# Run polite background crawl across ethical seeds every 6 hours
+0 */6 * * * senda /opt/senda/venv/bin/senda crawl --seeds-file /etc/senda/ethical_seeds.txt --max-pages 500 --max-depth 2 > /dev/null 2>&1
+
+# Run daily SQLite WAL truncate and query optimizer at 03:30 AM
+30 3 * * * senda sqlite3 /var/lib/senda/senda.db "PRAGMA wal_checkpoint(TRUNCATE); PRAGMA optimize;" > /dev/null 2>&1

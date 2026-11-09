@@ -1,0 +1,13 @@
+[Unit]
+Description=Trigger Senda Sovereign Web Crawler Every 6 Hours
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=true
+OnBootSec=10min
+OnUnitActiveSec=6h
+Unit=senda-crawler.service
+
+[Install]
+WantedBy=timers.target

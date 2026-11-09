@@ -11,7 +11,9 @@ description="Senda Sovereign Search Engine"
 : ${SENDA_HOST:="127.0.0.1"}
 : ${SENDA_PORT:="8000"}
 
-command="${SENDA_DIR}/.venv/bin/senda"
+: ${SENDA_COMMAND:="/opt/senda/venv/bin/senda"}
+
+command="${SENDA_COMMAND}"
 command_args="serve --host ${SENDA_HOST} --port ${SENDA_PORT}"
 command_user="${SENDA_USER}:${SENDA_GROUP}"
 command_background="yes"
