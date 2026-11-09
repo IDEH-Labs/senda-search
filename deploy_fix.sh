@@ -3,9 +3,11 @@ set -e
 
 echo "=== [Senda Search Engine] Despliegue y Activación en Debian ==="
 
-# 1. Actualizar el paquete senda desde GitHub con las plantillas y assets estáticos
-echo "[1/5] Actualizando senda-search con assets UI..."
+# 1. Actualizar dependencias y el paquete senda desde GitHub
+echo "[1/5] Actualizando uvicorn y senda-search..."
+/opt/senda/venv/bin/pip install --upgrade --force-reinstall "uvicorn[standard]"
 /opt/senda/venv/bin/pip install --force-reinstall --no-deps "git+https://github.com/IDEH-Labs/senda-search.git"
+
 
 # 2. Configurar senda.service
 echo "[2/5] Verificando /etc/systemd/system/senda.service..."

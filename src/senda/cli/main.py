@@ -122,7 +122,15 @@ def cmd_serve(args):
     host = args.host or settings.SERVER_HOST
     port = args.port or settings.SERVER_PORT
     print(f"Starting Senda Sovereign Search Web UI on http://{host}:{port}")
-    uvicorn.run("senda.api.app:app", host=host, port=port, log_level="info")
+    try:
+        uvicorn.run("senda.api.app:app", host=host, port=port, log_level="info")
+    except TypeError:
+        from uvicorn.config import Config
+        from uvicorn.server import Server
+        cfg = Config("senda.api.app:app", host=host, port=port, log_level="info")
+        server = Server(config=cfg)
+        server.run()
+
 
 
 def main():
