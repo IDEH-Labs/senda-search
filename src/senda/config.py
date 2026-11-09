@@ -88,8 +88,8 @@ class SendaSettings(BaseSettings):
     # Grounded AI Synthesis (Strictly disabled by default; never hallucinates; requires citations)
     ENABLE_AI_SYNTHESIS: bool = False
 
-    # Regional & Language Defaults (Colombia es-CO)
-    DEFAULT_REGION: str = "co"
+    # Regional & Language Defaults (Global por defecto; cero geolocalización invasiva)
+    DEFAULT_REGION: str = "all"
     DEFAULT_LANGUAGE: str = "es"
 
     # Tor Onion Service & Anonymous Crawling

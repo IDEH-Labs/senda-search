@@ -79,7 +79,7 @@ class RealTimeNewsProvider(SearchProvider):
 
     def __init__(
         self,
-        region: str = "CO",
+        region: str = "ALL",
         lang: str = "es-419",
         timeout: float = 5.0,
         enabled: bool = True,
@@ -127,12 +127,13 @@ class RealTimeNewsProvider(SearchProvider):
             return []
 
         gl_code = (region or self.region).upper()
-        if gl_code == "ALL" or len(gl_code) != 2:
-            gl_code = "CO"
-
         query_with_time = _resolve_time_query(clean_q, time_filter)
         encoded_q = urllib.parse.quote_plus(query_with_time)
-        feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}&gl={gl_code}&ceid={gl_code}:{self.lang}"
+
+        if gl_code in ("ALL", "GLOBAL", "") or len(gl_code) != 2:
+            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}"
+        else:
+            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}&gl={gl_code}&ceid={gl_code}:{self.lang}"
 
         headers = {
             "User-Agent": settings.USER_AGENT,
