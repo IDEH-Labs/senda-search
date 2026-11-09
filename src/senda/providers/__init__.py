@@ -20,6 +20,8 @@ from senda.providers.crossref import CrossrefProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.pubmed import PubMedProvider
+from senda.providers.fediverse import FediverseProvider
+from senda.providers.bluesky import BlueskyProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
 
 __all__ = [
@@ -38,6 +40,8 @@ __all__ = [
     "ArxivProvider",
     "DoajProvider",
     "PubMedProvider",
+    "FediverseProvider",
+    "BlueskyProvider",
     "ProviderAggregator",
     "BANG_SHORTCUTS",
 ]

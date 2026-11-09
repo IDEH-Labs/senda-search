@@ -13,6 +13,8 @@ from senda.providers.searxng import SearXNGProvider
 from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
 from senda.providers.openalex import OpenAlexProvider
+from senda.providers.fediverse import FediverseProvider
+from senda.providers.bluesky import BlueskyProvider
 
 
 BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
@@ -25,6 +27,8 @@ BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
     "!gut": ("https://www.gutenberg.org/ebooks/search/?query={query}", "Project Gutenberg"),
     "!fsf": ("https://directory.fsf.org/wiki?search={query}", "Free Software Directory"),
     "!codeberg": ("https://codeberg.org/explore/repos?q={query}", "Codeberg"),
+    "!masto": ("https://mastodon.social/search?q={query}", "Mastodon / Fediverso"),
+    "!bsky": ("https://bsky.app/search?q={query}", "Bluesky / ATProto"),
     "!ddg": ("https://html.duckduckgo.com/html/?q={query}", "DuckDuckGo (HTML)"),
 }
 
@@ -39,12 +43,16 @@ class ProviderAggregator:
         brave_provider: Optional[BraveSearchProvider] = None,
         mojeek_provider: Optional[MojeekProvider] = None,
         openalex_provider: Optional[OpenAlexProvider] = None,
+        fediverse_provider: Optional[FediverseProvider] = None,
+        bluesky_provider: Optional[BlueskyProvider] = None,
     ):
         self.internal = internal_provider or InternalStorageProvider()
         self.searxng = searxng_provider or SearXNGProvider()
         self.brave = brave_provider or BraveSearchProvider()
         self.mojeek = mojeek_provider or MojeekProvider()
         self.openalex = openalex_provider or OpenAlexProvider()
+        self.fediverse = fediverse_provider or FediverseProvider()
+        self.bluesky = bluesky_provider or BlueskyProvider()
 
     @staticmethod
     def detect_bang(query: str) -> Optional[Tuple[str, str]]:
@@ -70,6 +78,7 @@ class ProviderAggregator:
         safe_search: str = "off",
         no_ads: bool = True,
         opt_in_academic: bool = False,
+        opt_in_social: bool = False,
         boost_domains: Optional[List[str]] = None,
         bury_domains: Optional[List[str]] = None,
         block_domains: Optional[List[str]] = None,
@@ -120,6 +129,24 @@ class ProviderAggregator:
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )
             )
+
+        # Open Social Protocols (Fediverse & Bluesky): isolated strictly to 'social' vertical or explicit opt-in
+        should_query_social = (category == "social") or (opt_in_social is True)
+        if should_query_social:
+            if self.fediverse.is_configured:
+                tasks.append(
+                    self.fediverse.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.bluesky.is_configured:
+                tasks.append(
+                    self.bluesky.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
 
         results_batches = await asyncio.gather(*tasks, return_exceptions=True)
 

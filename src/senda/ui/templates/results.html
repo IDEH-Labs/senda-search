@@ -57,6 +57,9 @@
             <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
                 <span data-i18n="tab_library">Biblioteca</span>
             </a>
+            <a href="/search?q={{ query | urlencode }}&category=social&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'social' %}active{% endif %}">
+                <span>Redes Abiertas</span>
+            </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
                 <span>Mapas ↗</span>
             </a>
@@ -91,6 +94,40 @@
         <span>{{ results.total_matches }} <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)</span>
         <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
     </div>
+
+    <!-- Grounded AI Synthesis (Zero JS, Accessible, Attributed to Primary Sources) -->
+    {% if grounded_synthesis %}
+    <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis de fuentes primarias">
+        <div class="grounded-header">
+            <span class="grounded-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Síntesis Asistida de Procedencia
+            </span>
+            <span class="grounded-disclaimer">{{ grounded_synthesis.disclaimer }}</span>
+        </div>
+        <div class="grounded-content">
+            <p>{{ grounded_synthesis.summary }}</p>
+        </div>
+        {% if grounded_synthesis.citations %}
+        <div class="grounded-citations">
+            <span class="citations-title">Evidencia y fuentes primarias citadas:</span>
+            <ol class="citations-list">
+                {% for cit in grounded_synthesis.citations %}
+                <li id="cite-{{ cit.index }}" class="citation-item">
+                    <span class="citation-num">[{{ cit.index }}]</span>
+                    <a href="{{ cit.url }}" target="_blank" rel="noopener noreferrer" class="citation-link">{{ cit.title }}</a>
+                    <span class="citation-meta">— {{ cit.source }} · Autoría: {{ cit.author }} {% if cit.published_date %}· Fecha: {{ cit.published_date }}{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% endif %}
+    </aside>
+    {% endif %}
 
     <!-- Search results -->
     {% if results.items %}

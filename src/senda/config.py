@@ -79,6 +79,15 @@ class SendaSettings(BaseSettings):
     OPENALEX_RATE_LIMIT_PER_MINUTE: int = 30
     OPENALEX_CACHE_TTL_SECONDS: int = 3600
 
+    # Open social protocols (strictly isolated to 'social' vertical or explicit opt-in)
+    FEDIVERSE_ENABLED: bool = True
+    FEDIVERSE_INSTANCE: str = "mastodon.social"
+    BLUESKY_ENABLED: bool = True
+    BLUESKY_ENDPOINT: str = "https://api.bsky.app"
+
+    # Grounded AI Synthesis (Strictly disabled by default; never hallucinates; requires citations)
+    ENABLE_AI_SYNTHESIS: bool = False
+
     # Regional & Language Defaults (Colombia es-CO)
     DEFAULT_REGION: str = "co"
     DEFAULT_LANGUAGE: str = "es"

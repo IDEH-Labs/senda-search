@@ -22,7 +22,10 @@ from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
 from senda.providers.internal import InternalStorageProvider
 from senda.providers.openalex import OpenAlexProvider
+from senda.providers.fediverse import FediverseProvider
+from senda.providers.bluesky import BlueskyProvider
 from senda.providers.base import SearchResultItem
+from senda.ai.grounded_synthesis import GroundedSynthesizer
 
 
 # Pydantic schemas for API documentation and validation
@@ -66,6 +69,7 @@ class SearchResponseModel(BaseModel):
     duration_ms: float
     category: str = "all"
     items: list[SearchItemModel]
+    grounded_synthesis: Optional[dict] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -114,6 +118,15 @@ def create_app(
         api_key=settings.OPENALEX_API_KEY,
         enabled=settings.OPENALEX_ENABLED,
     )
+    fediverse_prov = FediverseProvider(
+        instance=settings.FEDIVERSE_INSTANCE,
+        enabled=settings.FEDIVERSE_ENABLED,
+    )
+    bluesky_prov = BlueskyProvider(
+        endpoint=settings.BLUESKY_ENDPOINT,
+        enabled=settings.BLUESKY_ENABLED,
+    )
+    app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -121,6 +134,8 @@ def create_app(
         brave_provider=brave_prov,
         mojeek_provider=mojeek_prov,
         openalex_provider=openalex_prov,
+        fediverse_provider=fediverse_prov,
+        bluesky_provider=bluesky_prov,
     )
 
     # Privacy and Hardening Middleware
@@ -285,6 +300,8 @@ def create_app(
         safe_search: str = Query(default="off"),
         no_ads: bool = Query(default=True),
         academic: bool = Query(default=False),
+        social: bool = Query(default=False),
+        synthesis: bool = Query(default=False),
         theme: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
@@ -297,7 +314,8 @@ def create_app(
         ss = safe_search if isinstance(safe_search, str) else "off"
         na = no_ads if isinstance(no_ads, bool) else True
         ac = academic if isinstance(academic, bool) else False
-
+        soc = social if isinstance(social, bool) else False
+        synth = synthesis if isinstance(synthesis, bool) else False
 
         # Bang shortcuts: redirect immediately to target without intermediate tracking
         bang_redir = ProviderAggregator.detect_bang(clean_q)
@@ -311,13 +329,13 @@ def create_app(
             osm_url = f"https://www.openstreetmap.org/search?query={urllib.parse.quote_plus(clean_q)}"
             return RedirectResponse(url=osm_url, status_code=302)
 
-        if cat not in ("all", "web", "news", "images", "videos", "library"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social"):
             cat = "all"
 
         page_sz = 12 if cat == "images" else 10
         start_t = time.perf_counter()
 
-        # Multi-provider aggregated search (OpenAlex is strictly opt-in or library-vertical)
+        # Multi-provider aggregated search (OpenAlex strictly opt-in/library; Social strictly opt-in/social)
         items_list = await app_aggregator.aggregate(
             query=clean_q,
             category=cat,
@@ -328,6 +346,7 @@ def create_app(
             safe_search=ss,
             no_ads=na,
             opt_in_academic=ac,
+            opt_in_social=(cat == "social" or soc),
         )
 
 
@@ -407,6 +426,13 @@ def create_app(
                 )
             )
 
+        # Grounded AI Synthesis (Strictly grounded in retrieved items; never hallucinates)
+        grounded_data = None
+        if (settings.ENABLE_AI_SYNTHESIS or synth) and clean_q:
+            synth_res = app_synthesizer.synthesize(clean_q, items_list, force=synth)
+            if synth_res:
+                grounded_data = synth_res.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -416,6 +442,7 @@ def create_app(
             duration_ms=duration_ms,
             category=cat,
             items=formatted_items,
+            grounded_synthesis=grounded_data,
         )
 
         # Content negotiation
@@ -432,6 +459,7 @@ def create_app(
                 "region": reg,
                 "time_filter": tf,
                 "safe_search": ss,
+                "grounded_synthesis": grounded_data,
             },
             theme,
         )
@@ -448,7 +476,7 @@ def create_app(
 
         q = form_data.get("q", [""])[0].strip()
         cat = form_data.get("category", ["all"])[0].lower().strip()
-        if cat not in ("all", "web", "news", "images", "videos", "library"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social"):
             cat = "all"
 
         try:
@@ -458,8 +486,21 @@ def create_app(
 
         theme = form_data.get("theme", [None])[0]
         academic = form_data.get("academic", ["false"])[0].lower() in ("true", "1")
+        social = form_data.get("social", ["false"])[0].lower() in ("true", "1")
+        synthesis = form_data.get("synthesis", ["false"])[0].lower() in ("true", "1")
 
-        return await search(request, q=q, category=cat, p=p, format=format, accept=accept, academic=academic, theme=theme)
+        return await search(
+            request,
+            q=q,
+            category=cat,
+            p=p,
+            format=format,
+            accept=accept,
+            academic=academic,
+            social=social,
+            synthesis=synthesis,
+            theme=theme,
+        )
 
     @app.get("/api/v1/search", response_model=SearchResponseModel)
     async def api_search(

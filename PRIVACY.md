@@ -75,6 +75,25 @@ Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de 
 
 ---
 
-## 6. Auditoría y Código Abierto
+## 6. Aislamiento Estricto y Opt-In de Redes Abiertas (Fediverso y Bluesky)
+
+Para garantizar que las consultas de búsqueda habituales no se filtren a nodos de redes sociales ni a directorios federados:
+
+1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** contacta instancias de Mastodon (ActivityPub) ni endpoints de Bluesky (ATProto).
+2. **Activación Exclusiva por Vertical "Redes Abiertas" u Opt-in:** Las solicitudes hacia instancias federadas únicamente se despachan cuando el usuario pulsa explícitamente la pestaña **Redes Abiertas** (`category=social`) o invoca atajos tipográficos soberanos (`!masto`, `!bsky`).
+3. **Anonimización Absoluta:** Las solicitudes se originan desde el backend proxy de Senda sin cookies, tokens de usuario ni cabeceras del cliente final. Solo se procesan contenidos declarados como públicos según el protocolo respectivo.
+
+---
+
+## 7. Síntesis Asistida Grounded (Cero Alucinaciones y Desactivada por Defecto)
+
+1. **Desactivada por Defecto:** La síntesis asistida se encuentra inactiva en la configuración estándar del servidor (`ENABLE_AI_SYNTHESIS=False`).
+2. **Fundamentación Estricta (*Grounded*):** Si se activa explícitamente, Senda prohíbe categóricamente generar afirmaciones sin respaldo. Toda afirmación debe citar obligatoriamente `[1]`, `[2]` vinculando al documento primario recuperado en la consulta.
+3. **Rechazo Ético por Falta de Evidencia:** Si los resultados recuperados son insuficientes o no responden con certeza a la consulta, el sistema se rehúsa formalmente a responder en lugar de especular o inventar respuestas.
+4. **Compatibilidad Total LibreJS y Tor Browser:** Se procesa y renderiza al 100% en el servidor mediante HTML semántico nativo (`<aside>`), funcionando sin una sola línea de JavaScript privativo y sin telemetría.
+
+---
+
+## 8. Auditoría y Código Abierto
 
 Todo el código de Senda está publicado bajo la licencia **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`). Cualquier usuario o auditor independiente tiene la libertad de inspeccionar, compilar, ejecutar y verificar que estas afirmaciones se correspondan estrictamente con la implementación en código.
