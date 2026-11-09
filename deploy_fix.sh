@@ -45,11 +45,15 @@ systemctl restart senda
 sleep 2
 
 # 5. Verificación
-echo "[5/5] Estado y verificación en local:"
-systemctl status senda --no-pager
+echo "[5/5] Logs y diagnóstico del fallo:"
+journalctl -u senda -n 30 --no-pager
+
+echo ""
+echo "=== Test directo de importación como usuario senda ==="
+su -s /bin/bash senda -c "cd /var/lib/senda && /opt/senda/venv/bin/python3 -c 'from senda.api.app import app; print(\"APP OK\")'" || true
 
 echo ""
 echo "=== Test de respuesta HTTP (puerto 8000) ==="
 curl -sI http://127.0.0.1:8000/api/v1/health || true
 echo ""
-echo "=== ¡Listo! Senda está en producción en https://senda.ideh.top ==="
+echo "=== Fin del script de diagnóstico ==="
