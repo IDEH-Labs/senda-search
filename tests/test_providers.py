@@ -288,7 +288,13 @@ async def test_aggregator_multi_provider_fusion(temp_storage):
 
 @pytest.mark.asyncio
 async def test_openalex_provider_mocked():
-    oa_provider = OpenAlexProvider(enabled=True)
+    # 1. Verification of missing API key: disabled and silent
+    unconfigured = OpenAlexProvider(api_key="")
+    assert unconfigured.is_configured is False
+    assert await unconfigured.search("quantum") == []
+
+    # 2. Configured provider with key
+    oa_provider = OpenAlexProvider(api_key="test_oa_secret_key_123", rate_limit_per_minute=10)
     assert oa_provider.name == "OpenAlex (Ciencia Abierta)"
     assert oa_provider.is_configured is True
 
@@ -300,12 +306,15 @@ async def test_openalex_provider_mocked():
                 "doi": "https://doi.org/10.1234/example.2026",
                 "title": "Quantum Computing and Ethical Open Architectures",
                 "publication_year": 2026,
+                "type": "article",
                 "open_access": {
                     "is_oa": True,
+                    "version": "publishedVersion",
                     "oa_url": "https://arxiv.org/pdf/2026.12345.pdf",
                     "oa_status": "gold",
                 },
                 "primary_location": {
+                    "version": "publishedVersion",
                     "pdf_url": "https://arxiv.org/pdf/2026.12345.pdf",
                     "landing_page_url": "https://arxiv.org/abs/2026.12345",
                     "source": {
@@ -334,26 +343,112 @@ async def test_openalex_provider_mocked():
         assert item.title == "Quantum Computing and Ethical Open Architectures"
         assert item.url == "https://arxiv.org/pdf/2026.12345.pdf"
         assert "[PDF Abierto]" in item.snippet
+        assert "Artículo" in item.snippet
+        assert "Versión publicada" in item.snippet
+        assert "revisión por pares no verificada" in item.snippet
+        # Explicit check: must never claim generic peer review
+        assert "revisada por pares" not in item.snippet
+        assert "revisada por pares" not in item.why_seen
         assert "arXiv.org" in item.snippet
         assert "Ada Lovelace" in item.snippet
         assert "et al." in item.snippet
         assert item.source == "Ciencia Abierta (OpenAlex)"
         assert item.doc_type == "library"
         assert item.score == 45.0  # library vertical boost
-        assert "Acceso Abierto (OA)" in item.why_seen
 
-        # Error response returns empty
+        # 3. Test caching: duplicate search should NOT hit network again (saves 1 credit)
+        cached_results = await oa_provider.search("quantum", category="library")
+        assert len(cached_results) == 1
+        assert mock_get.call_count == 1  # Still 1 network call!
+
+        # 4. Error response: 429 Too Many Requests handled gracefully
+        mock_get.return_value = httpx.Response(429)
+        assert await oa_provider.search("different_uncached_query") == []
+
+        # 5. Error response: 409 Conflict handled gracefully
+        mock_get.return_value = httpx.Response(409)
+        assert await oa_provider.search("conflict_query") == []
+
+        # 6. General server error: 500
         mock_get.return_value = httpx.Response(500)
-        assert await oa_provider.search("quantum") == []
+        assert await oa_provider.search("server_error_query") == []
 
-        # Exception returns empty
-        mock_get.side_effect = httpx.ConnectError("Timeout")
-        assert await oa_provider.search("quantum") == []
+        # 7. Network exception handled gracefully
+        mock_get.side_effect = httpx.ConnectError("Network timeout")
+        assert await oa_provider.search("network_error_query") == []
 
-    # Disabled provider
-    disabled_provider = OpenAlexProvider(enabled=False)
-    assert disabled_provider.is_configured is False
-    assert await disabled_provider.search("quantum") == []
+    # 8. Rate limiting budget protection test
+    rate_limited_provider = OpenAlexProvider(api_key="test_key", rate_limit_per_minute=2)
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_rl:
+        mock_rl.return_value = httpx.Response(200, json=fake_json)
+        assert len(await rate_limited_provider.search("q1")) == 1
+        assert len(await rate_limited_provider.search("q2")) == 1
+        # Third request exceeds 2/min budget -> blocked by rate limiter
+        assert await rate_limited_provider.search("q3") == []
+
+
+def test_openalex_contract_real_response():
+    """Contract test verifying exact mapping against real recorded OpenAlex API response."""
+    import json
+    from pathlib import Path
+
+    fixture_path = Path(__file__).parent / "fixtures" / "openalex_response.json"
+    assert fixture_path.exists(), "Contract fixture openalex_response.json must exist."
+
+    with open(fixture_path, "r", encoding="utf-8") as f:
+        real_data = json.load(f)
+
+    oa = OpenAlexProvider(api_key="contract_test_key")
+    items = oa.parse_response(real_data, category="library", page_size=10)
+
+    assert len(items) == 3
+    for it in items:
+        # Schema assertions
+        assert it.title != ""
+        assert it.url.startswith("http")
+        assert it.source == "Ciencia Abierta (OpenAlex)"
+        assert it.doc_type == "library"
+        assert it.is_sponsored is False
+        assert "revisión por pares no verificada" in it.snippet
+        assert "revisada por pares" not in it.snippet
+        assert "revisada por pares" not in it.why_seen
+
+    # First item verification
+    first = items[0]
+    assert first.title == "Quantum computing"
+    assert first.url == "https://iopscience.iop.org/article/10.1088/0034-4885/61/2/002/pdf"
+    assert first.date == "1998"
+    assert "Reports on Progress in Physics" in first.snippet
+    assert "Artículo" in first.snippet
+
+
+@pytest.mark.asyncio
+async def test_aggregator_openalex_opt_in_isolation(temp_storage):
+    """Verify OpenAlex is never queried in general search unless library category or explicit opt-in."""
+    internal = InternalStorageProvider(temp_storage)
+    mock_oa = OpenAlexProvider(api_key="mock_key")
+
+    with patch.object(mock_oa, "search", new_callable=AsyncMock, return_value=[]) as mock_search:
+        aggregator = ProviderAggregator(
+            internal_provider=internal,
+            openalex_provider=mock_oa,
+        )
+
+        # 1. General search without opt-in: OpenAlex must NOT be invoked (Zero leakage)
+        await aggregator.aggregate("general web query", category="all", opt_in_academic=False)
+        assert mock_search.call_count == 0
+
+        # 2. General search with category="web": must NOT be invoked
+        await aggregator.aggregate("another web query", category="web", opt_in_academic=False)
+        assert mock_search.call_count == 0
+
+        # 3. Explicit category="library": must be invoked
+        await aggregator.aggregate("academic query", category="library")
+        assert mock_search.call_count == 1
+
+        # 4. Explicit opt_in_academic=True: must be invoked even in category="all"
+        await aggregator.aggregate("academic with opt-in", category="all", opt_in_academic=True)
+        assert mock_search.call_count == 2
 
 
 def test_open_access_bang_shortcuts():

@@ -69,6 +69,7 @@ class ProviderAggregator:
         region: Optional[str] = None,
         safe_search: str = "off",
         no_ads: bool = True,
+        opt_in_academic: bool = False,
         boost_domains: Optional[List[str]] = None,
         bury_domains: Optional[List[str]] = None,
         block_domains: Optional[List[str]] = None,
@@ -110,7 +111,9 @@ class ProviderAggregator:
                 )
             )
 
-        if category in ("all", "library", "web") and self.openalex.is_configured:
+        # OpenAlex: deactivated in general search by default; strictly isolated to 'library' or explicit opt-in
+        should_query_openalex = (category == "library") or (opt_in_academic is True)
+        if should_query_openalex and self.openalex.is_configured:
             tasks.append(
                 self.openalex.search(
                     query, category=category, page=page, page_size=page_size,

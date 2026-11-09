@@ -74,7 +74,10 @@ class SendaSettings(BaseSettings):
     SEARXNG_URL: str = ""
     BRAVE_API_KEY: str = ""
     MOJEEK_API_KEY: str = ""
+    OPENALEX_API_KEY: str = ""
     OPENALEX_ENABLED: bool = True
+    OPENALEX_RATE_LIMIT_PER_MINUTE: int = 30
+    OPENALEX_CACHE_TTL_SECONDS: int = 3600
 
     # Regional & Language Defaults (Colombia es-CO)
     DEFAULT_REGION: str = "co"

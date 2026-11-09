@@ -64,6 +64,17 @@ La honestidad hacia el usuario exige transparentar los límites técnicos de cua
 
 ---
 
-## 5. Auditoría y Código Abierto
+## 5. Aislamiento Estricto y Opt-In de Ciencia Abierta (OpenAlex)
+
+Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de literatura científica externos:
+
+1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** realiza solicitudes salientes a la API de OpenAlex.
+2. **Activación Exclusiva por Intención Explícita:** La consulta saliente anonimizada hacia OpenAlex únicamente se emite cuando el usuario selecciona expresamente la vertical **Biblioteca** (`category=library`) o activa el parámetro explícito de opt-in académico (`academic=true`).
+3. **Caché Local y Protección de Presupuesto:** Cada consulta de lista a OpenAlex consume 1 crédito de API. Senda implementa una memoria intermedia en caché volátil local (TTL de 1 hora) y limitador de tasa de peticiones por minuto. Esto evita consultas duplicadas, minimiza la huella de red y maneja defensivamente códigos HTTP 409 y 429.
+4. **Sin Rastreo ni Filtración de Identidad:** La petición saliente se origina exclusivamente desde el servidor proxy de Senda, utilizando una cabecera técnica de cortesía (`User-Agent` institucional). La IP del usuario, sus cookies, datos de navegación y huellas digitales son completamente omitidas.
+
+---
+
+## 6. Auditoría y Código Abierto
 
 Todo el código de Senda está publicado bajo la licencia **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`). Cualquier usuario o auditor independiente tiene la libertad de inspeccionar, compilar, ejecutar y verificar que estas afirmaciones se correspondan estrictamente con la implementación en código.

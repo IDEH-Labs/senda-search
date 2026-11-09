@@ -1,0 +1,1301 @@
+{
+  "meta": {
+    "notice": "No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\"email\": \"<your user's email>\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt",
+    "count": 998093,
+    "db_response_time_ms": 256,
+    "page": 1,
+    "per_page": 3,
+    "groups_count": null,
+    "x_query": {
+      "oql": "get open access works with (quantum computing) in the title, abstract, or full text",
+      "x_new_oql": "get open access works with (quantum computing) in the title, abstract, or full text",
+      "oqo": {
+        "get_rows": "works",
+        "filter_rows": [
+          {
+            "column_id": "fulltext.search",
+            "value": "quantum computing",
+            "operator": "has"
+          },
+          {
+            "column_id": "open_access.is_oa",
+            "value": true
+          }
+        ]
+      },
+      "url": "/works?filter=fulltext.search:quantum computing,open_access.is_oa:true&per_page=3",
+      "order": "best matches first",
+      "order_default": true
+    },
+    "cost_usd": 0.001
+  },
+  "results": [
+    {
+      "id": "https://openalex.org/W3037315640",
+      "doi": "https://doi.org/10.1088/0034-4885/61/2/002",
+      "title": "Quantum computing",
+      "publication_year": 1998,
+      "type": "article",
+      "open_access": {
+        "is_oa": true,
+        "oa_status": "bronze",
+        "oa_url": "https://iopscience.iop.org/article/10.1088/0034-4885/61/2/002/pdf",
+        "any_repository_has_fulltext": true
+      },
+      "primary_location": {
+        "id": "doi:10.1088/0034-4885/61/2/002",
+        "doi": "https://doi.org/10.1088/0034-4885/61/2/002",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.1088/0034-4885/61/2/002",
+        "pdf_url": "https://iopscience.iop.org/article/10.1088/0034-4885/61/2/002/pdf",
+        "source": {
+          "id": "https://openalex.org/S105282323",
+          "display_name": "Reports on Progress in Physics",
+          "issn_l": "0034-4885",
+          "issn": [
+            "0034-4885",
+            "1361-6633"
+          ],
+          "is_oa": false,
+          "is_in_doaj": false,
+          "is_core": true,
+          "listed_in": [
+            "anvur-scientific",
+            "cwts-core",
+            "dongbi-b",
+            "jufo-3",
+            "medline",
+            "norway-2",
+            "poland-200",
+            "russia-white-list-1"
+          ],
+          "host_organization": "https://openalex.org/P4310320083",
+          "host_organization_name": "IOP Publishing",
+          "host_organization_lineage": [
+            "https://openalex.org/P4310320083",
+            "https://openalex.org/P4310311669"
+          ],
+          "host_organization_lineage_names": [
+            "IOP Publishing",
+            "Institute of Physics"
+          ],
+          "type": "journal"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "publishedVersion",
+        "is_accepted": true,
+        "is_published": true,
+        "raw_source_name": "Reports on Progress in Physics",
+        "raw_type": "journal-article"
+      },
+      "authorships": [
+        {
+          "author_position": "first",
+          "author": {
+            "id": "https://openalex.org/A5039762638",
+            "display_name": "Andrew M. Steane",
+            "orcid": "https://orcid.org/0000-0001-7689-4133",
+            "observed_orcids": [
+              "https://orcid.org/0000-0001-7689-4133"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I40120149",
+              "display_name": "University of Oxford",
+              "ror": "https://ror.org/052gg0110",
+              "country_code": "GB",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I40120149"
+              ]
+            }
+          ],
+          "countries": [
+            "GB"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Andrew Steane",
+          "raw_affiliation_strings": [
+            "Department of Atomic and Laser Physics, University of Oxford, Clarendon Laboratory, Parks Road, Oxford OX1 3PU, UK"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Atomic and Laser Physics, University of Oxford, Clarendon Laboratory, Parks Road, Oxford OX1 3PU, UK",
+              "institution_ids": [
+                "https://openalex.org/I40120149"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://openalex.org/W2906538035",
+      "doi": "https://doi.org/10.1021/acs.chemrev.8b00803",
+      "title": "Quantum Chemistry in the Age of Quantum Computing",
+      "publication_year": 2019,
+      "type": "review",
+      "open_access": {
+        "is_oa": true,
+        "oa_status": "green",
+        "oa_url": "https://arxiv.org/pdf/1812.09976",
+        "any_repository_has_fulltext": true
+      },
+      "primary_location": {
+        "id": "doi:10.1021/acs.chemrev.8b00803",
+        "doi": "https://doi.org/10.1021/acs.chemrev.8b00803",
+        "is_oa": false,
+        "landing_page_url": "https://doi.org/10.1021/acs.chemrev.8b00803",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S41143188",
+          "display_name": "Chemical Reviews",
+          "issn_l": "0009-2665",
+          "issn": [
+            "0009-2665",
+            "1520-6890"
+          ],
+          "is_oa": false,
+          "is_in_doaj": false,
+          "is_core": true,
+          "listed_in": [
+            "cwts-core",
+            "dongbi-b",
+            "doyens",
+            "jufo-3",
+            "ki-jl-2",
+            "medline",
+            "norway-2",
+            "poland-200",
+            "russia-white-list-1",
+            "vabb-shw"
+          ],
+          "host_organization": "https://openalex.org/P4310320006",
+          "host_organization_name": "American Chemical Society",
+          "host_organization_lineage": [
+            "https://openalex.org/P4310320006"
+          ],
+          "host_organization_lineage_names": [
+            "American Chemical Society"
+          ],
+          "type": "journal"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "publishedVersion",
+        "is_accepted": true,
+        "is_published": true,
+        "raw_source_name": "Chemical Reviews",
+        "raw_type": "journal-article"
+      },
+      "authorships": [
+        {
+          "author_position": "first",
+          "author": {
+            "id": null,
+            "display_name": "Yudong Cao",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Yudong Cao",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": null,
+            "display_name": "Jonathan Romero",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Jonathan Romero",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": null,
+            "display_name": "Jonathan P. Olson",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Jonathan P. Olson",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5000821684",
+            "display_name": "Matthias Degroote",
+            "orcid": "https://orcid.org/0000-0002-8850-7708",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-8850-7708"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I185261750",
+              "display_name": "University of Toronto",
+              "ror": "https://ror.org/03dbr7087",
+              "country_code": "CA",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I185261750"
+              ]
+            }
+          ],
+          "countries": [
+            "CA",
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Matthias Degroote",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Department of Chemistry, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+            "Department of Computer Science, University of Toronto, Toronto, Ontario M5G 1Z8, Canada"
+          ],
+          "raw_orcid": "https://orcid.org/0000-0002-8850-7708",
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Chemistry, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+              "institution_ids": [
+                "https://openalex.org/I185261750"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Computer Science, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+              "institution_ids": [
+                "https://openalex.org/I185261750"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": null,
+            "display_name": "Peter D. Johnson",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Peter D. Johnson",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5050776397",
+            "display_name": "Mária Kieferová",
+            "orcid": "https://orcid.org/0000-0002-0749-8126",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-0749-8126"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I151746483",
+              "display_name": "University of Waterloo",
+              "ror": "https://ror.org/01aff2v68",
+              "country_code": "CA",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I151746483"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I99043593",
+              "display_name": "Macquarie University",
+              "ror": "https://ror.org/01sf06y89",
+              "country_code": "AU",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I99043593"
+              ]
+            }
+          ],
+          "countries": [
+            "AU",
+            "CA",
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Mária Kieferová",
+          "raw_affiliation_strings": [
+            "Department of Physics and Astronomy, Macquarie University, Sydney, NSW 2109, Australia",
+            "Institute for Quantum Computing and Department of Physics and Astronomy, University of Waterloo, Waterloo, Ontario N2L 3G1, Canada",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Physics and Astronomy, Macquarie University, Sydney, NSW 2109, Australia",
+              "institution_ids": [
+                "https://openalex.org/I99043593"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Institute for Quantum Computing and Department of Physics and Astronomy, University of Waterloo, Waterloo, Ontario N2L 3G1, Canada",
+              "institution_ids": [
+                "https://openalex.org/I151746483"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5015180445",
+            "display_name": "Ian Kivlichan",
+            "orcid": "https://orcid.org/0000-0003-2719-2500",
+            "observed_orcids": [
+              "https://orcid.org/0000-0003-2719-2500"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Ian D. Kivlichan",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Department of Physics, Harvard University, Cambridge, Massachusetts 02138, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Physics, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5007778441",
+            "display_name": "Tim Menke",
+            "orcid": "https://orcid.org/0000-0002-7205-752X",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-7205-752X"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I63966007",
+              "display_name": "Massachusetts Institute of Technology",
+              "ror": "https://ror.org/042nb2s44",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I63966007"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Tim Menke",
+          "raw_affiliation_strings": [
+            "Department of Physics, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Department of Physics, Massachusetts Institute of Technology, Cambridge, Massachusetts 02139, United States",
+            "Research Laboratory of Electronics, Massachusetts Institute of Technology, Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Physics, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Physics, Massachusetts Institute of Technology, Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I63966007"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Research Laboratory of Electronics, Massachusetts Institute of Technology, Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I63966007"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": null,
+            "display_name": "Borja Peropadre",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Borja Peropadre",
+          "raw_affiliation_strings": [
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5059810871",
+            "display_name": "Nicolas P. D. Sawaya",
+            "orcid": "https://orcid.org/0000-0001-8510-8480",
+            "observed_orcids": [
+              "https://orcid.org/0000-0001-8510-8480"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I1343180700",
+              "display_name": "Intel (United States)",
+              "ror": "https://ror.org/01ek73717",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I1343180700"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Nicolas P. D. Sawaya",
+          "raw_affiliation_strings": [
+            "Intel Laboratories, Intel Corporation, Santa Clara, California 95054 United States"
+          ],
+          "raw_orcid": "https://orcid.org/0000-0001-8510-8480",
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Intel Laboratories, Intel Corporation, Santa Clara, California 95054 United States",
+              "institution_ids": [
+                "https://openalex.org/I1343180700"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": null,
+            "display_name": "Sukin Sim",
+            "orcid": null,
+            "observed_orcids": []
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Sukin Sim",
+          "raw_affiliation_strings": [
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5070063151",
+            "display_name": "Libor Veis",
+            "orcid": "https://orcid.org/0000-0002-4229-6335",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-4229-6335"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I202391551",
+              "display_name": "Czech Academy of Sciences",
+              "ror": "https://ror.org/053avzc18",
+              "country_code": "CZ",
+              "type": "government",
+              "lineage": [
+                "https://openalex.org/I202391551"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210127897",
+              "display_name": "Czech Academy of Sciences, Heyrovsky Institute",
+              "ror": "https://ror.org/02sat5y74",
+              "country_code": "CZ",
+              "type": "facility",
+              "lineage": [
+                "https://openalex.org/I202391551",
+                "https://openalex.org/I4210127897"
+              ]
+            }
+          ],
+          "countries": [
+            "CZ"
+          ],
+          "is_corresponding": false,
+          "raw_author_name": "Libor Veis",
+          "raw_affiliation_strings": [
+            "J. Heyrovský Institute of Physical Chemistry, Academy of Sciences of the Czech Republic v.v.i., Doleǰskova 3, 18223 Prague 8, Czech Republic"
+          ],
+          "raw_orcid": "https://orcid.org/0000-0002-4229-6335",
+          "affiliations": [
+            {
+              "raw_affiliation_string": "J. Heyrovský Institute of Physical Chemistry, Academy of Sciences of the Czech Republic v.v.i., Doleǰskova 3, 18223 Prague 8, Czech Republic",
+              "institution_ids": [
+                "https://openalex.org/I202391551",
+                "https://openalex.org/I4210127897"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "last",
+          "author": {
+            "id": "https://openalex.org/A5071495561",
+            "display_name": "Alán Aspuru‐Guzik",
+            "orcid": "https://orcid.org/0000-0002-8277-4434",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-8277-4434"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I109736498",
+              "display_name": "Canadian Institute for Advanced Research",
+              "ror": "https://ror.org/01sdtdd95",
+              "country_code": "CA",
+              "type": "facility",
+              "lineage": [
+                "https://openalex.org/I109736498"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I136199984",
+              "display_name": "Harvard University",
+              "ror": "https://ror.org/03vek6s52",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I185261750",
+              "display_name": "University of Toronto",
+              "ror": "https://ror.org/03dbr7087",
+              "country_code": "CA",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I185261750"
+              ]
+            },
+            {
+              "id": "https://openalex.org/I4210111877",
+              "display_name": "Zapata (United States)",
+              "ror": "https://ror.org/01bhrtv82",
+              "country_code": "US",
+              "type": "company",
+              "lineage": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ],
+          "countries": [
+            "CA",
+            "US"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Alán Aspuru-Guzik",
+          "raw_affiliation_strings": [
+            "Canadian Institute for Advanced Research, Toronto, Ontario M5G 1Z8, Canada",
+            "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+            "Department of Chemistry, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+            "Department of Computer Science, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+            "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States"
+          ],
+          "raw_orcid": "https://orcid.org/0000-0002-8277-4434",
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Canadian Institute for Advanced Research, Toronto, Ontario M5G 1Z8, Canada",
+              "institution_ids": [
+                "https://openalex.org/I109736498"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, United States",
+              "institution_ids": [
+                "https://openalex.org/I136199984"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Chemistry, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+              "institution_ids": [
+                "https://openalex.org/I185261750"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Computer Science, University of Toronto, Toronto, Ontario M5G 1Z8, Canada",
+              "institution_ids": [
+                "https://openalex.org/I185261750"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Zapata Computing Inc., Cambridge, Massachusetts 02139, United States",
+              "institution_ids": [
+                "https://openalex.org/I4210111877"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://openalex.org/W4289884297",
+      "doi": "https://doi.org/10.1007/s12525-022-00570-y",
+      "title": "Quantum computing",
+      "publication_year": 2022,
+      "type": "article",
+      "open_access": {
+        "is_oa": true,
+        "oa_status": "hybrid",
+        "oa_url": "https://link.springer.com/content/pdf/10.1007/s12525-022-00570-y.pdf",
+        "any_repository_has_fulltext": true
+      },
+      "primary_location": {
+        "id": "doi:10.1007/s12525-022-00570-y",
+        "doi": "https://doi.org/10.1007/s12525-022-00570-y",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.1007/s12525-022-00570-y",
+        "pdf_url": "https://link.springer.com/content/pdf/10.1007/s12525-022-00570-y.pdf",
+        "source": {
+          "id": "https://openalex.org/S137519996",
+          "display_name": "Electronic Markets",
+          "issn_l": "1019-6781",
+          "issn": [
+            "1019-6781",
+            "1422-8890"
+          ],
+          "is_oa": false,
+          "is_in_doaj": false,
+          "is_core": true,
+          "listed_in": [
+            "abdc-a",
+            "anvur-class-a",
+            "anvur-scientific",
+            "cwts-core",
+            "fnege-3",
+            "jufo-1",
+            "norway-1",
+            "poland-140",
+            "russia-white-list-1",
+            "vabb-shw"
+          ],
+          "host_organization": "https://openalex.org/P4310319900",
+          "host_organization_name": "Springer Science+Business Media",
+          "host_organization_lineage": [
+            "https://openalex.org/P4310319900",
+            "https://openalex.org/P4310319965"
+          ],
+          "host_organization_lineage_names": [
+            "Springer Science+Business Media",
+            "Springer Nature"
+          ],
+          "type": "journal"
+        },
+        "license": "cc-by",
+        "license_id": "https://openalex.org/licenses/cc-by",
+        "version": "publishedVersion",
+        "is_accepted": true,
+        "is_published": true,
+        "raw_source_name": "Electronic Markets",
+        "raw_type": "journal-article"
+      },
+      "authorships": [
+        {
+          "author_position": "first",
+          "author": {
+            "id": "https://openalex.org/A5026372514",
+            "display_name": "Roman Rietsche",
+            "orcid": "https://orcid.org/0000-0002-6112-1709",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-6112-1709"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I202963720",
+              "display_name": "University of St.Gallen",
+              "ror": "https://ror.org/0561a3s31",
+              "country_code": "CH",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ],
+          "countries": [
+            "CH"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Roman Rietsche",
+          "raw_affiliation_strings": [
+            "Institute of Information Management, University of St.Gallen, St.Gallen, Switzerland",
+            "Institute of Information Management, University of St.Gallen, Müller-Friedberg-Strasse 8, 9000, St.Gallen, Switzerland"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Institute of Information Management, University of St.Gallen, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Institute of Information Management, University of St.Gallen, Müller-Friedberg-Strasse 8, 9000, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5005529530",
+            "display_name": "Christian Dremel",
+            "orcid": "https://orcid.org/0000-0002-2161-4883",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-2161-4883"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I204778367",
+              "display_name": "Norwegian University of Science and Technology",
+              "ror": "https://ror.org/05xg72x27",
+              "country_code": "NO",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I204778367"
+              ]
+            }
+          ],
+          "countries": [
+            "NO"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Christian Dremel",
+          "raw_affiliation_strings": [
+            "Norwegian University of Science and Technology, Trondheim, Norway",
+            "Norwegian University of Science and Technology, Høgskoleringen 1, 7491, Trondheim, Norway"
+          ],
+          "raw_orcid": "https://orcid.org/0000-0002-2161-4883",
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Norwegian University of Science and Technology, Trondheim, Norway",
+              "institution_ids": [
+                "https://openalex.org/I204778367"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Norwegian University of Science and Technology, Høgskoleringen 1, 7491, Trondheim, Norway",
+              "institution_ids": [
+                "https://openalex.org/I204778367"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5036271075",
+            "display_name": "Samuel Bosch",
+            "orcid": "https://orcid.org/0000-0002-2514-0283",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-2514-0283"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I63966007",
+              "display_name": "Massachusetts Institute of Technology",
+              "ror": "https://ror.org/042nb2s44",
+              "country_code": "US",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I63966007"
+              ]
+            }
+          ],
+          "countries": [
+            "US"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Samuel Bosch",
+          "raw_affiliation_strings": [
+            "Department of Electrical Engineering and Computer Science, Massachusetts Institute of Technology, Cambridge, United States of America",
+            "Department of Electrical Engineering and Computer Science, Massachusetts Institute of Technology, 77 Massachusetts Ave., MA, 02139, Cambridge, United States of America"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Department of Electrical Engineering and Computer Science, Massachusetts Institute of Technology, Cambridge, United States of America",
+              "institution_ids": [
+                "https://openalex.org/I63966007"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Department of Electrical Engineering and Computer Science, Massachusetts Institute of Technology, 77 Massachusetts Ave., MA, 02139, Cambridge, United States of America",
+              "institution_ids": [
+                "https://openalex.org/I63966007"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5053607890",
+            "display_name": "Léa Steinacker",
+            "orcid": "https://orcid.org/0000-0002-2820-7332",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-2820-7332"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I202963720",
+              "display_name": "University of St.Gallen",
+              "ror": "https://ror.org/0561a3s31",
+              "country_code": "CH",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ],
+          "countries": [
+            "CH"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Léa Steinacker",
+          "raw_affiliation_strings": [
+            "University of St.Gallen, St.Gallen, Switzerland",
+            "University of St.Gallen, Müller-Friedberg-Strasse 8,  9000, St.Gallen, Switzerland"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "University of St.Gallen, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            },
+            {
+              "raw_affiliation_string": "University of St.Gallen, Müller-Friedberg-Strasse 8,  9000, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "middle",
+          "author": {
+            "id": "https://openalex.org/A5039235118",
+            "display_name": "Miriam Meckel",
+            "orcid": "https://orcid.org/0000-0003-4553-6231",
+            "observed_orcids": [
+              "https://orcid.org/0000-0003-4553-6231"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I202963720",
+              "display_name": "University of St.Gallen",
+              "ror": "https://ror.org/0561a3s31",
+              "country_code": "CH",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ],
+          "countries": [
+            "CH"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Miriam Meckel",
+          "raw_affiliation_strings": [
+            "Institute for Media and Communications Managment, University of St.Gallen, St.Gallen, Switzerland",
+            "Institute for Media and Communications Managment, University of St.Gallen,  Müller-Friedberg-Srasse 8,  9000, St.Gallen, Switzerland"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Institute for Media and Communications Managment, University of St.Gallen, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Institute for Media and Communications Managment, University of St.Gallen,  Müller-Friedberg-Srasse 8,  9000, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ]
+        },
+        {
+          "author_position": "last",
+          "author": {
+            "id": "https://openalex.org/A5031171331",
+            "display_name": "Jan Marco Leimeister",
+            "orcid": "https://orcid.org/0000-0002-1990-2894",
+            "observed_orcids": [
+              "https://orcid.org/0000-0002-1990-2894"
+            ]
+          },
+          "institutions": [
+            {
+              "id": "https://openalex.org/I202963720",
+              "display_name": "University of St.Gallen",
+              "ror": "https://ror.org/0561a3s31",
+              "country_code": "CH",
+              "type": "education",
+              "lineage": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ],
+          "countries": [
+            "CH"
+          ],
+          "is_corresponding": true,
+          "raw_author_name": "Jan-Marco Leimeister",
+          "raw_affiliation_strings": [
+            "Institute of Information Management, University of St.Gallen, St.Gallen, Switzerland",
+            "Institute of Information Management, University of St.Gallen, Müller-Friedberg-Strasse 8, 9000, St.Gallen, Switzerland"
+          ],
+          "raw_orcid": null,
+          "affiliations": [
+            {
+              "raw_affiliation_string": "Institute of Information Management, University of St.Gallen, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            },
+            {
+              "raw_affiliation_string": "Institute of Information Management, University of St.Gallen, Müller-Friedberg-Strasse 8, 9000, St.Gallen, Switzerland",
+              "institution_ids": [
+                "https://openalex.org/I202963720"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "group_by": []
+}

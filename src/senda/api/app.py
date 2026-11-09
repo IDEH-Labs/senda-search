@@ -94,7 +94,10 @@ def create_app(
     searxng_prov = SearXNGProvider(settings.SEARXNG_URL)
     brave_prov = BraveSearchProvider(settings.BRAVE_API_KEY)
     mojeek_prov = MojeekProvider(settings.MOJEEK_API_KEY)
-    openalex_prov = openalex_provider or OpenAlexProvider(enabled=settings.OPENALEX_ENABLED)
+    openalex_prov = openalex_provider or OpenAlexProvider(
+        api_key=settings.OPENALEX_API_KEY,
+        enabled=settings.OPENALEX_ENABLED,
+    )
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -265,6 +268,7 @@ def create_app(
         region: Optional[str] = Query(default=settings.DEFAULT_REGION),
         safe_search: str = Query(default="off"),
         no_ads: bool = Query(default=True),
+        academic: bool = Query(default=False),
         theme: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
@@ -276,6 +280,7 @@ def create_app(
         tf = time_filter if isinstance(time_filter, str) else None
         ss = safe_search if isinstance(safe_search, str) else "off"
         na = no_ads if isinstance(no_ads, bool) else True
+        ac = academic if isinstance(academic, bool) else False
 
 
         # Bang shortcuts: redirect immediately to target without intermediate tracking
@@ -296,7 +301,7 @@ def create_app(
         page_sz = 12 if cat == "images" else 10
         start_t = time.perf_counter()
 
-        # Multi-provider aggregated search
+        # Multi-provider aggregated search (OpenAlex is strictly opt-in or library-vertical)
         items_list = await app_aggregator.aggregate(
             query=clean_q,
             category=cat,
@@ -306,6 +311,7 @@ def create_app(
             region=reg,
             safe_search=ss,
             no_ads=na,
+            opt_in_academic=ac,
         )
 
 
@@ -385,8 +391,9 @@ def create_app(
             p = 1
 
         theme = form_data.get("theme", [None])[0]
+        academic = form_data.get("academic", ["false"])[0].lower() in ("true", "1")
 
-        return await search(request, q=q, category=cat, p=p, format=format, accept=accept, theme=theme)
+        return await search(request, q=q, category=cat, p=p, format=format, accept=accept, academic=academic, theme=theme)
 
     @app.get("/api/v1/search", response_model=SearchResponseModel)
     async def api_search(
