@@ -6,7 +6,7 @@
 https://ideh.top
 
 # Free Software Foundation & GNU Project
-https://fsf.org
+https://www.fsf.org
 https://www.gnu.org
 
 # Linux Kernel & Community
@@ -22,14 +22,21 @@ https://archive.org
 https://libreplanet.org
 
 # Free Knowledge & Sovereign Digital Library
-https://en.wikipedia.org
-https://es.wikipedia.org
-https://pt.wikipedia.org
-https://it.wikipedia.org
-https://ja.wikipedia.org
-https://zh.wikipedia.org
+https://es.wikipedia.org/wiki/Wikipedia:Portada
+https://es.wikipedia.org/wiki/Colombia
+https://es.wikipedia.org/wiki/Software_libre
+https://es.wikipedia.org/wiki/GNU/Linux
+https://es.wikipedia.org/wiki/Ciencia
+https://es.wikipedia.org/wiki/Tecnolog%C3%ADa
+https://es.wikipedia.org/wiki/Internet
+https://es.wikipedia.org/wiki/Filosof%C3%ADa
+https://en.wikipedia.org/wiki/Main_Page
+https://en.wikipedia.org/wiki/Free_software
+https://en.wikipedia.org/wiki/Linux
+https://es.wikinews.org/wiki/Portada
 https://www.gutenberg.org
 https://www.gnu.org/manual
+https://www.w3.org
 
 # Free Cultural Media (Wikimedia Commons)
 https://commons.wikimedia.org

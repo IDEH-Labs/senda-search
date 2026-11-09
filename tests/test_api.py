@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from senda.api.app import create_app
 from senda.extractor.parser import ExtractedDocument
 from senda.indexer.storage import StorageEngine
+from senda.providers.openalex import OpenAlexProvider
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ def client(tmp_path):
             content_hash="hash99",
         )
     )
-    app = create_app(storage=storage)
+    app = create_app(storage=storage, openalex_provider=OpenAlexProvider(enabled=False))
     return TestClient(app)
 
 

@@ -21,6 +21,7 @@ from senda.providers.searxng import SearXNGProvider
 from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
 from senda.providers.internal import InternalStorageProvider
+from senda.providers.openalex import OpenAlexProvider
 from senda.providers.base import SearchResultItem
 
 
@@ -64,7 +65,10 @@ class TakedownRequest(BaseModel):
     reason: Optional[str] = Field(default=None, description="Reason for removal.")
 
 
-def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
+def create_app(
+    storage: Optional[StorageEngine] = None,
+    openalex_provider: Optional[OpenAlexProvider] = None,
+) -> FastAPI:
     """Create and configure the sovereign FastAPI application."""
     app = FastAPI(
         title="Senda Search Engine",
@@ -90,12 +94,14 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
     searxng_prov = SearXNGProvider(settings.SEARXNG_URL)
     brave_prov = BraveSearchProvider(settings.BRAVE_API_KEY)
     mojeek_prov = MojeekProvider(settings.MOJEEK_API_KEY)
+    openalex_prov = openalex_provider or OpenAlexProvider(enabled=settings.OPENALEX_ENABLED)
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
         searxng_provider=searxng_prov,
         brave_provider=brave_prov,
         mojeek_provider=mojeek_prov,
+        openalex_provider=openalex_prov,
     )
 
     # Privacy and Hardening Middleware

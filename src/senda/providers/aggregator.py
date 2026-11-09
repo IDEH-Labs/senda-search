@@ -12,6 +12,7 @@ from senda.providers.internal import InternalStorageProvider
 from senda.providers.searxng import SearXNGProvider
 from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
+from senda.providers.openalex import OpenAlexProvider
 
 
 BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
@@ -19,6 +20,8 @@ BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
     "!wen": ("https://en.wikipedia.org/w/index.php?search={query}", "Wikipedia (EN)"),
     "!osm": ("https://www.openstreetmap.org/search?query={query}", "OpenStreetMap"),
     "!ia": ("https://archive.org/search?query={query}", "Internet Archive"),
+    "!oa": ("https://openalex.org/works?search={query}", "OpenAlex (Ciencia Abierta)"),
+    "!arxiv": ("https://arxiv.org/search/?query={query}&searchtype=all", "arXiv.org"),
     "!gut": ("https://www.gutenberg.org/ebooks/search/?query={query}", "Project Gutenberg"),
     "!fsf": ("https://directory.fsf.org/wiki?search={query}", "Free Software Directory"),
     "!codeberg": ("https://codeberg.org/explore/repos?q={query}", "Codeberg"),
@@ -35,11 +38,13 @@ class ProviderAggregator:
         searxng_provider: Optional[SearXNGProvider] = None,
         brave_provider: Optional[BraveSearchProvider] = None,
         mojeek_provider: Optional[MojeekProvider] = None,
+        openalex_provider: Optional[OpenAlexProvider] = None,
     ):
         self.internal = internal_provider or InternalStorageProvider()
         self.searxng = searxng_provider or SearXNGProvider()
         self.brave = brave_provider or BraveSearchProvider()
         self.mojeek = mojeek_provider or MojeekProvider()
+        self.openalex = openalex_provider or OpenAlexProvider()
 
     @staticmethod
     def detect_bang(query: str) -> Optional[Tuple[str, str]]:
@@ -100,6 +105,14 @@ class ProviderAggregator:
         if self.mojeek.is_configured:
             tasks.append(
                 self.mojeek.search(
+                    query, category=category, page=page, page_size=page_size,
+                    time_filter=time_filter, region=region, safe_search=safe_search
+                )
+            )
+
+        if category in ("all", "library", "web") and self.openalex.is_configured:
+            tasks.append(
+                self.openalex.search(
                     query, category=category, page=page, page_size=page_size,
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )

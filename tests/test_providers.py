@@ -13,6 +13,7 @@ from senda.providers.internal import InternalStorageProvider
 from senda.providers.searxng import SearXNGProvider
 from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
+from senda.providers.openalex import OpenAlexProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
 
 
@@ -246,10 +247,12 @@ async def test_mojeek_provider_mocked():
 
 
 @pytest.mark.asyncio
-async def test_aggregator_multi_provider_fusion():
+async def test_aggregator_multi_provider_fusion(temp_storage):
     searx = SearXNGProvider("http://localhost:8888")
     brave = BraveSearchProvider("brave_token")
     mojeek = MojeekProvider("mojeek_token")
+    internal = InternalStorageProvider(temp_storage)
+    openalex = OpenAlexProvider(enabled=False)
 
     searx_res = [
         SearchResultItem(title="Senda Meta", url="https://senda.ideh.top", snippet="Senda search", source="SearXNG (google)", why_seen="Meta")
@@ -267,9 +270,11 @@ async def test_aggregator_multi_provider_fusion():
          patch.object(mojeek, "search", new_callable=AsyncMock, return_value=mojeek_res):
 
         aggregator = ProviderAggregator(
+            internal_provider=internal,
             searxng_provider=searx,
             brave_provider=brave,
             mojeek_provider=mojeek,
+            openalex_provider=openalex,
         )
 
         fused = await aggregator.aggregate("free software", category="all", page=1, page_size=10)
@@ -279,3 +284,83 @@ async def test_aggregator_multi_provider_fusion():
         assert urls.count("https://senda.ideh.top") == 1
         assert "https://gnu.org" in urls
         assert "https://fsf.org" in urls
+
+
+@pytest.mark.asyncio
+async def test_openalex_provider_mocked():
+    oa_provider = OpenAlexProvider(enabled=True)
+    assert oa_provider.name == "OpenAlex (Ciencia Abierta)"
+    assert oa_provider.is_configured is True
+
+    fake_json = {
+        "meta": {"count": 100},
+        "results": [
+            {
+                "id": "https://openalex.org/W123456",
+                "doi": "https://doi.org/10.1234/example.2026",
+                "title": "Quantum Computing and Ethical Open Architectures",
+                "publication_year": 2026,
+                "open_access": {
+                    "is_oa": True,
+                    "oa_url": "https://arxiv.org/pdf/2026.12345.pdf",
+                    "oa_status": "gold",
+                },
+                "primary_location": {
+                    "pdf_url": "https://arxiv.org/pdf/2026.12345.pdf",
+                    "landing_page_url": "https://arxiv.org/abs/2026.12345",
+                    "source": {
+                        "display_name": "arXiv.org",
+                    }
+                },
+                "authorships": [
+                    {"author": {"display_name": "Ada Lovelace"}},
+                    {"author": {"display_name": "Alan Turing"}},
+                    {"author": {"display_name": "Claude Shannon"}},
+                    {"author": {"display_name": "Richard Stallman"}},
+                ]
+            },
+            {
+                "id": "https://openalex.org/W999",
+                # Missing title should be safely skipped
+            }
+        ]
+    }
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = httpx.Response(200, json=fake_json)
+        results = await oa_provider.search("quantum", category="library")
+        assert len(results) == 1
+        item = results[0]
+        assert item.title == "Quantum Computing and Ethical Open Architectures"
+        assert item.url == "https://arxiv.org/pdf/2026.12345.pdf"
+        assert "[PDF Abierto]" in item.snippet
+        assert "arXiv.org" in item.snippet
+        assert "Ada Lovelace" in item.snippet
+        assert "et al." in item.snippet
+        assert item.source == "Ciencia Abierta (OpenAlex)"
+        assert item.doc_type == "library"
+        assert item.score == 45.0  # library vertical boost
+        assert "Acceso Abierto (OA)" in item.why_seen
+
+        # Error response returns empty
+        mock_get.return_value = httpx.Response(500)
+        assert await oa_provider.search("quantum") == []
+
+        # Exception returns empty
+        mock_get.side_effect = httpx.ConnectError("Timeout")
+        assert await oa_provider.search("quantum") == []
+
+    # Disabled provider
+    disabled_provider = OpenAlexProvider(enabled=False)
+    assert disabled_provider.is_configured is False
+    assert await disabled_provider.search("quantum") == []
+
+
+def test_open_access_bang_shortcuts():
+    res_oa = ProviderAggregator.detect_bang("!oa artificial intelligence")
+    assert res_oa is not None
+    assert "openalex.org" in res_oa[0]
+
+    res_arxiv = ProviderAggregator.detect_bang("!arxiv neural networks")
+    assert res_arxiv is not None
+    assert "arxiv.org" in res_arxiv[0]

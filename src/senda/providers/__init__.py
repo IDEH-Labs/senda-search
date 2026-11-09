@@ -8,6 +8,7 @@ from senda.providers.internal import InternalStorageProvider
 from senda.providers.searxng import SearXNGProvider
 from senda.providers.brave import BraveSearchProvider
 from senda.providers.mojeek import MojeekProvider
+from senda.providers.openalex import OpenAlexProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     "SearXNGProvider",
     "BraveSearchProvider",
     "MojeekProvider",
+    "OpenAlexProvider",
     "ProviderAggregator",
     "BANG_SHORTCUTS",
 ]
