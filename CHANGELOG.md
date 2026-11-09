@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dedicated Image FTS5 Index:** SQLite `images` and `images_fts` tables with automatic synchronization triggers and BM25 relevance ranking over image metadata and alt text.
 - **REST API:** FastAPI application providing `/api/v1/search`, `/api/v1/stats`, `/api/v1/health`, `/api/v1/takedown`, and OpenSearch 1.1 discovery at `/opensearch.xml`.
 - **Sovereign Web UI:** Semantic, accessible HTML5 templates functional 100% without JavaScript, featuring automatic dark mode, OpenSearch auto-discovery link, category tabs, and zero external asset calls.
-- **Client-Side i18n:** Multi-language support (English canonical, Spanish, French, German) with privacy-preserving local storage.
+- **Client-Side i18n:** Multi-language support across 8 global languages (English, Spanish, French, German, Portuguese, Italian, Japanese, Chinese) with privacy-preserving local storage.
 - **Administrative CLI:** Command-line suite (`senda crawl`, `senda search --category`, `senda stats`, `senda purge-domain`, `senda purge-url`, `senda serve`).
 - **Test Suite:** 65 unit and integration tests with 88% codebase coverage.
 - **Documentation:** Architecture guide, installation manual for Gentoo Linux / POSIX, administration manual, security threat model, privacy policy, and software bill of materials (SBOM).

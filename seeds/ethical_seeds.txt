@@ -24,6 +24,10 @@ https://libreplanet.org
 # Free Knowledge & Sovereign Digital Library
 https://en.wikipedia.org
 https://es.wikipedia.org
+https://pt.wikipedia.org
+https://it.wikipedia.org
+https://ja.wikipedia.org
+https://zh.wikipedia.org
 https://www.gutenberg.org
 https://www.gnu.org/manual
 
