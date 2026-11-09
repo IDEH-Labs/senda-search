@@ -15,6 +15,13 @@ from senda.providers.mojeek import MojeekProvider
 from senda.providers.openalex import OpenAlexProvider
 from senda.providers.fediverse import FediverseProvider
 from senda.providers.bluesky import BlueskyProvider
+from senda.providers.wikipedia import WikipediaSearchProvider
+from senda.providers.news import RealTimeNewsProvider
+from senda.providers.images import FreeCultureImageProvider
+from senda.providers.crossref import CrossrefProvider
+from senda.providers.doaj import DoajProvider
+from senda.providers.arxiv import ArxivProvider
+from senda.providers.pubmed import PubMedProvider
 
 
 BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
@@ -45,6 +52,13 @@ class ProviderAggregator:
         openalex_provider: Optional[OpenAlexProvider] = None,
         fediverse_provider: Optional[FediverseProvider] = None,
         bluesky_provider: Optional[BlueskyProvider] = None,
+        wikipedia_search_provider: Optional[WikipediaSearchProvider] = None,
+        news_provider: Optional[RealTimeNewsProvider] = None,
+        image_provider: Optional[FreeCultureImageProvider] = None,
+        crossref_provider: Optional[CrossrefProvider] = None,
+        doaj_provider: Optional[DoajProvider] = None,
+        arxiv_provider: Optional[ArxivProvider] = None,
+        pubmed_provider: Optional[PubMedProvider] = None,
     ):
         self.internal = internal_provider or InternalStorageProvider()
         self.searxng = searxng_provider or SearXNGProvider()
@@ -53,6 +67,13 @@ class ProviderAggregator:
         self.openalex = openalex_provider or OpenAlexProvider()
         self.fediverse = fediverse_provider or FediverseProvider()
         self.bluesky = bluesky_provider or BlueskyProvider()
+        self.wikipedia_search = wikipedia_search_provider
+        self.news = news_provider
+        self.images = image_provider
+        self.crossref = crossref_provider
+        self.doaj = doaj_provider
+        self.arxiv = arxiv_provider
+        self.pubmed = pubmed_provider
 
     @staticmethod
     def detect_bang(query: str) -> Optional[Tuple[str, str]]:
@@ -88,61 +109,129 @@ class ProviderAggregator:
         bury_set = set(d.lower().strip() for d in (bury_domains or []))
         block_set = set(d.lower().strip() for d in (block_domains or []))
 
-        # Build list of active tasks
-        tasks = [
-            self.internal.search(
-                query, category=category, page=page, page_size=page_size,
-                time_filter=time_filter, region=region, safe_search=safe_search
-            )
-        ]
+        cat = category.lower().strip()
 
-        if self.searxng.is_configured:
+        # Build list of active tasks based on vertical category
+        tasks = []
+
+        if cat == "images":
+            if self.images and self.images.is_configured:
+                tasks.append(
+                    self.images.search(
+                        query, category="images", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
             tasks.append(
-                self.searxng.search(
-                    query, category=category, page=page, page_size=page_size,
+                self.internal.search(
+                    query, category="images", page=page, page_size=page_size,
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )
             )
-
-        if self.brave.is_configured:
+        elif cat == "news":
+            if self.news and self.news.is_configured:
+                tasks.append(
+                    self.news.search(
+                        query, category="news", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
             tasks.append(
-                self.brave.search(
-                    query, category=category, page=page, page_size=page_size,
+                self.internal.search(
+                    query, category="news", page=page, page_size=page_size,
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )
             )
-
-        if self.mojeek.is_configured:
+        elif cat == "library" or opt_in_academic:
             tasks.append(
-                self.mojeek.search(
-                    query, category=category, page=page, page_size=page_size,
+                self.internal.search(
+                    query, category="library", page=page, page_size=page_size,
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )
             )
-
-        # OpenAlex: deactivated in general search by default; strictly isolated to 'library' or explicit opt-in
-        should_query_openalex = (category == "library") or (opt_in_academic is True)
-        if should_query_openalex and self.openalex.is_configured:
-            tasks.append(
-                self.openalex.search(
-                    query, category=category, page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+            for prov in (self.crossref, self.doaj, self.arxiv, self.pubmed):
+                if prov and prov.is_configured:
+                    tasks.append(
+                        prov.search(
+                            query, category="library", page=page, page_size=page_size,
+                            time_filter=time_filter, region=region, safe_search=safe_search
+                        )
+                    )
+            if self.openalex and self.openalex.is_configured:
+                tasks.append(
+                    self.openalex.search(
+                        query, category="library", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
                 )
-            )
-
-        # Open Social Protocols (Fediverse & Bluesky): isolated strictly to 'social' vertical or explicit opt-in
-        should_query_social = (category == "social") or (opt_in_social is True)
-        if should_query_social:
-            if self.fediverse.is_configured:
+        elif cat == "social" or opt_in_social:
+            if self.fediverse and self.fediverse.is_configured:
                 tasks.append(
                     self.fediverse.search(
                         query, category=category, page=page, page_size=page_size,
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )
                 )
-            if self.bluesky.is_configured:
+            if self.bluesky and self.bluesky.is_configured:
                 tasks.append(
                     self.bluesky.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+        else:
+            # General Web Search (category='all'): Unified constellation of serious, verified sources
+            tasks.append(
+                self.internal.search(
+                    query, category=category, page=page, page_size=page_size,
+                    time_filter=time_filter, region=region, safe_search=safe_search
+                )
+            )
+            if self.wikipedia_search and self.wikipedia_search.is_configured:
+                tasks.append(
+                    self.wikipedia_search.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.news and self.news.is_configured:
+                tasks.append(
+                    self.news.search(
+                        query, category="news", page=page, page_size=3,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.crossref and self.crossref.is_configured:
+                tasks.append(
+                    self.crossref.search(
+                        query, category=category, page=page, page_size=3,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.doaj and self.doaj.is_configured:
+                tasks.append(
+                    self.doaj.search(
+                        query, category=category, page=page, page_size=3,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.searxng and self.searxng.is_configured:
+                tasks.append(
+                    self.searxng.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.brave and self.brave.is_configured:
+                tasks.append(
+                    self.brave.search(
+                        query, category=category, page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.mojeek and self.mojeek.is_configured:
+                tasks.append(
+                    self.mojeek.search(
                         query, category=category, page=page, page_size=page_size,
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )

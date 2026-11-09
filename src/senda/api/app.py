@@ -24,7 +24,13 @@ from senda.providers.internal import InternalStorageProvider
 from senda.providers.openalex import OpenAlexProvider
 from senda.providers.fediverse import FediverseProvider
 from senda.providers.bluesky import BlueskyProvider
-from senda.providers.wikipedia import WikipediaEntityProvider
+from senda.providers.wikipedia import WikipediaEntityProvider, WikipediaSearchProvider
+from senda.providers.news import RealTimeNewsProvider
+from senda.providers.images import FreeCultureImageProvider
+from senda.providers.crossref import CrossrefProvider
+from senda.providers.doaj import DoajProvider
+from senda.providers.arxiv import ArxivProvider
+from senda.providers.pubmed import PubMedProvider
 from senda.providers.base import SearchResultItem
 from senda.ai.grounded_synthesis import GroundedSynthesizer
 
@@ -90,6 +96,7 @@ class TakedownRequest(BaseModel):
 def create_app(
     storage: Optional[StorageEngine] = None,
     openalex_provider: Optional[OpenAlexProvider] = None,
+    enable_federated_providers: bool = True,
 ) -> FastAPI:
     """Create and configure the sovereign FastAPI application."""
     app = FastAPI(
@@ -128,6 +135,15 @@ def create_app(
         endpoint=settings.BLUESKY_ENDPOINT,
         enabled=settings.BLUESKY_ENABLED,
     )
+
+    wiki_search_prov = WikipediaSearchProvider() if enable_federated_providers else None
+    news_prov = RealTimeNewsProvider() if enable_federated_providers else None
+    images_prov = FreeCultureImageProvider() if enable_federated_providers else None
+    crossref_prov = CrossrefProvider() if enable_federated_providers else None
+    doaj_prov = DoajProvider() if enable_federated_providers else None
+    arxiv_prov = ArxivProvider() if enable_federated_providers else None
+    pubmed_prov = PubMedProvider() if enable_federated_providers else None
+
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
     app_wiki_entity = WikipediaEntityProvider()
 
@@ -139,6 +155,13 @@ def create_app(
         openalex_provider=openalex_prov,
         fediverse_provider=fediverse_prov,
         bluesky_provider=bluesky_prov,
+        wikipedia_search_provider=wiki_search_prov,
+        news_provider=news_prov,
+        image_provider=images_prov,
+        crossref_provider=crossref_prov,
+        doaj_provider=doaj_prov,
+        arxiv_provider=arxiv_prov,
+        pubmed_provider=pubmed_prov,
     )
 
     # Privacy and Hardening Middleware

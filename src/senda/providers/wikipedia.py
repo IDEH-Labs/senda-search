@@ -8,13 +8,16 @@ directly from official Wikimedia REST APIs. Requires zero local disk storage,
 attributes all facts under Creative Commons CC BY-SA 4.0, and provides links to revision histories.
 """
 
+import html
+import re
 import time
 import urllib.parse
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 import httpx
 from pydantic import BaseModel, Field
 
 from senda.config import settings
+from senda.providers.base import SearchProvider, SearchResultItem, AIProvenance
 
 
 class WikipediaEntityCard(BaseModel):
@@ -138,3 +141,100 @@ class WikipediaEntityProvider:
             return None
 
         return None
+
+
+class WikipediaSearchProvider(SearchProvider):
+    """Full-text encyclopedic article search provider via Wikipedia REST API."""
+
+    def __init__(self, lang: str = "es", timeout: float = 4.5, enabled: bool = True):
+        self.lang = lang
+        self.timeout = timeout
+        self.enabled = enabled
+
+    @property
+    def name(self) -> str:
+        return "wikipedia_search"
+
+    @property
+    def is_configured(self) -> bool:
+        return self.enabled
+
+    async def search(
+        self,
+        query: str,
+        category: str = "all",
+        page: int = 1,
+        page_size: int = 10,
+        time_filter: Optional[str] = None,
+        region: Optional[str] = None,
+        safe_search: str = "off",
+    ) -> List[SearchResultItem]:
+        """Query official Wikipedia REST search API."""
+        clean_q = query.strip()
+        if not clean_q or not self.is_configured:
+            return []
+
+        encoded_q = urllib.parse.quote(clean_q)
+        api_url = f"https://{self.lang}.wikipedia.org/w/rest.php/v1/search/page?q={encoded_q}&limit={page_size}"
+        headers = {
+            "User-Agent": settings.USER_AGENT,
+            "Accept": "application/json",
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.get(api_url, headers=headers)
+                if resp.status_code != 200:
+                    return []
+                data = resp.json()
+                return self.parse_pages(data)[:page_size]
+        except Exception:
+            return []
+
+    def parse_pages(self, data: dict) -> List[SearchResultItem]:
+        """Convert Wikipedia search API results into normalized SearchResultItems."""
+        items: List[SearchResultItem] = []
+        if not isinstance(data, dict):
+            return items
+
+        pages = data.get("pages", [])
+        for p in pages:
+            if not isinstance(p, dict):
+                continue
+            key = p.get("key") or ""
+            title = p.get("title") or key.replace("_", " ")
+            raw_excerpt = p.get("excerpt") or p.get("description") or ""
+
+            # Strip searchmatch html tags
+            clean_excerpt = re.sub(r"<[^>]+>", " ", raw_excerpt)
+            clean_excerpt = html.unescape(clean_excerpt)
+            clean_excerpt = " ".join(clean_excerpt.split())
+            if not clean_excerpt:
+                clean_excerpt = p.get("description") or title
+
+            article_url = f"https://{self.lang}.wikipedia.org/wiki/{urllib.parse.quote(key)}"
+            thumb_info = p.get("thumbnail") or {}
+            media_url = thumb_info.get("url") if isinstance(thumb_info, dict) else None
+            if media_url and media_url.startswith("//"):
+                media_url = f"https:{media_url}"
+
+            items.append(
+                SearchResultItem(
+                    url=article_url,
+                    title=title,
+                    snippet=clean_excerpt,
+                    score=85.0,
+                    source=f"Wikipedia ({self.lang.upper()})",
+                    media_url=media_url,
+                    doc_type="web",
+                    is_sponsored=False,
+                    canonical_url=article_url,
+                    source_type="académica",
+                    content_type="artículo",
+                    authors=["Comunidad Wikimedia"],
+                    provider_origin="Wikipedia",
+                    why_seen="Artículo enciclopédico de referencia abierta (Wikipedia). Sin cookies ni venta de perfiles.",
+                    ai_provenance=AIProvenance(declared_signal=None, status="no determinado"),
+                )
+            )
+        return items

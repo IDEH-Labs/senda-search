@@ -25,7 +25,11 @@ def client(tmp_path):
             content_hash="hash99",
         )
     )
-    app = create_app(storage=storage, openalex_provider=OpenAlexProvider(enabled=False))
+    app = create_app(
+        storage=storage,
+        openalex_provider=OpenAlexProvider(enabled=False),
+        enable_federated_providers=False,
+    )
     return TestClient(app)
 
 
