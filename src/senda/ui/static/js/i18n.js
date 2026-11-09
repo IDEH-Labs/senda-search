@@ -181,33 +181,21 @@ function initDensityManager() {
 }
 
 /**
- * Why Seen Dialog Handler
+ * Optional Accordion Enhancement for Native Why-Seen Disclosures
+ * (Mejora progresiva: 100% funcional de forma nativa sin JavaScript)
  */
 function initWhySeenDialog() {
-  var dialog = document.getElementById('whyDialog');
-  var dialogText = document.getElementById('whyDialogText');
-  var closeBtn = document.getElementById('closeWhyBtn');
-
-  if (!dialog || !dialogText) return;
-
-  document.querySelectorAll('.why-seen-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var explanation = btn.getAttribute('data-why') || "Resultado orgánico obtenido según relevancia léxica BM25.";
-      dialogText.textContent = explanation;
-      dialog.showModal();
+  var disclosures = document.querySelectorAll('.why-seen-disclosure');
+  disclosures.forEach(function(detail) {
+    detail.addEventListener('toggle', function() {
+      if (detail.open) {
+        disclosures.forEach(function(other) {
+          if (other !== detail && other.open) {
+            other.removeAttribute('open');
+          }
+        });
+      }
     });
-  });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-      dialog.close();
-    });
-  }
-
-  dialog.addEventListener('click', function(e) {
-    if (e.target === dialog) {
-      dialog.close();
-    }
   });
 }
 

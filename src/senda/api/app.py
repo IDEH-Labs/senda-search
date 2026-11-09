@@ -302,6 +302,7 @@ def create_app(storage: Optional[StorageEngine] = None) -> FastAPI:
                 "region": reg,
                 "time_filter": tf,
                 "safe_search": ss,
+                "settings": settings,
             }
 
         )

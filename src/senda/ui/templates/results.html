@@ -124,10 +124,25 @@
                     <span class="result-date">&bull; {{ item.published_at }}</span>
                     {% endif %}
 
-                    <!-- Botón transparente: "¿Por qué veo esto?" -->
-                    <button type="button" class="why-seen-btn" data-why="{{ item.why_seen }}" title="Ver criterios de ordenación e inclusión">
-                        ¿Por qué veo esto?
-                    </button>
+                    <!-- Transparencia nativa sin JS: "¿Por qué veo esto?" -->
+                    <details class="why-seen-disclosure">
+                        <summary class="why-seen-summary" title="Ver criterios de ordenación e inclusión">
+                            <span>¿Por qué veo esto?</span>
+                            <svg class="why-seen-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </summary>
+                        <div class="why-seen-dropdown" role="region" aria-label="Detalle de transparencia">
+                            <div class="why-seen-badge-row">
+                                <span class="why-seen-source-tag">Proveedor: {{ item.source }}</span>
+                                <span class="why-seen-privacy-tag">Cero Rastreo</span>
+                            </div>
+                            <p class="why-seen-text">{{ item.why_seen }}</p>
+                            <div class="why-seen-footer">
+                                <span>Inclusión y ranking deterministas &bull; Cero burbujas de filtro &bull; Sin perfilado</span>
+                            </div>
+                        </div>
+                    </details>
                 </div>
                 
                 <h2 class="result-heading">
@@ -139,20 +154,6 @@
             {% endfor %}
         </ol>
         {% endif %}
-
-        <!-- Modal transparente "¿Por qué veo esto?" -->
-        <dialog id="whyDialog" class="why-dialog" aria-labelledby="whyDialogTitle">
-            <div class="why-dialog-content">
-                <div class="why-dialog-header">
-                    <h3 id="whyDialogTitle">Transparencia del Resultado</h3>
-                    <button type="button" id="closeWhyBtn" class="dialog-close-btn" aria-label="Cerrar">&times;</button>
-                </div>
-                <p id="whyDialogText" class="why-dialog-body"></p>
-                <div class="why-dialog-footer">
-                    <span>Senda no crea perfiles de usuario. La inclusión y ranking son deterministas.</span>
-                </div>
-            </div>
-        </dialog>
 
         <!-- Pagination -->
         {% if results.total_pages > 1 %}
@@ -179,10 +180,50 @@
 
     {% else %}
         <div class="no-results-panel">
-            <h2 class="no-results-title" data-i18n="no_results_title">No se encontraron resultados</h2>
-            <p class="no-results-desc" data-i18n="no_results_desc">
-                Comprueba la ortografía, prueba con términos más generales o desactiva filtros de fecha.
+            <div class="no-results-icon" aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+            </div>
+            <h2 class="no-results-title">No se encontraron resultados locales</h2>
+            <p class="no-results-desc">
+                El índice soberano local no contiene documentos coincidentes para «<strong>{{ query }}</strong>».
             </p>
+            
+            <div class="no-results-suggestions">
+                <span class="suggestions-label">Explorar la web pública con atajos directos sin rastreo:</span>
+                <div class="suggestions-grid">
+                    <a href="/search?q={{ ('!w ' ~ query) | urlencode }}" class="suggestion-chip">
+                        <span class="chip-cmd">!w</span>
+                        <span class="chip-name">Wikipedia</span>
+                    </a>
+                    <a href="/search?q={{ ('!osm ' ~ query) | urlencode }}" class="suggestion-chip">
+                        <span class="chip-cmd">!osm</span>
+                        <span class="chip-name">OpenStreetMap</span>
+                    </a>
+                    <a href="/search?q={{ ('!ia ' ~ query) | urlencode }}" class="suggestion-chip">
+                        <span class="chip-cmd">!ia</span>
+                        <span class="chip-name">Internet Archive</span>
+                    </a>
+                    <a href="/search?q={{ ('!gut ' ~ query) | urlencode }}" class="suggestion-chip">
+                        <span class="chip-cmd">!gut</span>
+                        <span class="chip-name">Gutenberg</span>
+                    </a>
+                    <a href="/search?q={{ ('!ddg ' ~ query) | urlencode }}" class="suggestion-chip">
+                        <span class="chip-cmd">!ddg</span>
+                        <span class="chip-name">DuckDuckGo HTML</span>
+                    </a>
+                </div>
+            </div>
+
+            {% if settings and not settings.SEARXNG_URL and not settings.BRAVE_API_KEY %}
+            <div class="no-results-federation-tip">
+                <span class="tip-icon">💡</span>
+                <span class="tip-text"><strong>Soberanía federada:</strong> Puede federar este buscador con un nodo SearXNG propio vía Docker ejecutando <code>export SENDA_SEARXNG_URL="http://127.0.0.1:8888"</code> para obtener millones de resultados web sin intermediarios privativos.</span>
+            </div>
+            {% endif %}
         </div>
     {% endif %}
 
