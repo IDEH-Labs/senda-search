@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+# Asegurar privilegios de root
+if [ "$EUID" -ne 0 ]; then
+    echo "Este script requiere permisos de superusuario (root)."
+    echo "Por favor ejecútalo como: curl -sSL https://gitlab.com/ideh-labs/senda-search/-/raw/main/update.sh | sudo bash"
+    exit 1
+fi
+
 echo "=== [Senda Search Engine] Actualización de Interfaz Minimalista ==="
 
-# 1. Localizar o restaurar el entorno virtual
+# 1. Localizar o crear el entorno virtual
 VENV_DIR="/opt/senda/venv"
 if [ ! -d "$VENV_DIR" ]; then
     if [ -d "/var/lib/senda/.venv" ]; then
@@ -20,17 +27,17 @@ if [ ! -x "$PYTHON_EXEC" ]; then
     PYTHON_EXEC="$VENV_DIR/bin/python"
 fi
 
-echo "Entorno detectado: $VENV_DIR (Python: $PYTHON_EXEC)"
+echo "Entorno detectado: $VENV_DIR"
 
 # Asegurar disponibilidad de pip
 if ! "$PYTHON_EXEC" -m pip --version &>/dev/null; then
-    echo "Restaurando pip en el entorno..."
-    "$PYTHON_EXEC" -m ensurepip --upgrade 2>/dev/null || (apt-get update && apt-get install -y python3-pip python3-venv && python3 -m venv --upgrade "$VENV_DIR")
+    echo "Instalando pip en el entorno..."
+    "$PYTHON_EXEC" -m ensurepip --upgrade 2>/dev/null || (apt-get update && apt-get install -y python3-pip python3-venv git && python3 -m venv --upgrade "$VENV_DIR")
 fi
 
-# 2. Instalar la última versión de Senda desde GitHub
+# 2. Instalar la última versión de Senda desde GitHub/GitLab
 echo "[1/4] Instalando la versión minimalista de Senda..."
-"$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://github.com/IDEH-Labs/senda-search.git"
+"$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://gitlab.com/ideh-labs/senda-search.git"
 
 # 3. Configurar senda.service
 echo "[2/4] Verificando servicio systemd..."
@@ -56,10 +63,11 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-# 4. Permisos
+# 4. Directorio de datos y permisos
 echo "[3/4] Ajustando permisos de almacenamiento..."
 mkdir -p /var/lib/senda/data
-chown -R senda:senda /var/lib/senda
+id -u senda &>/dev/null || useradd -r -s /bin/false -d /var/lib/senda senda
+chown -R senda:senda /var/lib/senda /opt/senda 2>/dev/null || true
 
 # 5. Reiniciar servicio
 echo "[4/4] Reiniciando Senda..."
@@ -77,4 +85,4 @@ echo ""
 echo "=== Test de respuesta local ==="
 curl -sI http://127.0.0.1:8000/api/v1/health || true
 echo ""
-echo "=== ¡Listo! Senda está actualizado en https://senda.ideh.top ==="
+echo "=== ¡Listo! Senda Minimalista está activo en https://senda.ideh.top ==="
