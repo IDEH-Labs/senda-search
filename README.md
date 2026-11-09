@@ -3,7 +3,7 @@
 [![Licencia: GPL v3+](https://img.shields.io/badge/Licencia-GPL%20v3%2B-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python: 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Privacidad: Cero Rastreo](https://img.shields.io/badge/Privacidad-Cero%20Rastreo-brightgreen.svg)](PRIVACY.md)
-[![Pruebas: 110 Aprobadas](https://img.shields.io/badge/Pruebas-110%20Aprobadas-success.svg)](tests/)
+[![Pruebas: 119 Aprobadas](https://img.shields.io/badge/Pruebas-119%20Aprobadas-success.svg)](tests/)
 [![Accesibilidad: WCAG 2.2 AA](https://img.shields.io/badge/Accesibilidad-WCAG%202.2%20AA-purple.svg)](docs/ACCESSIBILITY.md)
 
 > **Senda** es una interfaz y motor de búsqueda web rápida, limpia, privada y transparente que devuelve el control total de la información al usuario. Desarrollado por **IDEH Labs** bajo la filosofía del Software Libre (FSF).
@@ -52,7 +52,7 @@ senda-search/
 │       │       ├── js/i18n.js      # Internacionalización local, lentes y atajos
 │       │       └── img/            # Logotipos y favicons vectoriales SVG
 │       └── config.py          # Configuración de variables de entorno y defaults
-├── tests/                     # Suite de pruebas unitarias y de integración (110 pruebas)
+├── tests/                     # Suite de pruebas unitarias y de integración (119 pruebas)
 │   ├── test_providers.py      # Pruebas de normalización, agregador, lentes y bangs
 │   ├── test_indexer.py        # Pruebas FTS5
 │   └── ...

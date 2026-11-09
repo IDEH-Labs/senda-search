@@ -1,0 +1,34 @@
+{
+  "@context": "https://schema.org",
+  "@type": "ClaimReview",
+  "datePublished": "2026-03-15",
+  "url": "https://colombiacheck.com/chequeos/es-falso-que-exista-decreto-de-expropiacion-inmobiliaria",
+  "claimReviewed": "Circula en redes que el gobierno promulgó un decreto secreto para expropiar segundas viviendas.",
+  "author": {
+    "@type": "Organization",
+    "name": "ColombiaCheck",
+    "url": "https://colombiacheck.com",
+    "sameAs": "https://ifcncodeofprinciples.poynter.org/signatories"
+  },
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": "1",
+    "bestRating": "5",
+    "worstRating": "1",
+    "alternateName": "Falso"
+  },
+  "itemReviewed": {
+    "@type": "CreativeWork",
+    "author": {
+      "@type": "Person",
+      "name": "Cuentas anónimas en redes"
+    },
+    "datePublished": "2026-03-10",
+    "appearance": [
+      {
+        "@type": "CreativeWork",
+        "url": "https://example-disinformation-claim.org/post/999"
+      }
+    ]
+  }
+}
