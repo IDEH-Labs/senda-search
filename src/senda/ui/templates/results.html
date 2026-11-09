@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ query }} — Senda Search{% endblock %}
+{% block title %}{{ query }} — Senda{% endblock %}
 
 {% block content %}
 <div class="results-layout">
@@ -9,7 +9,7 @@
         <form class="search-form results-form" action="/search" method="get" role="search">
             <div class="search-input-wrapper">
                 <span class="search-icon-adornment" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
@@ -25,39 +25,35 @@
                     autocomplete="off"
                     autocapitalize="none"
                     spellcheck="false"
-                    aria-label="Search query"
+                    aria-label="Términos de búsqueda"
                 >
                 <input type="hidden" name="category" value="{{ category }}">
 
-                <button type="button" id="clearSearchBtn" class="clear-btn" aria-label="Clear query">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <button type="button" id="clearSearchBtn" class="clear-btn" aria-label="Limpiar búsqueda">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
 
-                <span class="kbd-shortcut" title="Press '/' to focus search input">/</span>
+                <span class="kbd-shortcut" title="Presiona '/' para buscar">/</span>
 
-                <button type="submit" class="search-button" data-i18n="search_btn">Search</button>
+                <button type="submit" class="search-button" data-i18n="search_btn">Buscar</button>
             </div>
         </form>
 
         <!-- Vertical tabs -->
-        <nav class="category-tabs results-tabs" role="tablist" aria-label="Search categories">
+        <nav class="category-tabs results-tabs" role="tablist" aria-label="Categorías de búsqueda">
             <a href="/search?q={{ query | urlencode }}&category=all" role="tab" aria-selected="{% if category == 'all' or category == 'web' %}true{% else %}false{% endif %}" class="category-tab {% if category == 'all' or category == 'web' %}active{% endif %}">
-                <span class="tab-icon">🌐</span>
                 <span class="tab-label" data-i18n="tab_web">Web</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=news" role="tab" aria-selected="{% if category == 'news' %}true{% else %}false{% endif %}" class="category-tab {% if category == 'news' %}active{% endif %}">
-                <span class="tab-icon">📰</span>
                 <span class="tab-label" data-i18n="tab_news">Noticias</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=images" role="tab" aria-selected="{% if category == 'images' %}true{% else %}false{% endif %}" class="category-tab {% if category == 'images' %}active{% endif %}">
-                <span class="tab-icon">🖼️</span>
                 <span class="tab-label" data-i18n="tab_images">Imágenes</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=library" role="tab" aria-selected="{% if category == 'library' %}true{% else %}false{% endif %}" class="category-tab {% if category == 'library' %}active{% endif %}">
-                <span class="tab-icon">📚</span>
                 <span class="tab-label" data-i18n="tab_library">Biblioteca</span>
             </a>
         </nav>
@@ -66,11 +62,11 @@
     <!-- Results metadata bar -->
     <div class="results-meta-bar">
         <span class="results-stats">
-            <strong>{{ results.total_matches }}</strong> <span data-i18n="results_found">results found in</span> <strong>{{ results.duration_ms }} ms</strong>
+            <strong>{{ results.total_matches }}</strong> <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)
         </span>
         {% if results.total_pages > 1 %}
         <span class="results-page-indicator">
-            <span data-i18n="results_page">Page</span> {{ results.page }} <span data-i18n="results_of">of</span> {{ results.total_pages }}
+            <span data-i18n="results_page">Página</span> {{ results.page }} <span data-i18n="results_of">de</span> {{ results.total_pages }}
         </span>
         {% endif %}
     </div>
@@ -78,7 +74,7 @@
     <!-- Results list / Image grid -->
     {% if results.items %}
         {% if results.category == 'images' %}
-        <div class="image-grid" role="region" aria-label="Image search results">
+        <div class="image-grid" role="region" aria-label="Resultados de imágenes">
             {% for item in results.items %}
             <article class="image-card">
                 <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="image-link" referrerpolicy="no-referrer">
@@ -88,7 +84,7 @@
                     <div class="image-info">
                         <h3 class="image-title">{{ item.title }}</h3>
                         <div class="image-meta">
-                            <span class="image-license-badge">{{ item.license or 'Free Culture' }}</span>
+                            <span class="image-license-badge">{{ item.license or 'Cultura Libre' }}</span>
                             <span class="image-domain">{{ item.domain }}</span>
                         </div>
                     </div>
@@ -97,23 +93,22 @@
             {% endfor %}
         </div>
         {% else %}
-        <ol class="results-list" role="feed" aria-label="Web search results">
+        <ol class="results-list" role="feed" aria-label="Resultados web">
             {% for item in results.items %}
             <li class="result-card" data-result-index="{{ loop.index0 }}">
                 <div class="result-header-row">
                     <div class="result-breadcrumb">
-                        <span class="domain-icon-dot" aria-hidden="true"></span>
                         <span class="result-domain">{{ item.domain }}</span>
                         {% if item.doc_type == 'news' %}
-                        <span class="badge badge-news">📰 Noticias</span>
+                        <span class="badge badge-news">Noticias</span>
                         {% if item.published_at %}<span class="result-date">{{ item.published_at }}</span>{% endif %}
                         {% elif item.doc_type == 'library' %}
-                        <span class="badge badge-library">📚 Biblioteca</span>
+                        <span class="badge badge-library">Biblioteca</span>
                         {% endif %}
                     </div>
                     
-                    <button type="button" class="copy-url-btn" data-copy-url="{{ item.url }}" title="Copy URL" aria-label="Copy URL to clipboard">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="copy-url-btn" data-copy-url="{{ item.url }}" title="Copiar enlace" aria-label="Copiar URL al portapapeles">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
                             <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
                         </svg>
@@ -125,10 +120,6 @@
                 </h3>
 
                 <p class="result-snippet">{{ item.snippet | safe }}</p>
-
-                <div class="result-footer-metrics">
-                    <span class="metric-chip" title="BM25 Lexical Ranking Score">BM25: {{ "%.2f"|format(item.relevance_score) }}</span>
-                </div>
             </li>
             {% endfor %}
         </ol>
@@ -136,9 +127,9 @@
 
         <!-- Pagination -->
         {% if results.total_pages > 1 %}
-        <nav class="pagination" role="navigation" aria-label="Search result pages">
+        <nav class="pagination" role="navigation" aria-label="Páginas de resultados">
             {% if results.page > 1 %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page - 1 }}" class="pagination-btn" aria-label="Previous page">&laquo; Anterior</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page - 1 }}" class="pagination-btn" aria-label="Página anterior">&laquo; Anterior</a>
             {% endif %}
 
             {% for p in range(1, results.total_pages + 1) %}
@@ -152,17 +143,17 @@
             {% endfor %}
 
             {% if results.page < results.total_pages %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page + 1 }}" class="pagination-btn" aria-label="Next page">Siguiente &raquo;</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&page={{ results.page + 1 }}" class="pagination-btn" aria-label="Página siguiente">Siguiente &raquo;</a>
             {% endif %}
         </nav>
         {% endif %}
 
         <!-- Keyboard navigation hints -->
         <div class="keyboard-hints-bar">
-            <span>Atajos de teclado:</span>
-            <kbd class="kbd-key">j</kbd> / <kbd class="kbd-key">k</kbd> Navegar resultados
+            <span>Atajos:</span>
+            <kbd class="kbd-key">j</kbd> / <kbd class="kbd-key">k</kbd> Navegar
             <span class="hint-sep">&bull;</span>
-            <kbd class="kbd-key">Enter</kbd> Abrir enlace
+            <kbd class="kbd-key">Enter</kbd> Abrir
             <span class="hint-sep">&bull;</span>
             <kbd class="kbd-key">/</kbd> Buscar
         </div>
@@ -170,19 +161,12 @@
     {% else %}
         <!-- Empty state -->
         <div class="no-results-card">
-            <div class="no-results-icon" aria-hidden="true">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                </svg>
-            </div>
-            <h2 class="no-results-title" data-i18n="no_results_title">No results matched your query</h2>
+            <h2 class="no-results-title" data-i18n="no_results_title">No se encontraron resultados</h2>
             <p class="no-results-desc" data-i18n="no_results_desc">
-                Try checking your spelling, using more general terms, or adding new sites to the crawler index.
+                Revisa la ortografía o intenta con términos más generales.
             </p>
             <div class="no-results-actions">
-                <a href="/" class="btn-primary" data-i18n="nav_home">Volver al buscador</a>
+                <a href="/" class="btn-primary" data-i18n="nav_home">Volver al inicio</a>
             </div>
         </div>
     {% endif %}
