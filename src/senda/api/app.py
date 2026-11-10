@@ -38,6 +38,10 @@ from senda.ai.grounded_synthesis import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
 from senda.calculator import evaluate_math_query
 from senda.providers.weather import WeatherProvider
+from senda.converters import convert_query
+from senda.worldtime import get_world_time
+from senda.reader import SovereignReader
+from senda.crawler.network_guard import SSRFSecurityViolation
 
 
 # Pydantic schemas for API documentation and validation
@@ -87,6 +91,8 @@ class SearchResponseModel(BaseModel):
     entity_card: Optional[dict] = None
     calculator: Optional[dict] = None
     weather: Optional[dict] = None
+    conversion: Optional[dict] = None
+    world_time: Optional[dict] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -194,6 +200,7 @@ def create_app(
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
     app_wiki_entity = WikipediaEntityProvider()
     app_weather = WeatherProvider()
+    app_reader = SovereignReader()
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -308,6 +315,61 @@ def create_app(
     async def javascript_licenses(request: Request, theme: Optional[str] = Query(default=None)):
         """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
         return render_with_theme("javascript.html", request, {}, theme)
+
+    @app.get("/reader", response_class=HTMLResponse)
+    async def reader_view(
+        request: Request,
+        url: str = Query(default="", description="URL de la página a leer"),
+        q: Optional[str] = Query(default=None, description="Consulta original para retorno"),
+        theme: Optional[str] = Query(default=None),
+    ):
+        """Sovereign Reader Mode: Distraction-free, zero-tracker reader view."""
+        clean_url = url.strip()
+        if not clean_url:
+            return render_with_theme(
+                "reader.html",
+                request,
+                {
+                    "error": "No se proporcionó ninguna URL para la vista de lectura.",
+                    "target_url": "",
+                    "return_q": q or "",
+                },
+                theme,
+            )
+
+        try:
+            article = await app_reader.extract_url(clean_url)
+            return render_with_theme(
+                "reader.html",
+                request,
+                {
+                    "article": article,
+                    "target_url": clean_url,
+                    "return_q": q or "",
+                },
+                theme,
+            )
+        except SSRFSecurityViolation:
+            err_msg = "Acceso bloqueado por seguridad: La dirección solicitada apunta a una red local o privada (protección anti-SSRF de Senda)."
+        except Exception as e:
+            err_msg = str(e)
+            if "SSRF" in err_msg or "forbidden" in err_msg.lower() or "private ip" in err_msg.lower():
+                err_msg = "Acceso bloqueado por seguridad: La dirección solicitada apunta a una red local o privada (protección anti-SSRF de Senda)."
+            elif "timed out" in err_msg.lower():
+                err_msg = "El sitio web remoto tardó demasiado en responder."
+            else:
+                err_msg = f"No se pudo extraer el artículo: {err_msg}"
+
+        return render_with_theme(
+            "reader.html",
+            request,
+            {
+                "error": err_msg,
+                "target_url": clean_url,
+                "return_q": q or "",
+            },
+            theme,
+        )
 
     @app.get("/opensearch.xml")
     async def opensearch(request: Request):
@@ -531,6 +593,20 @@ def create_app(
             if calc_obj:
                 calculator_data = calc_obj.model_dump()
 
+        # Instant Sovereign Unit & Currency Converter Card
+        conversion_data = None
+        if current_page == 1 and clean_q:
+            conv_obj = await convert_query(clean_q)
+            if conv_obj:
+                conversion_data = conv_obj.model_dump()
+
+        # Instant Sovereign World Time Card
+        world_time_data = None
+        if current_page == 1 and clean_q:
+            wt_obj = get_world_time(clean_q)
+            if wt_obj:
+                world_time_data = wt_obj.model_dump()
+
         # Instant Sovereign Real-Time Weather Card (Open-Meteo Open Data)
         weather_data = None
         if current_page == 1 and clean_q and cat in ("all", "web"):
@@ -553,6 +629,8 @@ def create_app(
             entity_card=entity_data,
             calculator=calculator_data,
             weather=weather_data,
+            conversion=conversion_data,
+            world_time=world_time_data,
         )
 
         # Content negotiation
@@ -574,6 +652,8 @@ def create_app(
                 "entity_card": entity_data,
                 "calculator": calculator_data,
                 "weather": weather_data,
+                "conversion": conversion_data,
+                "world_time": world_time_data,
             },
             theme,
         )

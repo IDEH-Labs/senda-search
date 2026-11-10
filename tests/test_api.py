@@ -291,3 +291,56 @@ def test_provenance_json_negotiation(client):
     assert "primary_citations" in item
     assert "verifications" in item
     assert "ai_provenance" in item
+
+
+def test_conversion_and_world_time_cards(client):
+    """Verify that instant conversion and world time cards render properly in HTML and JSON."""
+    # 1. Conversion query in HTML and JSON
+    resp_conv = client.get("/search?q=10+km+a+metros")
+    assert resp_conv.status_code == 200
+    assert "conversion-card" in resp_conv.text
+    assert "10,000 m" in resp_conv.text or "10000" in resp_conv.text
+
+    resp_conv_json = client.get("/search?q=10+km+a+metros&format=json")
+    assert resp_conv_json.status_code == 200
+    conv_data = resp_conv_json.json()
+    assert conv_data.get("conversion") is not None
+    assert conv_data["conversion"]["category"] == "length"
+
+    # 2. World time query in HTML and JSON
+    resp_time = client.get("/search?q=hora+en+Tokio")
+    assert resp_time.status_code == 200
+    assert "worldtime-card" in resp_time.text
+    assert "Tokio" in resp_time.text
+
+    resp_time_json = client.get("/search?q=hora+en+Tokio&format=json")
+    assert resp_time_json.status_code == 200
+    time_data = resp_time_json.json()
+    assert time_data.get("world_time") is not None
+    assert "Asia/Tokyo" in time_data["world_time"]["timezone_name"]
+
+
+def test_reader_endpoint(client):
+    """Verify /reader endpoint handles missing URL, errors, and rendering."""
+    # Missing URL
+    resp_empty = client.get("/reader")
+    assert resp_empty.status_code == 200
+    assert "No se proporcionó ninguna URL" in resp_empty.text
+
+    # SSRF blocked URL
+    resp_ssrf = client.get("/reader?url=http://127.0.0.1:8000/secret")
+    assert resp_ssrf.status_code == 200
+    assert "bloqueado por seguridad" in resp_ssrf.text or "protección anti-SSRF" in resp_ssrf.text
+
+
+def test_opensearch_integration(client):
+    """Verify OpenSearch XML and footer 1-click details element."""
+    resp_xml = client.get("/opensearch.xml")
+    assert resp_xml.status_code == 200
+    assert "OpenSearchDescription" in resp_xml.text
+    assert "application/opensearchdescription+xml" in resp_xml.headers["Content-Type"]
+
+    resp_home = client.get("/")
+    assert resp_home.status_code == 200
+    assert "opensearch-details" in resp_home.text
+    assert "Añadir a mi navegador" in resp_home.text

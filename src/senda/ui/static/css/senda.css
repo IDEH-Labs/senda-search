@@ -2412,3 +2412,578 @@ html.light .weather-forecast-row {
 html.light .weather-card-footer {
   background: #f1f5f9;
 }
+
+/* ==========================================================================
+   Instant Sovereign Converter Card (Physical Units & Currencies)
+   ========================================================================== */
+.conversion-card {
+  max-width: var(--content-max-width, 680px);
+  margin: 0.25rem 0 1.25rem 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid #10b981;
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.conversion-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem 0.35rem 1.25rem;
+}
+
+.conversion-query {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.conversion-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.conversion-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.25rem 1.25rem 1rem 1.25rem;
+}
+
+.conversion-result {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.conversion-formula {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.conversion-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+[data-theme="light"] .conversion-card,
+html.light .conversion-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left-color: #10b981;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .conversion-footer,
+html.light .conversion-footer {
+  background: #f1f5f9;
+}
+
+/* ==========================================================================
+   Instant Sovereign World Time Card
+   ========================================================================== */
+.worldtime-card {
+  max-width: var(--content-max-width, 680px);
+  margin: 0.25rem 0 1.25rem 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid #8b5cf6;
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.worldtime-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.35rem;
+}
+
+.worldtime-location-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.worldtime-city-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.worldtime-city-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.worldtime-tz-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: rgba(139, 92, 246, 0.14);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.28);
+}
+
+.worldtime-date {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.worldtime-diff {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.worldtime-display-col {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: right;
+}
+
+.worldtime-day-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.worldtime-clock {
+  display: flex;
+  flex-direction: column;
+}
+
+.worldtime-clock-24 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.worldtime-clock-12 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.worldtime-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 1.35rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+[data-theme="light"] .worldtime-card,
+html.light .worldtime-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left-color: #7c3aed;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .worldtime-tz-badge,
+html.light .worldtime-tz-badge {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+[data-theme="light"] .worldtime-footer,
+html.light .worldtime-footer {
+  background: #f1f5f9;
+}
+
+/* ==========================================================================
+   Modo Lectura Link Pill in Search Results
+   ========================================================================== */
+.reader-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  font-size: 0.74rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.reader-pill-link:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+[data-theme="light"] .reader-pill-link,
+html.light .reader-pill-link {
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284c7;
+  border-color: rgba(2, 132, 199, 0.22);
+}
+
+[data-theme="light"] .reader-pill-link:hover,
+html.light .reader-pill-link:hover {
+  background: rgba(2, 132, 199, 0.15);
+  color: #0369a1;
+}
+
+/* ==========================================================================
+   Sovereign Reader Mode Template View (/reader)
+   ========================================================================== */
+.reader-container {
+  max-width: 780px;
+  margin: 1.5rem auto 4rem auto;
+  padding: 0 1.25rem;
+}
+
+.reader-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reader-btn-back,
+.reader-btn-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.reader-btn-back {
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.reader-btn-back:hover {
+  color: var(--text-main);
+  background: var(--bg-elevated);
+}
+
+.reader-btn-source {
+  color: var(--text-accent);
+  background: rgba(0, 210, 160, 0.08);
+  border: 1px solid rgba(0, 210, 160, 0.2);
+}
+
+.reader-btn-source:hover {
+  background: rgba(0, 210, 160, 0.16);
+  color: var(--text-accent-hover);
+}
+
+.reader-article {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 14px);
+  padding: 2.5rem 2.75rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.reader-domain-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-accent);
+  margin-bottom: 0.75rem;
+}
+
+.reader-title {
+  margin: 0 0 1.1rem 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.reader-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reader-shield {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.reader-content {
+  font-size: 1.12rem;
+  line-height: 1.85;
+  color: var(--text-main);
+}
+
+.reader-content p {
+  margin: 0 0 1.5rem 0;
+}
+
+.reader-content h2,
+.reader-content h3,
+.reader-content h4 {
+  color: var(--text-main);
+  margin: 2rem 0 1rem 0;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.reader-content h2 { font-size: 1.5rem; }
+.reader-content h3 { font-size: 1.25rem; }
+
+.reader-content blockquote {
+  margin: 1.75rem 0;
+  padding: 0.85rem 1.4rem;
+  border-left: 4px solid var(--accent-primary);
+  background: rgba(0, 210, 160, 0.06);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.reader-content ul,
+.reader-content ol {
+  margin: 0 0 1.5rem 1.5rem;
+  padding: 0;
+}
+
+.reader-content li {
+  margin-bottom: 0.5rem;
+}
+
+.reader-content a {
+  color: var(--text-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reader-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1.5rem 0;
+  display: block;
+}
+
+.reader-content pre {
+  background: #040711;
+  padding: 1.1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-subtle);
+}
+
+.reader-footer {
+  margin-top: 3rem;
+}
+
+.reader-divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin-bottom: 1.5rem;
+}
+
+.reader-footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
+.reader-link-canonical {
+  color: var(--text-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.reader-error-card {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.reader-error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.reader-error-card h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+}
+
+.reader-error-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="light"] .reader-article,
+html.light .reader-article {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .reader-content blockquote,
+html.light .reader-content blockquote {
+  background: #f0fdf4;
+}
+
+[data-theme="light"] .reader-content pre,
+html.light .reader-content pre {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* ==========================================================================
+   Footer OpenSearch Installation Details Popover
+   ========================================================================== */
+.footer-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opensearch-details {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.footer-link-btn::-webkit-details-marker {
+  display: none;
+}
+
+.footer-link-btn:hover {
+  color: var(--text-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.opensearch-popover {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  max-width: 90vw;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+  text-align: left;
+}
+
+.opensearch-popover-header {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.65rem;
+}
+
+.opensearch-steps {
+  margin: 0 0 1rem 1.1rem;
+  padding: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.opensearch-steps li {
+  margin-bottom: 0.45rem;
+}
+
+.btn-opensearch-action {
+  width: 100%;
+  padding: 0.45rem 0.85rem;
+  background: var(--accent-gradient, #00d2a0);
+  color: #030712;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-opensearch-action:hover {
+  opacity: 0.9;
+}
+
+[data-theme="light"] .opensearch-popover,
+html.light .opensearch-popover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+

@@ -442,6 +442,22 @@ function initPreferencesManager() {
   });
 }
 
+function initOpenSearchInstallation() {
+  var btn = document.getElementById("btnInstallOpenSearch");
+  if (!btn) return;
+  btn.addEventListener("click", function() {
+    if (window.external && "AddSearchProvider" in window.external) {
+      try {
+        window.external.AddSearchProvider("/opensearch.xml");
+      } catch (e) {
+        alert("En tu navegador, añade Senda haciendo clic derecho en la barra de direcciones y seleccionando 'Añadir motor de búsqueda'.");
+      }
+    } else {
+      alert("En tu navegador, añade Senda haciendo clic derecho en la barra de direcciones y seleccionando 'Añadir motor de búsqueda'.");
+    }
+  });
+}
+
 // Lifecycle Initialization
 document.addEventListener("DOMContentLoaded", function() {
   var selector = document.getElementById("langSelector");
@@ -472,6 +488,7 @@ document.addEventListener("DOMContentLoaded", function() {
   initPreferencesManager();
   initDropdownsAndFilters();
   initCommandBar();
+  initOpenSearchInstallation();
 });
 
 // @license-end

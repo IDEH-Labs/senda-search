@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title if article else 'Modo Lectura' }} — Senda{% endblock %}
+
+{% block content %}
+<div class="reader-container">
+    <div class="reader-toolbar">
+        <a href="/search?q={{ return_q | default('') | urlencode }}" class="reader-btn-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver a resultados
+        </a>
+
+        <div class="reader-toolbar-actions">
+            {% if article and article.url %}
+            <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer nofollow" class="reader-btn-source" title="Abrir página original en una nueva pestaña">
+                <span>Fuente original</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="reader-error-card">
+        <div class="reader-error-icon" aria-hidden="true">🛡️</div>
+        <h2>No se pudo generar la vista de lectura</h2>
+        <p>{{ error }}</p>
+        {% if target_url %}
+        <div class="reader-error-actions">
+            <a href="{{ target_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                Visitar sitio web directamente ↗
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% elif article %}
+    <article class="reader-article">
+        <header class="reader-header">
+            <div class="reader-domain-pill">{{ article.domain }}</div>
+            <h1 class="reader-title">{{ article.title }}</h1>
+            <div class="reader-meta">
+                {% if article.byline %}
+                <span class="reader-author">✍️ {{ article.byline }}</span>
+                <span class="reader-sep">&bull;</span>
+                {% endif %}
+                {% if article.published_date %}
+                <span class="reader-date">📅 {{ article.published_date }}</span>
+                <span class="reader-sep">&bull;</span>
+                {% endif %}
+                <span class="reader-time">⏱️ {{ article.reading_time_min }} min de lectura</span>
+                <span class="reader-sep">&bull;</span>
+                <span class="reader-shield" title="Contenido aislado por Senda sin rastreadores, cookies ni anuncios">🔒 100% Libre de rastreadores</span>
+            </div>
+        </header>
+
+        <div class="reader-content">
+            {{ article.content_html | safe }}
+        </div>
+
+        <footer class="reader-footer">
+            <hr class="reader-divider">
+            <div class="reader-footer-info">
+                <p>Esta vista fue generada por <strong>Senda Modo Lectura</strong> bajo el estándar de privacidad soberana: sin scripts de terceros, sin cookies y sin recolección de telemetría.</p>
+                {% if article.url %}
+                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer nofollow" class="reader-link-canonical">
+                    Leer publicación completa en {{ article.domain }} ↗
+                </a>
+                {% endif %}
+            </div>
+        </footer>
+    </article>
+    {% endif %}
+</div>
+{% endblock %}
