@@ -203,6 +203,12 @@ class WeatherProvider:
             country = best.get("country", "")
             admin1 = best.get("admin1")
 
+            # Harmonize Colombian administrative geography and avoid redundant names
+            if city_name.lower() in ("bogotá", "bogota") and country.lower() == "colombia":
+                admin1 = "Cundinamarca · Distrito Capital"
+            elif admin1 and admin1.lower() == city_name.lower():
+                admin1 = None
+
             # 2. Fetch current weather and 4-day forecast
             weather_url = (
                 f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
