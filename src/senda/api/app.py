@@ -37,6 +37,7 @@ from senda.providers.base import SearchResultItem
 from senda.ai.grounded_synthesis import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
 from senda.calculator import evaluate_math_query
+from senda.providers.weather import WeatherProvider
 
 
 # Pydantic schemas for API documentation and validation
@@ -85,6 +86,7 @@ class SearchResponseModel(BaseModel):
     grounded_synthesis: Optional[dict] = None
     entity_card: Optional[dict] = None
     calculator: Optional[dict] = None
+    weather: Optional[dict] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -191,6 +193,7 @@ def create_app(
 
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
     app_wiki_entity = WikipediaEntityProvider()
+    app_weather = WeatherProvider()
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -528,6 +531,13 @@ def create_app(
             if calc_obj:
                 calculator_data = calc_obj.model_dump()
 
+        # Instant Sovereign Real-Time Weather Card (Open-Meteo Open Data)
+        weather_data = None
+        if current_page == 1 and clean_q and cat in ("all", "web"):
+            weather_card_obj = await app_weather.get_weather(clean_q)
+            if weather_card_obj:
+                weather_data = weather_card_obj.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -542,6 +552,7 @@ def create_app(
             grounded_synthesis=grounded_data,
             entity_card=entity_data,
             calculator=calculator_data,
+            weather=weather_data,
         )
 
         # Content negotiation
@@ -562,6 +573,7 @@ def create_app(
                 "grounded_synthesis": grounded_data,
                 "entity_card": entity_data,
                 "calculator": calculator_data,
+                "weather": weather_data,
             },
             theme,
         )

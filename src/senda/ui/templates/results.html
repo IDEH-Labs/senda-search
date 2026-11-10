@@ -233,6 +233,74 @@
     </section>
     {% endif %}
 
+    <!-- Instant Sovereign Weather Card (Open-Meteo Open Data) -->
+    {% if weather %}
+    <section class="weather-card" role="region" aria-label="Información meteorológica en tiempo real">
+        <div class="weather-main-row">
+            <div class="weather-location-col">
+                <div class="weather-city-header">
+                    <h2 class="weather-city-name">{{ weather.city_name }}</h2>
+                    <span class="weather-country-badge">{{ weather.country }}</span>
+                </div>
+                {% if weather.admin1 and weather.admin1 != weather.city_name %}
+                <span class="weather-admin1">{{ weather.admin1 }}</span>
+                {% endif %}
+                <span class="weather-condition-desc">{{ weather.weather_description }}</span>
+            </div>
+
+            <div class="weather-temp-col">
+                <span class="weather-condition-icon" aria-hidden="true">{{ weather.weather_icon }}</span>
+                <div class="weather-temp-display">
+                    <span class="weather-temp-val">{{ weather.temperature }}</span>
+                    <span class="weather-temp-unit">°C</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="weather-details-grid">
+            <div class="weather-detail-pill">
+                <span class="detail-label">Sensación</span>
+                <span class="detail-val">{{ weather.apparent_temperature }} °C</span>
+            </div>
+            <div class="weather-detail-pill">
+                <span class="detail-label">Humedad</span>
+                <span class="detail-val">{{ weather.humidity }}%</span>
+            </div>
+            <div class="weather-detail-pill">
+                <span class="detail-label">Viento</span>
+                <span class="detail-val">{{ weather.wind_speed }} km/h</span>
+            </div>
+            <div class="weather-detail-pill">
+                <span class="detail-label">Precipitación</span>
+                <span class="detail-val">{{ weather.precipitation }} mm</span>
+            </div>
+        </div>
+
+        {% if weather.daily_forecast %}
+        <div class="weather-forecast-row">
+            {% for f in weather.daily_forecast %}
+            <div class="forecast-day-card">
+                <span class="forecast-day-title">{{ f.day_name }}</span>
+                <span class="forecast-day-icon" aria-hidden="true">{{ f.icon }}</span>
+                <div class="forecast-day-temps">
+                    <span class="forecast-temp-max">{{ f.temp_max }}°</span>
+                    <span class="forecast-temp-min">{{ f.temp_min }}°</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <footer class="weather-card-footer">
+            <span>Fuente: {{ weather.source }}</span>
+            <span class="footer-dot">&bull;</span>
+            <span>{{ weather.license }}</span>
+            <span class="footer-dot">&bull;</span>
+            <span>Actualizado: {{ weather.updated_at }}</span>
+        </footer>
+    </section>
+    {% endif %}
+
     <!-- Verifiable Encyclopedic Entity Card (Wikipedia / Wikidata) -->
     {% if entity_card %}
     <aside class="entity-card" role="region" aria-label="Ficha enciclopédica verificable">
