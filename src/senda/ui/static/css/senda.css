@@ -250,22 +250,79 @@ html.light .theme-btn .icon-sun { display: none; }
 [data-theme="light"] .theme-btn .icon-moon,
 html.light .theme-btn .icon-moon { display: block; }
 
-.lang-selector {
+/* Language Selector (Modern minimal glass pill) */
+.lang-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
   background: var(--bg-chip);
   border: 1px solid var(--border-subtle);
-  color: var(--text-main);
   border-radius: var(--radius-sm);
-  padding: 0.35rem 0.55rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  min-height: 38px;
-  transition: border-color var(--transition-fast);
+  height: 38px;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(8px);
 }
 
-.lang-selector:hover, .lang-selector:focus {
+.lang-picker:hover,
+.lang-picker:focus-within {
   border-color: var(--border-strong);
+  background: var(--bg-chip-hover);
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.lang-picker .lang-icon {
+  position: absolute;
+  left: 0.65rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.lang-picker:hover .lang-icon,
+.lang-picker:focus-within .lang-icon {
+  color: var(--text-accent);
+}
+
+.lang-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 0 1.85rem 0 2.15rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  height: 100%;
+  line-height: 38px;
+  font-family: inherit;
+}
+
+.lang-selector option {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 0.5rem;
+  font-size: 0.88rem;
+}
+
+[data-theme="light"] .lang-selector option,
+html.light .lang-selector option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.lang-picker .lang-arrow {
+  position: absolute;
+  right: 0.6rem;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.lang-picker:hover .lang-arrow {
+  color: var(--text-muted);
 }
 
 /* Main Content Layout */
