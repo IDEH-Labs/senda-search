@@ -2089,3 +2089,111 @@ footer.app-footer a:hover {
     height: 180px;
   }
 }
+
+/* Sovereign Instant Calculator Card */
+.calculator-card {
+  margin: 1.25rem 0 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--text-accent);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: calcSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes calcSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calculator-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calculator-expression {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.calculator-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--text-accent);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+}
+
+.calculator-bottom {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calculator-result {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.calculator-result.calc-error {
+  font-size: 1.15rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.calculator-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.calculator-copy-btn:hover {
+  background: var(--bg-chip-hover);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.calculator-copy-btn.copied {
+  background: rgba(74, 222, 128, 0.15);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+}
+
+[data-theme="light"] .calculator-card,
+html.light .calculator-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left-color: #10b981;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}

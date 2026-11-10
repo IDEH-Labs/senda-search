@@ -36,6 +36,7 @@ from senda.providers.pubmed import PubMedProvider
 from senda.providers.base import SearchResultItem
 from senda.ai.grounded_synthesis import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
+from senda.calculator import evaluate_math_query
 
 
 # Pydantic schemas for API documentation and validation
@@ -83,6 +84,7 @@ class SearchResponseModel(BaseModel):
     items: list[SearchItemModel]
     grounded_synthesis: Optional[dict] = None
     entity_card: Optional[dict] = None
+    calculator: Optional[dict] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -519,6 +521,13 @@ def create_app(
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
 
+        # Instant Sovereign Calculator Card
+        calculator_data = None
+        if current_page == 1 and clean_q:
+            calc_obj = evaluate_math_query(clean_q)
+            if calc_obj:
+                calculator_data = calc_obj.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -532,6 +541,7 @@ def create_app(
             items=formatted_items,
             grounded_synthesis=grounded_data,
             entity_card=entity_data,
+            calculator=calculator_data,
         )
 
         # Content negotiation
@@ -551,6 +561,7 @@ def create_app(
                 "safe_search": ss,
                 "grounded_synthesis": grounded_data,
                 "entity_card": entity_data,
+                "calculator": calculator_data,
             },
             theme,
         )

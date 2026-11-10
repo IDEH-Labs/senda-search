@@ -331,6 +331,26 @@ function initDropdownsAndFilters() {
       window.selectCategory(cat, this);
     });
   });
+
+  // Sovereign Calculator copy button
+  var calcCopy = document.getElementById('calcCopyBtn');
+  if (calcCopy) {
+    calcCopy.addEventListener('click', function() {
+      var res = this.getAttribute('data-result');
+      if (res && navigator.clipboard) {
+        var btn = this;
+        navigator.clipboard.writeText(res).then(function() {
+          var label = btn.querySelector('.copy-label');
+          if (label) label.textContent = '¡Copiado!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            if (label) label.textContent = 'Copiar';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+    });
+  }
 }
 
 /**

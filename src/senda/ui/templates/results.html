@@ -211,6 +211,28 @@
         <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
     </div>
 
+    <!-- Instant Sovereign Calculator Card (Cálculo Matemático Seguro) -->
+    {% if calculator %}
+    <section class="calculator-card" role="region" aria-label="Calculadora matemática soberana">
+        <div class="calculator-top">
+            <span class="calculator-expression">{{ calculator.display_expr }} =</span>
+            <span class="calculator-badge">Calculadora</span>
+        </div>
+        <div class="calculator-bottom">
+            <span class="calculator-result {% if calculator.is_error %}calc-error{% endif %}">{{ calculator.formatted_result }}</span>
+            {% if not calculator.is_error %}
+            <button type="button" class="calculator-copy-btn" id="calcCopyBtn" data-result="{{ calculator.formatted_result }}" title="Copiar resultado" aria-label="Copiar resultado">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span class="copy-label">Copiar</span>
+            </button>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
     <!-- Verifiable Encyclopedic Entity Card (Wikipedia / Wikidata) -->
     {% if entity_card %}
     <aside class="entity-card" role="region" aria-label="Ficha enciclopédica verificable">
