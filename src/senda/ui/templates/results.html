@@ -599,46 +599,5 @@
         <code>!codeberg</code> Codeberg
     </div>
     {% endif %}
-
-    <script>
-        // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later
-        (function() {
-            var dropdowns = document.querySelectorAll('.filter-dropdown');
-            dropdowns.forEach(function(d) {
-                d.addEventListener('toggle', function() {
-                    if (d.open) {
-                        dropdowns.forEach(function(other) {
-                            if (other !== d) other.removeAttribute('open');
-                        });
-                        var filterInput = d.querySelector('.country-search-input');
-                        if (filterInput) setTimeout(function() { filterInput.focus(); }, 50);
-                    }
-                });
-            });
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.filter-dropdown')) {
-                    dropdowns.forEach(function(d) { d.removeAttribute('open'); });
-                }
-            });
-
-            // Instant client-side filter for all countries of the world
-            var countryFilter = document.getElementById('countryQuickFilter');
-            if (countryFilter) {
-                countryFilter.addEventListener('input', function() {
-                    var term = this.value.toLowerCase().trim();
-                    var items = document.querySelectorAll('.country-item');
-                    var headers = document.querySelectorAll('.country-continent-header');
-                    items.forEach(function(el) {
-                        var text = (el.getAttribute('data-country') || el.textContent).toLowerCase();
-                        el.style.display = text.indexOf(term) !== -1 ? 'flex' : 'none';
-                    });
-                    headers.forEach(function(h) {
-                        h.style.display = term ? 'none' : 'block';
-                    });
-                });
-            }
-        })();
-        // @license-end
-    </script>
 </div>
 {% endblock %}

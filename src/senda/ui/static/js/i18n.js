@@ -230,20 +230,105 @@ function initDensityManager() {
 }
 
 /**
- * Optional Accordion Enhancement for Native Why-Seen Disclosures
- * (Mejora progresiva: 100% funcional de forma nativa sin JavaScript)
+ * Sovereign Dropdown & Accessible Filter Manager (GNU LibreJS Compliant)
+ * - Closes dropdowns on Escape key press (with focus restore to summary)
+ * - Closes dropdowns on Outside Click
+ * - Automatically closes other open dropdowns when one opens (mutual exclusion)
+ * - Autofocuses country filter input when Region dropdown opens
+ * - Client-side instant filter for countries and ISO codes
+ * - Zero JS fallback: standard HTML <details> native behavior is preserved
+ * - GNU LibreJS Compliant: 100% Free Software under GNU GPL-3.0-or-later.
  */
-function initWhySeenDialog() {
-  var disclosures = document.querySelectorAll('.why-seen-disclosure');
-  disclosures.forEach(function(detail) {
-    detail.addEventListener('toggle', function() {
-      if (detail.open) {
-        disclosures.forEach(function(other) {
-          if (other !== detail && other.open) {
-            other.removeAttribute('open');
-          }
-        });
+window.selectCategory = function(cat, btn) {
+  var input = document.getElementById('search-category');
+  if (input) input.value = cat;
+  document.querySelectorAll('.cat-chip').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+};
+
+function initDropdownsAndFilters() {
+  var dropdowns = document.querySelectorAll('.filter-dropdown, .why-seen-disclosure');
+
+  function closeAllDropdowns(except) {
+    dropdowns.forEach(function(d) {
+      if (d !== except && d.open) {
+        d.removeAttribute('open');
       }
+    });
+  }
+
+  // Handle dropdown open toggle for mutual exclusion and autofocus
+  dropdowns.forEach(function(d) {
+    d.addEventListener('toggle', function() {
+      if (d.open) {
+        closeAllDropdowns(d);
+        var searchInput = d.querySelector('.country-search-input');
+        if (searchInput) {
+          setTimeout(function() {
+            searchInput.focus();
+          }, 40);
+        }
+      }
+    });
+  });
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.filter-dropdown, .why-seen-disclosure')) {
+      closeAllDropdowns(null);
+    }
+  });
+
+  // Close dropdowns on Escape key press and restore focus to summary
+  window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+      var anyClosed = false;
+      dropdowns.forEach(function(d) {
+        if (d.open) {
+          d.removeAttribute('open');
+          anyClosed = true;
+          var summary = d.querySelector('summary');
+          if (summary) summary.focus();
+        }
+      });
+      if (anyClosed) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Instant client-side filter for all countries and ISO codes
+  var countryFilter = document.getElementById('countryQuickFilter');
+  if (countryFilter) {
+    countryFilter.addEventListener('input', function() {
+      var term = this.value.toLowerCase().trim();
+      var items = document.querySelectorAll('.country-item');
+      var headers = document.querySelectorAll('.country-continent-header');
+      items.forEach(function(el) {
+        var text = (el.getAttribute('data-country') || el.textContent).toLowerCase();
+        el.style.display = text.indexOf(term) !== -1 ? 'flex' : 'none';
+      });
+      headers.forEach(function(h) {
+        h.style.display = term ? 'none' : 'block';
+      });
+    });
+
+    countryFilter.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && this.value) {
+        e.stopPropagation();
+        this.value = '';
+        this.dispatchEvent(new Event('input'));
+      }
+    });
+  }
+
+  // Category chip switcher buttons on home page
+  document.querySelectorAll('.cat-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var cat = this.getAttribute('data-cat') || 'all';
+      window.selectCategory(cat, this);
     });
   });
 }
@@ -365,7 +450,7 @@ document.addEventListener("DOMContentLoaded", function() {
   initThemeManager();
   initDensityManager();
   initPreferencesManager();
-  initWhySeenDialog();
+  initDropdownsAndFilters();
   initCommandBar();
 });
 
