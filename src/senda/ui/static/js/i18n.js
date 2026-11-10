@@ -249,7 +249,26 @@ window.selectCategory = function(cat, btn) {
 };
 
 function initDropdownsAndFilters() {
-  var dropdowns = document.querySelectorAll('.filter-dropdown, .why-seen-disclosure');
+  // Native HTML5 Popover enhancement (autofocus & positioning fallback)
+  document.querySelectorAll('[popover]').forEach(function(pop) {
+    pop.addEventListener('beforetoggle', function(e) {
+      if (e.newState === 'open') {
+        var btn = document.querySelector('[popovertarget="' + pop.id + '"]');
+        if (btn) {
+          var rect = btn.getBoundingClientRect();
+          pop.style.top = (rect.bottom + 6) + 'px';
+          var popWidth = pop.offsetWidth || (pop.classList.contains('filter-country-menu') ? 310 : 200);
+          pop.style.left = Math.max(10, Math.min(rect.left, window.innerWidth - popWidth - 16)) + 'px';
+        }
+        var searchInput = pop.querySelector('.country-search-input');
+        if (searchInput) {
+          setTimeout(function() { searchInput.focus(); }, 40);
+        }
+      }
+    });
+  });
+
+  var dropdowns = document.querySelectorAll('.why-seen-disclosure');
 
   function closeAllDropdowns(except) {
     dropdowns.forEach(function(d) {

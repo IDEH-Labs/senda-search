@@ -673,22 +673,6 @@ details summary::marker {
   display: inline-block;
 }
 
-/* Pure Zero-JS Backdrop: Clicking outside closes <details> natively */
-.filter-dropdown[open] > .filter-dropdown-btn::before {
-  content: "";
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 50;
-  background: transparent;
-  cursor: default;
-}
-
 .filter-dropdown-btn {
   list-style: none !important;
   cursor: pointer;
@@ -718,13 +702,15 @@ details summary::marker {
   color: var(--text-main);
 }
 
-.filter-dropdown[open] .filter-dropdown-btn {
+.filter-dropdown[open] .filter-dropdown-btn,
+.filter-dropdown:has(:popover-open) .filter-dropdown-btn {
   background: var(--bg-chip-active);
   border-color: var(--border-strong);
   color: var(--text-main);
 }
 
-.filter-dropdown[open] .dropdown-chevron {
+.filter-dropdown[open] .dropdown-chevron,
+.filter-dropdown:has(:popover-open) .dropdown-chevron {
   transform: rotate(180deg);
 }
 
@@ -740,6 +726,7 @@ details summary::marker {
   color: var(--text-faint);
 }
 
+/* HTML5 Popover API Native Styling (100% Zero-JS & Free Standard) */
 .filter-dropdown-menu {
   position: absolute;
   top: calc(100% + 5px);
@@ -755,10 +742,53 @@ details summary::marker {
   flex-direction: column;
 }
 
+.filter-dropdown-menu[popover] {
+  margin: 0;
+  inset: unset;
+  z-index: 1000;
+  display: none;
+}
+
+.filter-dropdown-menu[popover]:popover-open {
+  display: flex;
+}
+
+/* CSS Anchor Positioning (Gecko / LibreWolf & Chromium) */
+#timeBtn { anchor-name: --time-btn; }
+#timeFilterPopover {
+  position-anchor: --time-btn;
+  top: calc(anchor(bottom) + 6px);
+  left: anchor(left);
+}
+
+#sortBtn { anchor-name: --sort-btn; }
+#sortFilterPopover {
+  position-anchor: --sort-btn;
+  top: calc(anchor(bottom) + 6px);
+  left: anchor(left);
+}
+
+#regionBtn { anchor-name: --region-btn; }
+#regionFilterPopover {
+  position-anchor: --region-btn;
+  top: calc(anchor(bottom) + 6px);
+  left: anchor(left);
+}
+
+#safesearchBtn { anchor-name: --safesearch-btn; }
+#safesearchFilterPopover {
+  position-anchor: --safesearch-btn;
+  top: calc(anchor(bottom) + 6px);
+  left: anchor(left);
+}
+
 [data-theme="light"] .filter-dropdown-menu,
-html.light .filter-dropdown-menu {
+html.light .filter-dropdown-menu,
+[data-theme="light"] .filter-dropdown-menu[popover],
+html.light .filter-dropdown-menu[popover] {
   background: #ffffff;
   border-color: #cbd5e1;
+  color: #0f172a;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
 }
 
