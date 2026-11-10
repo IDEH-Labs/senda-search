@@ -2200,7 +2200,9 @@ html.light .calculator-card {
 
 /* Sovereign Instant Real-Time Weather Card (Compact & Sleek) */
 .weather-card {
-  max-width: var(--content-max-width, 680px);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin: 0.25rem 0 1.25rem 0;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
