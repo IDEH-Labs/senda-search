@@ -79,7 +79,7 @@ class FreeCultureImageProvider(SearchProvider):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 resp = await client.get(api_url, headers=headers)
                 if resp.status_code != 200:
                     return []

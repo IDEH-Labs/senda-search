@@ -477,54 +477,71 @@
                     <line x1="8" y1="11" x2="14" y2="11"></line>
                 </svg>
             </div>
-            <h2 class="no-results-title">No se encontraron resultados</h2>
-            <p class="no-results-desc">
-                No hay resultados para «<strong>{{ query }}</strong>»{% if time_filter %} en el filtro de tiempo actual{% endif %}.
-            </p>
-            {% if time_filter %}
-            <p class="no-results-desc" style="margin-top: 0.75rem;">
-                <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}" class="filter-link active" style="font-size: 0.9rem; text-decoration: underline;">
-                    Probar buscando en «Cualquier fecha» ↗
-                </a>
-            </p>
-            {% endif %}
-            
-            <div class="no-results-suggestions">
-                <span class="suggestions-label">Explorar la web pública con atajos directos sin rastreo:</span>
-                <div class="suggestions-grid">
-                    <a href="/search?q={{ ('!w ' ~ query) | urlencode }}" class="suggestion-chip">
-                        <span class="chip-cmd">!w</span>
-                        <span class="chip-name">Wikipedia</span>
-                    </a>
-                    <a href="/search?q={{ ('!osm ' ~ query) | urlencode }}" class="suggestion-chip">
-                        <span class="chip-cmd">!osm</span>
-                        <span class="chip-name">OpenStreetMap</span>
-                    </a>
-                    <a href="/search?q={{ ('!ia ' ~ query) | urlencode }}" class="suggestion-chip">
-                        <span class="chip-cmd">!ia</span>
-                        <span class="chip-name">Internet Archive</span>
-                    </a>
-                    <a href="/search?q={{ ('!gut ' ~ query) | urlencode }}" class="suggestion-chip">
-                        <span class="chip-cmd">!gut</span>
-                        <span class="chip-name">Gutenberg</span>
-                    </a>
-                    <a href="/search?q={{ ('!ddg ' ~ query) | urlencode }}" class="suggestion-chip">
-                        <span class="chip-cmd">!ddg</span>
-                        <span class="chip-name">DuckDuckGo HTML</span>
+
+            {% if category == 'news' %}
+                <h2 class="no-results-title">No se encontraron noticias</h2>
+                <p class="no-results-desc">
+                    No se encontraron noticias recientes para «<strong>{{ query }}</strong>»{% if time_filter %} en el intervalo de fecha seleccionado{% endif %}.
+                </p>
+                {% if time_filter %}
+                <div style="margin-bottom: 1.5rem;">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}" class="suggestion-chip" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <span>📅 Buscar en «Cualquier fecha» ↗</span>
                     </a>
                 </div>
-            </div>
+                {% endif %}
+                <ul class="no-results-tips" style="text-align: left; max-width: 420px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; margin: 0 auto; padding-left: 1.25rem;">
+                    <li>Comprueba que no haya errores ortográficos.</li>
+                    <li>Prueba con palabras clave más generales.</li>
+                    <li>Consulta resultados en la <a href="/search?q={{ query | urlencode }}&category=all&theme={{ theme }}" style="color: var(--text-cyan); text-decoration: underline;">búsqueda web general</a>.</li>
+                </ul>
 
-            {% if settings and not settings.SEARXNG_URL and not settings.BRAVE_API_KEY %}
-            <div class="no-results-federation-tip">
-                <span class="tip-icon">💡</span>
-                <span class="tip-text"><strong>Soberanía federada:</strong> Puede federar este buscador con un nodo SearXNG propio vía Docker ejecutando <code>export SENDA_SEARXNG_URL="http://127.0.0.1:8888"</code> para obtener millones de resultados web sin intermediarios privativos.</span>
-            </div>
+            {% elif category == 'images' %}
+                <h2 class="no-results-title">No se encontraron imágenes</h2>
+                <p class="no-results-desc">
+                    No hay imágenes con licencia abierta y reutilizable para «<strong>{{ query }}</strong>».
+                </p>
+                <ul class="no-results-tips" style="text-align: left; max-width: 420px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; margin: 0 auto; padding-left: 1.25rem;">
+                    <li>Prueba con el término en inglés o nombres científicos/históricos.</li>
+                    <li>Prueba con palabras clave más generales.</li>
+                </ul>
+
+            {% else %}
+                <h2 class="no-results-title">No se encontraron resultados</h2>
+                <p class="no-results-desc">
+                    No hay resultados para «<strong>{{ query }}</strong>».
+                </p>
+                <div class="no-results-suggestions">
+                    <span class="suggestions-label">Explorar la web pública con atajos directos:</span>
+                    <div class="suggestions-grid">
+                        <a href="/search?q={{ ('!w ' ~ query) | urlencode }}" class="suggestion-chip">
+                            <span class="chip-cmd">!w</span>
+                            <span class="chip-name">Wikipedia</span>
+                        </a>
+                        <a href="/search?q={{ ('!osm ' ~ query) | urlencode }}" class="suggestion-chip">
+                            <span class="chip-cmd">!osm</span>
+                            <span class="chip-name">OpenStreetMap</span>
+                        </a>
+                        <a href="/search?q={{ ('!ia ' ~ query) | urlencode }}" class="suggestion-chip">
+                            <span class="chip-cmd">!ia</span>
+                            <span class="chip-name">Internet Archive</span>
+                        </a>
+                        <a href="/search?q={{ ('!gut ' ~ query) | urlencode }}" class="suggestion-chip">
+                            <span class="chip-cmd">!gut</span>
+                            <span class="chip-name">Gutenberg</span>
+                        </a>
+                        <a href="/search?q={{ ('!ddg ' ~ query) | urlencode }}" class="suggestion-chip">
+                            <span class="chip-cmd">!ddg</span>
+                            <span class="chip-name">DuckDuckGo HTML</span>
+                        </a>
+                    </div>
+                </div>
             {% endif %}
         </div>
     {% endif %}
 
-    <!-- Bang shortcuts hint -->
+    <!-- Bang shortcuts hint (only shown in general web and science verticals, never in news or images) -->
+    {% if category != 'news' and category != 'images' %}
     <div class="bangs-hint-bar">
         <span>Atajos directos:</span>
         <code>!w</code> Wikipedia &bull;
@@ -533,6 +550,7 @@
         <code>!gut</code> Gutenberg &bull;
         <code>!codeberg</code> Codeberg
     </div>
+    {% endif %}
 
     <script>
         // @license magnet:?xt=urn:btih:1f739d935de45e38526949e2bee45099c10f745f&dn=gpl-3.0.txt GPL-v3.0-or-later

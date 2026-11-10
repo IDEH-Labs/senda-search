@@ -208,3 +208,43 @@ async def test_aggregator_routes_news_with_sort_and_time():
         "atentado", category="news", page=1, page_size=10,
         time_filter="1d", sort="date", region=None, safe_search="off"
     )
+
+
+@pytest.mark.asyncio
+async def test_realtime_news_client_uses_follow_redirects(news_xml_fixture):
+    """Ensure RealTimeNewsProvider uses follow_redirects=True to handle Google News redirects."""
+    provider = RealTimeNewsProvider()
+
+    with patch("senda.providers.news.httpx.AsyncClient") as mock_client:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = news_xml_fixture
+
+        instance = AsyncMock()
+        instance.get.return_value = mock_resp
+        instance.__aenter__.return_value = instance
+        instance.__aexit__.return_value = False
+        mock_client.return_value = instance
+
+        await provider.search("jesus de nazareth")
+        mock_client.assert_called_once_with(timeout=provider.timeout, follow_redirects=True)
+
+
+def test_news_empty_state_is_clean_and_minimal():
+    """Verify category='news' empty state does not leak docker tips or bang shortcut grids."""
+    from fastapi.testclient import TestClient
+    from senda.api.app import app
+
+    client = TestClient(app)
+    # Search for an obscure non-existent query in news vertical
+    resp = client.get("/search?q=qwertyuiopnonexistentquery123456789&category=news")
+    assert resp.status_code == 200
+    html = resp.text
+
+    assert "No se encontraron noticias" in html
+    # Must NOT contain docker instructions or environment variable prompts
+    assert "SENDA_SEARXNG_URL" not in html
+    assert "Docker" not in html
+    # Must NOT show the duplicate bang shortcuts bar in news
+    assert '<div class="bangs-hint-bar">' not in html
+
