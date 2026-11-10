@@ -233,70 +233,65 @@
     </section>
     {% endif %}
 
-    <!-- Instant Sovereign Weather Card (Open-Meteo Open Data) -->
+    <!-- Instant Sovereign Weather Card (Open-Meteo Open Data - Compact & Sleek) -->
     {% if weather %}
-    <section class="weather-card" role="region" aria-label="Información meteorológica en tiempo real">
-        <div class="weather-main-row">
-            <div class="weather-location-col">
-                <div class="weather-city-header">
-                    <h2 class="weather-city-name">{{ weather.city_name }}</h2>
-                    <span class="weather-country-badge">{{ weather.country }}</span>
+    <section class="weather-card weather-compact" role="region" aria-label="Información meteorológica en tiempo real">
+        <div class="weather-compact-body">
+            <!-- Left Pane: Main Weather Info & Inline Metrics -->
+            <div class="weather-current-pane">
+                <div class="weather-primary-row">
+                    <span class="weather-compact-icon" aria-hidden="true">{{ weather.weather_icon }}</span>
+                    <div class="weather-temp-wrap">
+                        <span class="weather-compact-temp">{{ weather.temperature }}</span>
+                        <span class="weather-compact-unit">°C</span>
+                    </div>
+                    <div class="weather-city-block">
+                        <div class="weather-city-line">
+                            <h2 class="weather-city-title">{{ weather.city_name }}</h2>
+                            <span class="weather-country-tag">{{ weather.country }}</span>
+                        </div>
+                        <div class="weather-sub-line">
+                            {% if weather.admin1 and weather.admin1 != weather.city_name %}
+                            <span class="weather-compact-admin">{{ weather.admin1 }}</span>
+                            <span class="metric-sep">&bull;</span>
+                            {% endif %}
+                            <span class="weather-condition-desc">{{ weather.weather_description }}</span>
+                        </div>
+                    </div>
                 </div>
-                {% if weather.admin1 and weather.admin1 != weather.city_name %}
-                <span class="weather-admin1">{{ weather.admin1 }}</span>
-                {% endif %}
-                <span class="weather-condition-desc">{{ weather.weather_description }}</span>
-            </div>
 
-            <div class="weather-temp-col">
-                <span class="weather-condition-icon" aria-hidden="true">{{ weather.weather_icon }}</span>
-                <div class="weather-temp-display">
-                    <span class="weather-temp-val">{{ weather.temperature }}</span>
-                    <span class="weather-temp-unit">°C</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="weather-details-grid">
-            <div class="weather-detail-pill">
-                <span class="detail-label">Sensación</span>
-                <span class="detail-val">{{ weather.apparent_temperature }} °C</span>
-            </div>
-            <div class="weather-detail-pill">
-                <span class="detail-label">Humedad</span>
-                <span class="detail-val">{{ weather.humidity }}%</span>
-            </div>
-            <div class="weather-detail-pill">
-                <span class="detail-label">Viento</span>
-                <span class="detail-val">{{ weather.wind_speed }} km/h</span>
-            </div>
-            <div class="weather-detail-pill">
-                <span class="detail-label">Precipitación</span>
-                <span class="detail-val">{{ weather.precipitation }} mm</span>
-            </div>
-        </div>
-
-        {% if weather.daily_forecast %}
-        <div class="weather-forecast-row">
-            {% for f in weather.daily_forecast %}
-            <div class="forecast-day-card">
-                <span class="forecast-day-title">{{ f.day_name }}</span>
-                <span class="forecast-day-icon" aria-hidden="true">{{ f.icon }}</span>
-                <div class="forecast-day-temps">
-                    <span class="forecast-temp-max">{{ f.temp_max }}°</span>
-                    <span class="forecast-temp-min">{{ f.temp_min }}°</span>
+                <div class="weather-metrics-line">
+                    <span class="weather-metric" title="Sensación térmica">Sensación <strong>{{ weather.apparent_temperature }}°</strong></span>
+                    <span class="metric-sep">&bull;</span>
+                    <span class="weather-metric" title="Humedad relativa">Humedad <strong>{{ weather.humidity }}%</strong></span>
+                    <span class="metric-sep">&bull;</span>
+                    <span class="weather-metric" title="Velocidad del viento">Viento <strong>{{ weather.wind_speed }} km/h</strong></span>
+                    {% if weather.precipitation and weather.precipitation > 0 %}
+                    <span class="metric-sep">&bull;</span>
+                    <span class="weather-metric" title="Precipitación">Lluvia <strong>{{ weather.precipitation }} mm</strong></span>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
 
-        <footer class="weather-card-footer">
-            <span>Fuente: {{ weather.source }}</span>
-            <span class="footer-dot">&bull;</span>
-            <span>{{ weather.license }}</span>
-            <span class="footer-dot">&bull;</span>
-            <span>Actualizado: {{ weather.updated_at }}</span>
+            <!-- Right Pane: Mini Forecast Strip -->
+            {% if weather.daily_forecast %}
+            <div class="weather-forecast-pane">
+                {% for f in weather.daily_forecast %}
+                <div class="forecast-mini-col">
+                    <span class="forecast-mini-day">{{ f.day_name }}</span>
+                    <span class="forecast-mini-icon" aria-hidden="true">{{ f.icon }}</span>
+                    <div class="forecast-mini-temps">
+                        <span class="forecast-mini-max">{{ f.temp_max }}°</span>
+                        <span class="forecast-mini-min">{{ f.temp_min }}°</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <footer class="weather-compact-footer">
+            <span>{{ weather.source }} &bull; {{ weather.license }} &bull; Actualizado: {{ weather.updated_at }}</span>
         </footer>
     </section>
     {% endif %}
