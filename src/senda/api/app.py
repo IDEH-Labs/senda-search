@@ -95,6 +95,7 @@ class SearchResponseModel(BaseModel):
     conversion: Optional[dict] = None
     world_time: Optional[dict] = None
     goggle: Optional[str] = None
+    custom_goggle: Optional[str] = None
     goggles_catalog: Optional[list] = None
 
 
@@ -446,6 +447,7 @@ def create_app(
         social: bool = Query(default=False),
         synthesis: bool = Query(default=False),
         goggle: Optional[str] = Query(default=None),
+        custom_goggle: Optional[str] = Query(default=None),
         anti_slop: bool = Query(default=True),
         clustering: bool = Query(default=True),
         theme: Optional[str] = Query(default=None),
@@ -464,6 +466,7 @@ def create_app(
         soc = social if isinstance(social, bool) else False
         synth = synthesis if isinstance(synthesis, bool) else False
         goggle_val = goggle.strip() if isinstance(goggle, str) and goggle.strip() else None
+        custom_goggle_val = custom_goggle.strip() if isinstance(custom_goggle, str) and custom_goggle.strip() else None
 
         # Bang shortcuts: redirect immediately to target without intermediate tracking
         bang_redir = ProviderAggregator.detect_bang(clean_q)
@@ -501,6 +504,7 @@ def create_app(
             opt_in_academic=ac,
             opt_in_social=(cat == "social" or soc),
             goggle=goggle_val,
+            custom_goggle=custom_goggle_val,
             anti_slop=anti_slop,
             clustering=clustering,
         )
@@ -547,10 +551,13 @@ def create_app(
 
             ai_dict = None
             if it.ai_provenance:
-                ai_dict = {
-                    "señal_declarada": it.ai_provenance.declared_signal,
-                    "estado": it.ai_provenance.status,
-                }
+                if isinstance(it.ai_provenance, dict):
+                    ai_dict = it.ai_provenance
+                else:
+                    ai_dict = {
+                        "señal_declarada": getattr(it.ai_provenance, "declared_signal", None) or getattr(it.ai_provenance, "señal_declarada", None),
+                        "estado": getattr(it.ai_provenance, "status", None) or getattr(it.ai_provenance, "estado", "no determinado"),
+                    }
 
             formatted_items.append(
                 SearchItemModel(
@@ -642,6 +649,7 @@ def create_app(
             conversion=conversion_data,
             world_time=world_time_data,
             goggle=goggle_val,
+            custom_goggle=custom_goggle_val,
             goggles_catalog=get_available_goggles(),
         )
 
@@ -667,6 +675,7 @@ def create_app(
                 "conversion": conversion_data,
                 "world_time": world_time_data,
                 "goggle": goggle_val,
+                "custom_goggle": custom_goggle_val,
                 "goggles_catalog": get_available_goggles(),
                 "anti_slop": anti_slop,
                 "clustering": clustering,
@@ -704,6 +713,7 @@ def create_app(
         social = form_data.get("social", ["false"])[0].lower() in ("true", "1")
         synthesis = form_data.get("synthesis", ["false"])[0].lower() in ("true", "1")
         goggle = form_data.get("goggle", [None])[0]
+        custom_goggle = form_data.get("custom_goggle", [None])[0]
         anti_slop = form_data.get("anti_slop", ["true"])[0].lower() in ("true", "1")
         clustering = form_data.get("clustering", ["true"])[0].lower() in ("true", "1")
 
@@ -722,6 +732,7 @@ def create_app(
             social=social,
             synthesis=synthesis,
             goggle=goggle,
+            custom_goggle=custom_goggle,
             anti_slop=anti_slop,
             clustering=clustering,
             theme=theme,

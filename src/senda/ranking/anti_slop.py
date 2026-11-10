@@ -116,10 +116,11 @@ def apply_anti_slop_filter(
             reason_str = "; ".join(reasons)
             item.why_seen = f"[Anti-Slop: Sospecha de granja SEO ({reason_str})] {item.why_seen}".strip()
             if not item.ai_provenance:
-                item.ai_provenance = {
-                    "señal_declarada": "Alta probabilidad de generación sintética / granja SEO",
-                    "estado": "degradado",
-                }
+                from senda.providers.base import AIProvenance
+                item.ai_provenance = AIProvenance(
+                    declared_signal="Heurística Anti-Slop: Alta probabilidad de generación sintética / granja SEO",
+                    status="degradado",
+                )
 
     # Re-sort descending
     items.sort(key=lambda x: x.score, reverse=True)

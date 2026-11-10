@@ -919,9 +919,86 @@ body.compact-density .result-snippet {
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-size: 0.72rem;
-  padding: 0.15rem 0.45rem;
+  padding: 0.15rem 0.5rem;
   border-radius: 4px;
   font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+}
+
+.meta-tag-feature:hover {
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.meta-tag-feature.is-active {
+  background: rgba(74, 222, 128, 0.08);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: var(--text-accent);
+}
+
+.meta-tag-feature.is-inactive {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+/* Custom Goggle DSL container inside dropdown */
+.custom-dsl-container {
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 0.35rem;
+  background: var(--bg-surface);
+}
+
+.custom-dsl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.custom-dsl-label {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+
+.custom-dsl-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.custom-dsl-input:focus {
+  border-color: var(--text-accent);
+  outline: none;
+}
+
+.custom-dsl-btn {
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 0.2rem;
+  transition: background var(--transition-fast);
+}
+
+.custom-dsl-btn:hover {
+  background: var(--bg-chip-hover);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
 }
 
 /* Results Feed */

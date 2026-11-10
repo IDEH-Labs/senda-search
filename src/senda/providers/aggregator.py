@@ -24,7 +24,7 @@ from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.ranking.clustering import apply_domain_clustering
-from senda.ranking.goggles import get_preset_goggle, apply_goggle_rules
+from senda.ranking.goggles import get_preset_goggle, apply_goggle_rules, parse_goggle_dsl
 from senda.ranking.anti_slop import apply_anti_slop_filter
 
 
@@ -111,6 +111,7 @@ class ProviderAggregator:
         bury_domains: Optional[List[str]] = None,
         block_domains: Optional[List[str]] = None,
         goggle: Optional[str] = None,
+        custom_goggle: Optional[str] = None,
         anti_slop: bool = True,
         clustering: bool = True,
     ) -> List[SearchResultItem]:
@@ -334,7 +335,12 @@ class ProviderAggregator:
                 merged.append(item)
 
         # 1. Apply user Goggle lens or smallweb default lens
-        active_goggle = get_preset_goggle(goggle) if goggle else None
+        active_goggle = None
+        if custom_goggle and custom_goggle.strip():
+            active_goggle = parse_goggle_dsl(custom_goggle.strip(), name="Lente Personalizada")
+        elif goggle:
+            active_goggle = get_preset_goggle(goggle)
+
         if cat == "smallweb" and not active_goggle:
             active_goggle = get_preset_goggle("small_web")
 

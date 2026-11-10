@@ -353,8 +353,8 @@ def test_goggles_and_smallweb_integration(client):
     assert resp_goggle.status_code == 200
     assert "Lente: Software Libre" in resp_goggle.text
     assert "Pequeña Web" in resp_goggle.text
-    assert "Diversidad de Dominios" in resp_goggle.text
-    assert "Anti-Slop Activo" in resp_goggle.text
+    assert "Diversidad: Activa" in resp_goggle.text
+    assert "Anti-Slop: Activo" in resp_goggle.text
 
     # 2. JSON search with Goggle catalog
     resp_json = client.get("/search?q=Foundation&goggle=tech_libre&format=json")
@@ -373,4 +373,15 @@ def test_goggles_and_smallweb_integration(client):
     resp_synth_on = client.get("/search?q=Foundation&synthesis=true")
     assert resp_synth_on.status_code == 200
     assert "Síntesis activa" in resp_synth_on.text
+
+    # 5. Custom DSL Goggle test
+    resp_custom = client.get("/search?q=Foundation&custom_goggle=%24discard%2Csite%3Dquora.com")
+    assert resp_custom.status_code == 200
+    assert "Lente: DSL Personalizada" in resp_custom.text
+
+    # 6. Interactive Anti-Slop and Clustering toggles
+    resp_toggles = client.get("/search?q=Foundation&anti_slop=false&clustering=false")
+    assert resp_toggles.status_code == 200
+    assert "Anti-Slop: Inactivo" in resp_toggles.text
+    assert "Diversidad: Inactiva" in resp_toggles.text
 
