@@ -673,6 +673,22 @@ details summary::marker {
   display: inline-block;
 }
 
+/* Pure Zero-JS Backdrop: Clicking outside closes <details> natively */
+.filter-dropdown[open] > .filter-dropdown-btn::before {
+  content: "";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 50;
+  background: transparent;
+  cursor: default;
+}
+
 .filter-dropdown-btn {
   list-style: none !important;
   cursor: pointer;
@@ -959,6 +975,22 @@ body.compact-density .result-snippet {
   position: relative;
   margin-left: auto;
   display: inline-block;
+}
+
+/* Pure Zero-JS Backdrop: Clicking outside closes why-seen panel natively */
+.why-seen-disclosure[open] > .why-seen-summary::before {
+  content: "";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 35;
+  background: transparent;
+  cursor: default;
 }
 
 .why-seen-summary {
