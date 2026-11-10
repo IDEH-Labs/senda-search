@@ -35,7 +35,7 @@ class InternalStorageProvider(SearchProvider):
         safe_search: str = "off",
     ) -> list[SearchResultItem]:
         cat = category.lower().strip()
-        if cat in ("all", "web", "news", "images", "library"):
+        if cat in ("all", "web", "news", "images", "videos", "library"):
             search_cat = cat
         else:
             search_cat = "all"

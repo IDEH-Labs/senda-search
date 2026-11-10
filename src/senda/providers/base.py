@@ -78,6 +78,16 @@ class SearchResultItem(BaseModel):
     provider_origin: str = Field(default="Senda", description="Identificador técnico del proveedor")
     ai_provenance: Optional[AIProvenance] = Field(default=None, description="Procedencia declarada de IA")
 
+    @property
+    def domain(self) -> str:
+        """Extract domain from URL safely."""
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(self.url)
+            return parsed.netloc or ""
+        except Exception:
+            return ""
+
     def to_provenance_dict(self) -> Dict[str, Any]:
         """Serialize into the exact canonical Senda Verifiable Provenance dictionary."""
         retraction_dict = None

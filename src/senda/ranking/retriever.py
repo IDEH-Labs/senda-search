@@ -290,10 +290,12 @@ class SearchRetriever:
                     items=image_items
                 )
 
-        # 2. Document Search Verticals (All, Web, News, Library/Encyclopedia)
+        # 2. Document Search Verticals (All, Web, News, Videos, Library/Encyclopedia)
         vertical_condition = ""
         if category == "news":
             vertical_condition = "AND (d.doc_type = 'news' OR d.url LIKE '%/news%' OR d.url LIKE '%/blog%' OR d.url LIKE '%/noticias%')"
+        elif category == "videos":
+            vertical_condition = "AND (d.doc_type = 'videos' OR d.url LIKE '%/video%' OR d.url LIKE '%/watch%' OR d.url LIKE '%/v/%')"
         elif category == "library":
             vertical_condition = "AND (d.doc_type = 'library' OR d.domain LIKE '%wikipedia%' OR d.domain LIKE '%archive.org%' OR d.domain LIKE '%gutenberg.org%' OR d.domain LIKE '%gnu.org%')"
 

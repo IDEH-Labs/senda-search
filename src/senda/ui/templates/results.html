@@ -312,6 +312,43 @@
             </article>
             {% endfor %}
         </div>
+        {% elif results.category == 'videos' %}
+        <div class="video-grid" role="region" aria-label="Resultados de videos">
+            {% for item in results.items %}
+            <article class="video-card">
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="video-link" referrerpolicy="no-referrer">
+                    <div class="video-thumb-wrapper">
+                        {% if item.media_url %}
+                        <img src="{{ item.media_url }}" alt="{{ item.title }}" class="video-thumb" loading="lazy" referrerpolicy="no-referrer" decoding="async">
+                        {% else %}
+                        <div class="video-thumb-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </div>
+                        {% endif %}
+                        <div class="video-play-badge" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="video-info">
+                        <h2 class="video-title">{{ item.title }}</h2>
+                        <div class="video-meta">
+                            <span class="video-channel">{{ item.source }}</span>
+                            {% if item.domain %}
+                            <span class="video-domain">{{ item.domain }}</span>
+                            {% endif %}
+                        </div>
+                        {% if item.snippet %}
+                        <p class="video-snippet">{{ item.snippet }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
         {% else %}
         <ol class="results-feed" role="feed">
             {% for item in results.items %}
@@ -506,6 +543,17 @@
                     <li>Prueba con palabras clave más generales.</li>
                 </ul>
 
+            {% elif category == 'videos' %}
+                <h2 class="no-results-title">No se encontraron videos</h2>
+                <p class="no-results-desc">
+                    No se encontraron videos abiertos para «<strong>{{ query }}</strong>».
+                </p>
+                <ul class="no-results-tips" style="text-align: left; max-width: 420px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; margin: 0 auto; padding-left: 1.25rem;">
+                    <li>Comprueba que no haya errores ortográficos.</li>
+                    <li>Prueba con palabras clave más generales o en inglés.</li>
+                    <li>Consulta resultados en la <a href="/search?q={{ query | urlencode }}&category=all&theme={{ theme }}" style="color: var(--text-cyan); text-decoration: underline;">búsqueda web general</a>.</li>
+                </ul>
+
             {% else %}
                 <h2 class="no-results-title">No se encontraron resultados</h2>
                 <p class="no-results-desc">
@@ -540,8 +588,8 @@
         </div>
     {% endif %}
 
-    <!-- Bang shortcuts hint (only shown in general web and science verticals, never in news or images) -->
-    {% if category != 'news' and category != 'images' %}
+    <!-- Bang shortcuts hint (only shown in general web and science verticals, never in news, images, or videos) -->
+    {% if category != 'news' and category != 'images' and category != 'videos' %}
     <div class="bangs-hint-bar">
         <span>Atajos directos:</span>
         <code>!w</code> Wikipedia &bull;

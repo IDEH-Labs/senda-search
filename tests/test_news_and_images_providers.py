@@ -248,3 +248,71 @@ def test_news_empty_state_is_clean_and_minimal():
     # Must NOT show the duplicate bang shortcuts bar in news
     assert '<div class="bangs-hint-bar">' not in html
 
+
+def test_ethical_video_provider_parsing():
+    """Verify EthicalVideoProvider parses PeerTube and Archive video items correctly."""
+    from senda.providers.videos import EthicalVideoProvider, format_duration
+
+    assert format_duration(65) == "01:05"
+    assert format_duration(3665) == "1:01:05"
+
+    provider = EthicalVideoProvider()
+    peertube_payload = {
+        "name": "Shakira En Vivo",
+        "url": "https://u2be.ovh/videos/watch/123",
+        "duration": 340,
+        "thumbnailUrl": "https://u2be.ovh/thumb.jpg",
+        "channel": {"displayName": "Shakira Channel"},
+        "account": {"displayName": "Shakira"},
+        "views": 15000,
+        "truncatedDescription": "Concierto oficial",
+        "originallyPublishedAt": "2026-05-01T12:00:00Z",
+    }
+    item = provider._parse_peertube_item(peertube_payload)
+    assert item is not None
+    assert item.title == "Shakira En Vivo"
+    assert item.doc_type == "videos"
+    assert item.content_type == "video"
+    assert item.media_url == "https://u2be.ovh/thumb.jpg"
+    assert item.domain == "u2be.ovh"
+    assert "[05:40" in item.snippet
+
+
+@pytest.mark.asyncio
+async def test_aggregator_routes_videos_vertical_strictly():
+    """Verify category='videos' routes only to video and internal providers, never to wikipedia or crossref."""
+    mock_videos = AsyncMock()
+    mock_videos.search.return_value = []
+    mock_wiki = AsyncMock()
+    mock_crossref = AsyncMock()
+    mock_internal = AsyncMock()
+    mock_internal.search.return_value = []
+
+    aggregator = ProviderAggregator(
+        internal_provider=mock_internal,
+        video_provider=mock_videos,
+        wikipedia_search_provider=mock_wiki,
+        crossref_provider=mock_crossref,
+    )
+
+    await aggregator.aggregate(query="shakira", category="videos")
+    mock_videos.search.assert_called_once()
+    mock_wiki.search.assert_not_called()
+    mock_crossref.search.assert_not_called()
+
+
+def test_videos_empty_state_clean():
+    """Verify category='videos' renders clean video empty state."""
+    from fastapi.testclient import TestClient
+    from senda.api.app import app
+
+    client = TestClient(app)
+    resp = client.get("/search?q=qwertyuiopnonexistentquery123456789&category=videos")
+    assert resp.status_code == 200
+    html = resp.text
+
+    assert "No se encontraron videos" in html
+    assert '<div class="bangs-hint-bar">' not in html
+    assert "SENDA_SEARXNG_URL" not in html
+
+

@@ -28,6 +28,7 @@ from senda.providers.bluesky import BlueskyProvider
 from senda.providers.wikipedia import WikipediaEntityProvider, WikipediaSearchProvider
 from senda.providers.news import RealTimeNewsProvider
 from senda.providers.images import FreeCultureImageProvider
+from senda.providers.videos import EthicalVideoProvider
 from senda.providers.crossref import CrossrefProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
@@ -180,6 +181,7 @@ def create_app(
     wiki_search_prov = WikipediaSearchProvider() if enable_federated_providers else None
     news_prov = RealTimeNewsProvider() if enable_federated_providers else None
     images_prov = FreeCultureImageProvider() if enable_federated_providers else None
+    videos_prov = EthicalVideoProvider() if enable_federated_providers else None
     crossref_prov = CrossrefProvider() if enable_federated_providers else None
     doaj_prov = DoajProvider() if enable_federated_providers else None
     arxiv_prov = ArxivProvider() if enable_federated_providers else None
@@ -199,6 +201,7 @@ def create_app(
         wikipedia_search_provider=wiki_search_prov,
         news_provider=news_prov,
         image_provider=images_prov,
+        video_provider=videos_prov,
         crossref_provider=crossref_prov,
         doaj_provider=doaj_prov,
         arxiv_provider=arxiv_prov,

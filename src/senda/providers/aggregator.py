@@ -18,6 +18,7 @@ from senda.providers.bluesky import BlueskyProvider
 from senda.providers.wikipedia import WikipediaSearchProvider
 from senda.providers.news import RealTimeNewsProvider
 from senda.providers.images import FreeCultureImageProvider
+from senda.providers.videos import EthicalVideoProvider
 from senda.providers.crossref import CrossrefProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
@@ -55,6 +56,7 @@ class ProviderAggregator:
         wikipedia_search_provider: Optional[WikipediaSearchProvider] = None,
         news_provider: Optional[RealTimeNewsProvider] = None,
         image_provider: Optional[FreeCultureImageProvider] = None,
+        video_provider: Optional[EthicalVideoProvider] = None,
         crossref_provider: Optional[CrossrefProvider] = None,
         doaj_provider: Optional[DoajProvider] = None,
         arxiv_provider: Optional[ArxivProvider] = None,
@@ -70,6 +72,7 @@ class ProviderAggregator:
         self.wikipedia_search = wikipedia_search_provider
         self.news = news_provider
         self.images = image_provider
+        self.videos = video_provider or EthicalVideoProvider()
         self.crossref = crossref_provider
         self.doaj = doaj_provider
         self.arxiv = arxiv_provider
@@ -140,6 +143,27 @@ class ProviderAggregator:
             tasks.append(
                 self.internal.search(
                     query, category="news", page=page, page_size=page_size,
+                    time_filter=time_filter, region=region, safe_search=safe_search
+                )
+            )
+        elif cat == "videos":
+            if self.videos and self.videos.is_configured:
+                tasks.append(
+                    self.videos.search(
+                        query, category="videos", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.searxng and self.searxng.is_configured:
+                tasks.append(
+                    self.searxng.search(
+                        query, category="videos", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            tasks.append(
+                self.internal.search(
+                    query, category="videos", page=page, page_size=page_size,
                     time_filter=time_filter, region=region, safe_search=safe_search
                 )
             )
