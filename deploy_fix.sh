@@ -4,11 +4,11 @@ set -e
 # Asegurar privilegios de root
 if [ "$EUID" -ne 0 ]; then
     echo "Este script requiere permisos de superusuario (root)."
-    echo "Por favor ejecútalo como: curl -sSL https://gitlab.com/ideh-labs/senda-search/-/raw/main/update.sh | sudo bash"
+    echo "Por favor ejecútalo como: curl -sSL https://codeberg.org/IDEH-Labs/senda-search/raw/branch/main/update.sh | sudo bash"
     exit 1
 fi
 
-echo "=== [Senda Search Engine] Actualización de Interfaz Minimalista ==="
+echo "=== [Senda Search Engine] Actualización Soberana de Senda ==="
 
 # 1. Localizar o crear el entorno virtual
 VENV_DIR="/opt/senda/venv"
@@ -35,9 +35,15 @@ if ! "$PYTHON_EXEC" -m pip --version &>/dev/null; then
     "$PYTHON_EXEC" -m ensurepip --upgrade 2>/dev/null || (apt-get update && apt-get install -y python3-pip python3-venv git && python3 -m venv --upgrade "$VENV_DIR")
 fi
 
-# 2. Instalar la última versión de Senda desde GitHub/GitLab
-echo "[1/4] Instalando la versión minimalista de Senda..."
-"$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://gitlab.com/ideh-labs/senda-search.git"
+# 2. Instalar la última versión de Senda (Prioridad: Codeberg > GitHub > GitLab)
+echo "[1/4] Instalando la versión de Senda (Prioridad: Codeberg)..."
+if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://codeberg.org/IDEH-Labs/senda-search.git"; then
+    echo "Fallo en Codeberg, intentando con GitHub..."
+    if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://github.com/IDEH-Labs/senda-search.git"; then
+        echo "Fallo en GitHub, intentando con GitLab..."
+        "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://gitlab.com/ideh-labs/senda-search.git"
+    fi
+fi
 
 # 3. Configurar senda.service
 echo "[2/4] Verificando servicio systemd..."
