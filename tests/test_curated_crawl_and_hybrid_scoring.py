@@ -9,7 +9,12 @@ import pytest
 
 from senda.crawler.runner import CrawlerRunner
 from senda.crawler.fetcher import FetchedDocument
-from senda.crawler.seeds import CURATED_SEEDS, get_curated_seed_urls
+from senda.crawler.seeds import (
+    CURATED_SEEDS,
+    get_curated_seed_urls,
+    get_seeds_by_country,
+    get_government_seeds,
+)
 from senda.extractor.parser import DocumentExtractor
 from senda.indexer.storage import StorageEngine
 from senda.security.threat_guard import threat_guard, ThreatCategory
@@ -132,6 +137,25 @@ def test_curated_seeds_integrity():
     assert len(software_libre) >= 3
     assert "https://www.fsf.org/" in software_libre
     assert "https://www.gnu.org/" in software_libre
+
+    # Country and government seeds filtering
+    co_seeds = get_seeds_by_country("CO")
+    assert len(co_seeds) >= 5
+    assert any(s.domain == "www.presidencia.gov.co" for s in co_seeds)
+    assert any(s.domain == "www.cancilleria.gov.co" for s in co_seeds)
+
+    es_seeds = get_seeds_by_country("es")
+    assert len(es_seeds) >= 5
+    assert any(s.domain == "www.lamoncloa.gob.es" for s in es_seeds)
+
+    jp_seeds = get_seeds_by_country("JP")
+    assert len(jp_seeds) >= 3
+    assert any(s.domain == "www.kantei.go.jp" for s in jp_seeds)
+
+    gov_seeds = get_government_seeds()
+    assert len(gov_seeds) >= 40
+    assert any(s.id == "seed-un-data" for s in gov_seeds)
+    assert any(s.id == "seed-whitehouse-gov" for s in gov_seeds)
 
 
 # 4. Test Crawler Safety Gate with ThreatGuard
