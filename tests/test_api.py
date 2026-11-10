@@ -344,3 +344,33 @@ def test_opensearch_integration(client):
     assert resp_home.status_code == 200
     assert "opensearch-details" in resp_home.text
     assert "Añadir a mi navegador" in resp_home.text
+
+
+def test_goggles_and_smallweb_integration(client):
+    """Verify Sovereign Goggles, Small Web tab, and AI synthesis toggle in API and HTML."""
+    # 1. HTML search with Goggle
+    resp_goggle = client.get("/search?q=Foundation&goggle=tech_libre")
+    assert resp_goggle.status_code == 200
+    assert "Lente: Software Libre" in resp_goggle.text
+    assert "Pequeña Web" in resp_goggle.text
+    assert "Diversidad de Dominios" in resp_goggle.text
+    assert "Anti-Slop Activo" in resp_goggle.text
+
+    # 2. JSON search with Goggle catalog
+    resp_json = client.get("/search?q=Foundation&goggle=tech_libre&format=json")
+    assert resp_json.status_code == 200
+    data = resp_json.json()
+    assert data["goggle"] == "tech_libre"
+    assert any(g["id"] == "tech_libre" for g in data["goggles_catalog"])
+
+    # 3. Smallweb vertical category
+    resp_smallweb = client.get("/search?q=Foundation&category=smallweb")
+    assert resp_smallweb.status_code == 200
+    assert "Pequeña Web" in resp_smallweb.text
+
+    # 4. Synthesis toggle button presence
+    assert "Síntesis de Fuentes" in resp_goggle.text
+    resp_synth_on = client.get("/search?q=Foundation&synthesis=true")
+    assert resp_synth_on.status_code == 200
+    assert "Síntesis activa" in resp_synth_on.text
+

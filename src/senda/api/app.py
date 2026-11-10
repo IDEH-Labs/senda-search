@@ -42,6 +42,7 @@ from senda.converters import convert_query
 from senda.worldtime import get_world_time
 from senda.reader import SovereignReader
 from senda.crawler.network_guard import SSRFSecurityViolation
+from senda.ranking.goggles import get_available_goggles
 
 
 # Pydantic schemas for API documentation and validation
@@ -93,6 +94,8 @@ class SearchResponseModel(BaseModel):
     weather: Optional[dict] = None
     conversion: Optional[dict] = None
     world_time: Optional[dict] = None
+    goggle: Optional[str] = None
+    goggles_catalog: Optional[list] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -442,6 +445,9 @@ def create_app(
         academic: bool = Query(default=False),
         social: bool = Query(default=False),
         synthesis: bool = Query(default=False),
+        goggle: Optional[str] = Query(default=None),
+        anti_slop: bool = Query(default=True),
+        clustering: bool = Query(default=True),
         theme: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
@@ -457,6 +463,7 @@ def create_app(
         ac = academic if isinstance(academic, bool) else False
         soc = social if isinstance(social, bool) else False
         synth = synthesis if isinstance(synthesis, bool) else False
+        goggle_val = goggle.strip() if isinstance(goggle, str) and goggle.strip() else None
 
         # Bang shortcuts: redirect immediately to target without intermediate tracking
         bang_redir = ProviderAggregator.detect_bang(clean_q)
@@ -470,7 +477,7 @@ def create_app(
             osm_url = f"https://www.openstreetmap.org/search?query={urllib.parse.quote_plus(clean_q)}"
             return RedirectResponse(url=osm_url, status_code=302)
 
-        if cat not in ("all", "web", "news", "images", "videos", "library", "social"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb"):
             cat = "all"
 
         # News defaults to freshest date sorting unless user explicitly opted for relevance
@@ -493,6 +500,9 @@ def create_app(
             no_ads=na,
             opt_in_academic=ac,
             opt_in_social=(cat == "social" or soc),
+            goggle=goggle_val,
+            anti_slop=anti_slop,
+            clustering=clustering,
         )
 
 
@@ -631,6 +641,8 @@ def create_app(
             weather=weather_data,
             conversion=conversion_data,
             world_time=world_time_data,
+            goggle=goggle_val,
+            goggles_catalog=get_available_goggles(),
         )
 
         # Content negotiation
@@ -654,6 +666,11 @@ def create_app(
                 "weather": weather_data,
                 "conversion": conversion_data,
                 "world_time": world_time_data,
+                "goggle": goggle_val,
+                "goggles_catalog": get_available_goggles(),
+                "anti_slop": anti_slop,
+                "clustering": clustering,
+                "synthesis": synth,
             },
             theme,
         )
@@ -670,7 +687,7 @@ def create_app(
 
         q = form_data.get("q", [""])[0].strip()
         cat = form_data.get("category", ["all"])[0].lower().strip()
-        if cat not in ("all", "web", "news", "images", "videos", "library", "social"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb"):
             cat = "all"
 
         try:
@@ -686,6 +703,9 @@ def create_app(
         academic = form_data.get("academic", ["false"])[0].lower() in ("true", "1")
         social = form_data.get("social", ["false"])[0].lower() in ("true", "1")
         synthesis = form_data.get("synthesis", ["false"])[0].lower() in ("true", "1")
+        goggle = form_data.get("goggle", [None])[0]
+        anti_slop = form_data.get("anti_slop", ["true"])[0].lower() in ("true", "1")
+        clustering = form_data.get("clustering", ["true"])[0].lower() in ("true", "1")
 
         return await search(
             request,
@@ -701,6 +721,9 @@ def create_app(
             academic=academic,
             social=social,
             synthesis=synthesis,
+            goggle=goggle,
+            anti_slop=anti_slop,
+            clustering=clustering,
             theme=theme,
         )
 

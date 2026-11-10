@@ -60,6 +60,9 @@
             <a href="/search?q={{ query | urlencode }}&category=social&region={{ region }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'social' %}active{% endif %}">
                 <span>Redes Abiertas</span>
             </a>
+            <a href="/search?q={{ query | urlencode }}&category=smallweb&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'smallweb' %}active{% endif %}" title="Explorar blogs personales, bitácoras y la web humana no comercial">
+                <span>Pequeña Web</span>
+            </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
                 <span>Mapas ↗</span>
             </a>
@@ -198,6 +201,55 @@
                 </div>
             </details>
 
+            <!-- Goggles / Lentes Soberanas Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if goggle %}is-filtered{% endif %}" title="Filtrar y ponderar resultados con lentes comunitarias abiertas">
+                    <span class="dropdown-btn-label">
+                        {% if goggle == 'tech_libre' %}Lente: Software Libre
+                        {% elif goggle == 'no_content_farms' %}Lente: Sin Granjas
+                        {% elif goggle == 'science_primary' %}Lente: Ciencia
+                        {% elif goggle == 'small_web' %}Lente: Web Humana
+                        {% else %}Lentes: Estándar{% endif %}
+                    </span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" class="filter-dropdown-item {% if not goggle %}active{% endif %}">
+                        <span>Estándar (Sin lente)</span>
+                        {% if not goggle %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=tech_libre{% if synthesis %}&synthesis=true{% endif %}" class="filter-dropdown-item {% if goggle == 'tech_libre' %}active{% endif %}" title="Prioriza repositorios libres, wikis comunitarias y documentación oficial">
+                        <span>Software Libre & Documentación</span>
+                        {% if goggle == 'tech_libre' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=no_content_farms{% if synthesis %}&synthesis=true{% endif %}" class="filter-dropdown-item {% if goggle == 'no_content_farms' %}active{% endif %}" title="Descarta granjas SEO, agregadores masivos y clickbait">
+                        <span>Sin Granjas ni Muros</span>
+                        {% if goggle == 'no_content_farms' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=science_primary{% if synthesis %}&synthesis=true{% endif %}" class="filter-dropdown-item {% if goggle == 'science_primary' %}active{% endif %}" title="Prioriza repositorios de acceso abierto y ciencia">
+                        <span>Ciencia & Fuentes Primarias</span>
+                        {% if goggle == 'science_primary' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=small_web{% if synthesis %}&synthesis=true{% endif %}" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
+                        <span>Web Humana & Blogs</span>
+                        {% if goggle == 'small_web' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                </div>
+            </details>
+
+            <!-- Síntesis Asistida Toggle (100% Zero-JS / Pure HTML link) -->
+            {% if synthesis %}
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}&synthesis=false" class="filter-dropdown-btn is-filtered synthesis-toggle-btn" title="Desactivar síntesis asistida de fuentes">
+                <span>✨ Síntesis activa (Desactivar)</span>
+            </a>
+            {% else %}
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}&synthesis=true" class="filter-dropdown-btn synthesis-toggle-btn" title="Generar síntesis ética fundamentada en fuentes primarias">
+                <span>✨ Síntesis de Fuentes</span>
+            </a>
+            {% endif %}
+
             <!-- Densidad Button -->
             <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
                 <span id="densityLabel">Densidad: Cómoda</span>
@@ -208,7 +260,11 @@
     <!-- Metadata stats -->
     <div class="results-meta-row">
         <span>{{ results.total_matches }} <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)</span>
-        <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
+        <div class="results-meta-tags">
+            <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
+            <span class="meta-tag-feature" title="Diversidad algorítmica: Máximo 2 resultados por dominio">Diversidad de Dominios</span>
+            <span class="meta-tag-feature" title="Filtro Anti-Slop: Detección y degradación de granjas SEO automatizadas">Anti-Slop Activo</span>
+        </div>
     </div>
 
     <!-- Instant Sovereign Calculator Card (Cálculo Matemático Seguro) -->

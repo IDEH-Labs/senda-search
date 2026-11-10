@@ -858,6 +858,21 @@ html.light .country-search-box {
   border-color: var(--border-strong);
 }
 
+.synthesis-toggle-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.synthesis-toggle-btn.is-filtered {
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
+  color: var(--text-accent);
+}
+
 /* Compact Density Mode */
 body.compact-density .result-card {
   padding: 0.85rem 1.15rem;
@@ -882,12 +897,31 @@ body.compact-density .result-snippet {
   color: var(--text-faint);
   margin-bottom: 1.25rem;
   padding: 0 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.results-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .meta-tag-organic {
   color: var(--text-accent);
   font-weight: 600;
   font-size: 0.75rem;
+}
+
+.meta-tag-feature {
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 500;
 }
 
 /* Results Feed */

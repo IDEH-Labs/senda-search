@@ -23,6 +23,9 @@ from senda.providers.crossref import CrossrefProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
+from senda.ranking.clustering import apply_domain_clustering
+from senda.ranking.goggles import get_preset_goggle, apply_goggle_rules
+from senda.ranking.anti_slop import apply_anti_slop_filter
 
 
 BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
@@ -107,6 +110,9 @@ class ProviderAggregator:
         boost_domains: Optional[List[str]] = None,
         bury_domains: Optional[List[str]] = None,
         block_domains: Optional[List[str]] = None,
+        goggle: Optional[str] = None,
+        anti_slop: bool = True,
+        clustering: bool = True,
     ) -> List[SearchResultItem]:
         """Query active providers asynchronously, deduplicate, filter ads, and apply lenses."""
         boost_set = set(d.lower().strip() for d in (boost_domains or []))
@@ -204,6 +210,35 @@ class ProviderAggregator:
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )
                 )
+        elif cat == "smallweb":
+            # Small Web / IndieWeb / Personal blogs & Fediverse
+            tasks.append(
+                self.internal.search(
+                    query, category="web", page=page, page_size=page_size,
+                    time_filter=time_filter, region=region, safe_search=safe_search
+                )
+            )
+            if self.fediverse and self.fediverse.is_configured:
+                tasks.append(
+                    self.fediverse.search(
+                        query, category="social", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.mojeek and self.mojeek.is_configured:
+                tasks.append(
+                    self.mojeek.search(
+                        query, category="all", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.searxng and self.searxng.is_configured:
+                tasks.append(
+                    self.searxng.search(
+                        query, category="all", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
         else:
             # General Web Search (category='all'): Unified constellation of serious, verified sources
             tasks.append(
@@ -298,7 +333,23 @@ class ProviderAggregator:
 
                 merged.append(item)
 
-        # Sort: internal score descending
+        # 1. Apply user Goggle lens or smallweb default lens
+        active_goggle = get_preset_goggle(goggle) if goggle else None
+        if cat == "smallweb" and not active_goggle:
+            active_goggle = get_preset_goggle("small_web")
+
+        if active_goggle:
+            merged = apply_goggle_rules(merged, active_goggle)
+
+        # 2. Apply anti-slop synthetic farm detector
+        if anti_slop and cat not in ("images", "videos"):
+            merged = apply_anti_slop_filter(merged)
+
+        # 3. Sort: internal score descending
         merged.sort(key=lambda x: x.score, reverse=True)
+
+        # 4. Domain clustering: guarantee diversity (max 2 per domain in top tier)
+        if clustering and cat not in ("images", "videos"):
+            merged = apply_domain_clustering(merged, max_per_domain=2)
 
         return merged[:page_size]
