@@ -290,6 +290,53 @@ function initCommandBar() {
   });
 }
 
+/**
+ * Preferences Manager: Persist all sovereign user preferences in browser localStorage
+ * (Theme, Language, Density, Preferred Region/Country, and SafeSearch).
+ * Zero tracking, zero telemetry, zero invasive cookies.
+ */
+function initPreferencesManager() {
+  try {
+    var savedRegion = localStorage.getItem("senda_region");
+    if (savedRegion) {
+      document.querySelectorAll('input[name="region"]').forEach(function(inp) {
+        if (!inp.value || inp.value === "all") inp.value = savedRegion;
+      });
+    }
+
+    var savedSafeSearch = localStorage.getItem("senda_safesearch");
+    if (savedSafeSearch) {
+      document.querySelectorAll('input[name="safe_search"]').forEach(function(inp) {
+        if (!inp.value || inp.value === "off") inp.value = savedSafeSearch;
+      });
+    }
+  } catch (e) {}
+
+  // Remember region/country preference when clicked in dropdown
+  document.querySelectorAll('.filter-dropdown-item[href*="region="]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      try {
+        var match = this.getAttribute('href').match(/[?&]region=([^&]+)/);
+        if (match && match[1]) {
+          localStorage.setItem('senda_region', decodeURIComponent(match[1]));
+        }
+      } catch (err) {}
+    });
+  });
+
+  // Remember SafeSearch preference when clicked in dropdown
+  document.querySelectorAll('.filter-dropdown-item[href*="safe_search="]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      try {
+        var match = this.getAttribute('href').match(/[?&]safe_search=([^&]+)/);
+        if (match && match[1]) {
+          localStorage.setItem('senda_safesearch', decodeURIComponent(match[1]));
+        }
+      } catch (err) {}
+    });
+  });
+}
+
 // Lifecycle Initialization
 document.addEventListener("DOMContentLoaded", function() {
   var selector = document.getElementById("langSelector");
@@ -317,6 +364,7 @@ document.addEventListener("DOMContentLoaded", function() {
   applyTranslations(initialLang);
   initThemeManager();
   initDensityManager();
+  initPreferencesManager();
   initWhySeenDialog();
   initCommandBar();
 });

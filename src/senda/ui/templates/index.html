@@ -38,6 +38,8 @@
     <form class="home-search-form" action="/search" method="get" role="search">
         <input type="hidden" name="category" id="search-category" value="all">
         <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
+        <input type="hidden" name="region" id="search-region" value="all">
+        <input type="hidden" name="safe_search" id="search-safesearch" value="off">
         
         <div class="command-bar">
             <span class="command-bar-icon" aria-hidden="true">
