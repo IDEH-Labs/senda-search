@@ -646,6 +646,18 @@ body.homepage-view main.content-area {
 }
 
 /* Minimalist Tools Toolbar (Google / Sovereign Clean Design) */
+/* Global Details/Summary Reset (cross-browser removal of native disclosure triangles) */
+details summary {
+  list-style: none !important;
+  list-style-type: none !important;
+}
+details summary::-webkit-details-marker {
+  display: none !important;
+}
+details summary::marker {
+  display: none !important;
+}
+
 .results-tools-bar {
   display: flex;
   align-items: center;
@@ -662,15 +674,15 @@ body.homepage-view main.content-area {
 }
 
 .filter-dropdown-btn {
-  list-style: none;
+  list-style: none !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.3rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   font-size: 0.8rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-chip);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   user-select: none;
@@ -679,18 +691,19 @@ body.homepage-view main.content-area {
   font-family: inherit;
 }
 
-.filter-dropdown-btn::-webkit-details-marker {
-  display: none;
+.filter-dropdown-btn::-webkit-details-marker,
+.filter-dropdown-btn::marker {
+  display: none !important;
 }
 
 .filter-dropdown-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-chip-hover);
   border-color: var(--border-strong);
   color: var(--text-main);
 }
 
 .filter-dropdown[open] .filter-dropdown-btn {
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--bg-chip-active);
   border-color: var(--border-strong);
   color: var(--text-main);
 }
@@ -715,15 +728,22 @@ body.homepage-view main.content-area {
   position: absolute;
   top: calc(100% + 5px);
   left: 0;
-  min-width: 180px;
+  min-width: 190px;
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
   padding: 0.35rem 0;
   z-index: 60;
   display: flex;
   flex-direction: column;
+}
+
+[data-theme="light"] .filter-dropdown-menu,
+html.light .filter-dropdown-menu {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
 }
 
 .filter-country-menu {
@@ -737,11 +757,16 @@ body.homepage-view main.content-area {
   background: var(--bg-card);
 }
 
+[data-theme="light"] .country-search-box,
+html.light .country-search-box {
+  background: #ffffff;
+}
+
 .country-search-input {
   width: 100%;
   padding: 0.35rem 0.65rem;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-chip);
   border: 1px solid var(--border-subtle);
   color: var(--text-main);
   font-size: 0.78rem;
@@ -792,7 +817,7 @@ body.homepage-view main.content-area {
 }
 
 .filter-dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-chip-hover);
   color: var(--text-main);
 }
 
