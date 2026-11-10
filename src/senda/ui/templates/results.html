@@ -68,9 +68,9 @@
         <!-- Minimalist Search Tools Toolbar (Google / Sovereign Minimalist Standard) -->
         <div class="results-tools-bar" role="toolbar" aria-label="Herramientas y filtros de búsqueda">
             {% if category == 'news' %}
-            <!-- Periodo Temporal Popover (HTML5 Nativo Zero-JS) -->
-            <div class="filter-dropdown">
-                <button type="button" class="filter-dropdown-btn {% if time_filter and time_filter != 'all' %}is-filtered{% endif %}" id="timeBtn" popovertarget="timeFilterPopover" popovertargetaction="toggle" aria-haspopup="true">
+            <!-- Periodo Temporal Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if time_filter and time_filter != 'all' %}is-filtered{% endif %}">
                     <span class="dropdown-btn-label">
                         {% if time_filter == '1h' %}Última hora
                         {% elif time_filter == '1d' %}Últimas 24 horas
@@ -84,8 +84,8 @@
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                </button>
-                <div id="timeFilterPopover" popover="auto" class="filter-dropdown-menu">
+                </summary>
+                <div class="filter-dropdown-menu">
                     <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
                         <span>Cualquier fecha</span>
                         {% if not time_filter or time_filter == 'all' %}<span class="item-check">✓</span>{% endif %}
@@ -119,17 +119,17 @@
                         {% if time_filter == '1y_plus' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                 </div>
-            </div>
+            </details>
 
-            <!-- Ordenar Popover (HTML5 Nativo Zero-JS) -->
-            <div class="filter-dropdown">
-                <button type="button" class="filter-dropdown-btn {% if sort == 'relevance' %}is-filtered{% endif %}" id="sortBtn" popovertarget="sortFilterPopover" popovertargetaction="toggle" aria-haspopup="true">
+            <!-- Ordenar Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if sort == 'relevance' %}is-filtered{% endif %}">
                     <span class="dropdown-btn-label">Ordenar: {% if sort == 'relevance' %}Relevancia{% else %}Más recientes{% endif %}</span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                </button>
-                <div id="sortFilterPopover" popover="auto" class="filter-dropdown-menu">
+                </summary>
+                <div class="filter-dropdown-menu">
                     <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
                         <span>Más recientes</span>
                         {% if sort == 'date' or not sort %}<span class="item-check">✓</span>{% endif %}
@@ -139,20 +139,20 @@
                         {% if sort == 'relevance' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                 </div>
-            </div>
+            </details>
             {% endif %}
 
-            <!-- Región Popover (Todos los países del mundo - HTML5 Nativo Zero-JS) -->
-            <div class="filter-dropdown filter-region-dropdown">
-                <button type="button" class="filter-dropdown-btn {% if region and region != 'all' %}is-filtered{% endif %}" id="regionBtn" popovertarget="regionFilterPopover" popovertargetaction="toggle" aria-haspopup="true">
+            <!-- Región Dropdown (Todos los países y territorios del mundo) -->
+            <details class="filter-dropdown filter-region-dropdown">
+                <summary class="filter-dropdown-btn {% if region and region != 'all' %}is-filtered{% endif %}">
                     <span class="dropdown-btn-label">
                         {% if region and region != 'all' %}{{ current_country_name }}{% else %}Región: Global{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                </button>
-                <div id="regionFilterPopover" popover="auto" class="filter-dropdown-menu filter-country-menu">
+                </summary>
+                <div class="filter-dropdown-menu filter-country-menu">
                     <div class="country-search-box">
                         <input type="text" id="countryQuickFilter" class="country-search-input" placeholder="Buscar país o código..." autocomplete="off">
                     </div>
@@ -176,17 +176,17 @@
                         {% endfor %}
                     </div>
                 </div>
-            </div>
+            </details>
 
-            <!-- SafeSearch Popover (HTML5 Nativo Zero-JS) -->
-            <div class="filter-dropdown">
-                <button type="button" class="filter-dropdown-btn {% if safe_search == 'moderate' %}is-filtered{% endif %}" id="safesearchBtn" popovertarget="safesearchFilterPopover" popovertargetaction="toggle" aria-haspopup="true">
+            <!-- SafeSearch Dropdown -->
+            <details class="filter-dropdown">
+                <summary class="filter-dropdown-btn {% if safe_search == 'moderate' %}is-filtered{% endif %}">
                     <span class="dropdown-btn-label">SafeSearch: {% if safe_search == 'moderate' %}Moderado{% else %}Desactivado{% endif %}</span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                </button>
-                <div id="safesearchFilterPopover" popover="auto" class="filter-dropdown-menu">
+                </summary>
+                <div class="filter-dropdown-menu">
                     <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'off' or not safe_search %}active{% endif %}">
                         <span>Desactivado</span>
                         {% if safe_search == 'off' or not safe_search %}<span class="item-check">✓</span>{% endif %}
@@ -196,7 +196,7 @@
                         {% if safe_search == 'moderate' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                 </div>
-            </div>
+            </details>
 
             <!-- Densidad Button -->
             <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
