@@ -61,11 +61,8 @@
             <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
                 <span data-i18n="tab_library">Biblioteca</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=social&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'social' %}active{% endif %}" title="Consultar debates, preguntas y respuestas compartidas en foros y comunidades abiertas">
-                <span>Foros</span>
-            </a>
-            <a href="/search?q={{ query | urlencode }}&category=smallweb&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'smallweb' %}active{% endif %}" title="Explorar blogs personales, bitácoras y páginas creadas por personas">
-                <span>Webs Personales</span>
+            <a href="/search?q={{ query | urlencode }}&category=community&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'community' or category == 'social' or category == 'smallweb' %}active{% endif %}" title="Consultar debates, foros, bitácoras y aportes comunitarios independientes">
+                <span>Comunidad & Foros</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
                 <span>Mapas ↗</span>
@@ -213,7 +210,7 @@
                         {% elif goggle == 'tech_libre' %}Lente: Software Libre
                         {% elif goggle == 'no_content_farms' %}Lente: Sin Granjas
                         {% elif goggle == 'science_primary' %}Lente: Ciencia
-                        {% elif goggle == 'small_web' %}Lente: Webs Personales
+                        {% elif goggle == 'small_web' %}Lente: Comunidad & Foros
                         {% else %}Lentes: Estándar{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -238,7 +235,7 @@
                         {% if goggle == 'science_primary' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                     <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=small_web" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
-                        <span>Webs Personales & Bitácoras</span>
+                        <span>Comunidad & Foros</span>
                         {% if goggle == 'small_web' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                     <!-- Custom DSL input box (100% Zero-JS HTML form) -->

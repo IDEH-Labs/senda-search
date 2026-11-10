@@ -480,7 +480,7 @@ def create_app(
             osm_url = f"https://www.openstreetmap.org/search?query={urllib.parse.quote_plus(clean_q)}"
             return RedirectResponse(url=osm_url, status_code=302)
 
-        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb", "community"):
             cat = "all"
 
         # News defaults to freshest date sorting unless user explicitly opted for relevance
@@ -696,7 +696,7 @@ def create_app(
 
         q = form_data.get("q", [""])[0].strip()
         cat = form_data.get("category", ["all"])[0].lower().strip()
-        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb"):
+        if cat not in ("all", "web", "news", "images", "videos", "library", "social", "smallweb", "community"):
             cat = "all"
 
         try:

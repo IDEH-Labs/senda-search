@@ -196,23 +196,8 @@ class ProviderAggregator:
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )
                 )
-        elif cat == "social" or opt_in_social:
-            if self.fediverse and self.fediverse.is_configured:
-                tasks.append(
-                    self.fediverse.search(
-                        query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
-                    )
-                )
-            if self.bluesky and self.bluesky.is_configured:
-                tasks.append(
-                    self.bluesky.search(
-                        query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
-                    )
-                )
-        elif cat == "smallweb":
-            # Small Web / IndieWeb / Personal blogs & Fediverse
+        elif cat in ("community", "social", "smallweb") or opt_in_social:
+            # Unified Community & Fora (Personal blogs, IndieWeb, Fediverse, Bluesky)
             tasks.append(
                 self.internal.search(
                     query, category="web", page=page, page_size=page_size,
@@ -222,6 +207,13 @@ class ProviderAggregator:
             if self.fediverse and self.fediverse.is_configured:
                 tasks.append(
                     self.fediverse.search(
+                        query, category="social", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search
+                    )
+                )
+            if self.bluesky and self.bluesky.is_configured:
+                tasks.append(
+                    self.bluesky.search(
                         query, category="social", page=page, page_size=page_size,
                         time_filter=time_filter, region=region, safe_search=safe_search
                     )
@@ -341,7 +333,7 @@ class ProviderAggregator:
         elif goggle:
             active_goggle = get_preset_goggle(goggle)
 
-        if cat == "smallweb" and not active_goggle:
+        if cat in ("community", "smallweb") and not active_goggle:
             active_goggle = get_preset_goggle("small_web")
 
         if active_goggle:

@@ -74,8 +74,8 @@ PRESET_GOGGLES: Dict[str, SovereignGoggle] = {
     ),
     "small_web": SovereignGoggle(
         id="small_web",
-        name="Webs Personales & Bitácoras",
-        description="Rescata blogs personales, bitácoras y publicaciones humanas; descarta megacorporaciones.",
+        name="Comunidad & Foros",
+        description="Rescata blogs personales, bitácoras, foros y publicaciones comunitarias; descarta megacorporaciones.",
         boost_domains={
             "bearblog.dev", "neocities.org", "mataroa.blog", "writefreely.org",
             "fediverse.party", "mastodon.social", "github.io", "gitlab.io",

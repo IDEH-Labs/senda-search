@@ -347,12 +347,12 @@ def test_opensearch_integration(client):
 
 
 def test_goggles_and_smallweb_integration(client):
-    """Verify Sovereign Goggles, Webs Personales tab, and custom DSL in API and HTML."""
+    """Verify Sovereign Goggles, Comunidad & Foros tab, and custom DSL in API and HTML."""
     # 1. HTML search with Goggle
     resp_goggle = client.get("/search?q=Foundation&goggle=tech_libre")
     assert resp_goggle.status_code == 200
     assert "Lente: Software Libre" in resp_goggle.text
-    assert "Webs Personales" in resp_goggle.text
+    assert "Comunidad & Foros" in resp_goggle.text
     assert "100% Orgánico" in resp_goggle.text
 
     # 2. JSON search with Goggle catalog
@@ -362,10 +362,10 @@ def test_goggles_and_smallweb_integration(client):
     assert data["goggle"] == "tech_libre"
     assert any(g["id"] == "tech_libre" for g in data["goggles_catalog"])
 
-    # 3. Smallweb vertical category (Webs Personales)
-    resp_smallweb = client.get("/search?q=Foundation&category=smallweb")
-    assert resp_smallweb.status_code == 200
-    assert "Webs Personales" in resp_smallweb.text
+    # 3. Community vertical category (Comunidad & Foros)
+    resp_community = client.get("/search?q=Foundation&category=community")
+    assert resp_community.status_code == 200
+    assert "Comunidad & Foros" in resp_community.text
 
     # 4. Custom DSL Goggle test
     resp_custom = client.get("/search?q=Foundation&custom_goggle=%24discard%2Csite%3Dquora.com")
