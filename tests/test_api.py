@@ -347,14 +347,13 @@ def test_opensearch_integration(client):
 
 
 def test_goggles_and_smallweb_integration(client):
-    """Verify Sovereign Goggles, Small Web tab, and AI synthesis toggle in API and HTML."""
+    """Verify Sovereign Goggles, Webs Personales tab, and custom DSL in API and HTML."""
     # 1. HTML search with Goggle
     resp_goggle = client.get("/search?q=Foundation&goggle=tech_libre")
     assert resp_goggle.status_code == 200
     assert "Lente: Software Libre" in resp_goggle.text
-    assert "Pequeña Web" in resp_goggle.text
-    assert "Diversidad: Activa" in resp_goggle.text
-    assert "Anti-Slop: Activo" in resp_goggle.text
+    assert "Webs Personales" in resp_goggle.text
+    assert "100% Orgánico" in resp_goggle.text
 
     # 2. JSON search with Goggle catalog
     resp_json = client.get("/search?q=Foundation&goggle=tech_libre&format=json")
@@ -363,25 +362,13 @@ def test_goggles_and_smallweb_integration(client):
     assert data["goggle"] == "tech_libre"
     assert any(g["id"] == "tech_libre" for g in data["goggles_catalog"])
 
-    # 3. Smallweb vertical category
+    # 3. Smallweb vertical category (Webs Personales)
     resp_smallweb = client.get("/search?q=Foundation&category=smallweb")
     assert resp_smallweb.status_code == 200
-    assert "Pequeña Web" in resp_smallweb.text
+    assert "Webs Personales" in resp_smallweb.text
 
-    # 4. Synthesis toggle button presence
-    assert "Síntesis de Fuentes" in resp_goggle.text
-    resp_synth_on = client.get("/search?q=Foundation&synthesis=true")
-    assert resp_synth_on.status_code == 200
-    assert "Síntesis activa" in resp_synth_on.text
-
-    # 5. Custom DSL Goggle test
+    # 4. Custom DSL Goggle test
     resp_custom = client.get("/search?q=Foundation&custom_goggle=%24discard%2Csite%3Dquora.com")
     assert resp_custom.status_code == 200
     assert "Lente: DSL Personalizada" in resp_custom.text
-
-    # 6. Interactive Anti-Slop and Clustering toggles
-    resp_toggles = client.get("/search?q=Foundation&anti_slop=false&clustering=false")
-    assert resp_toggles.status_code == 200
-    assert "Anti-Slop: Inactivo" in resp_toggles.text
-    assert "Diversidad: Inactiva" in resp_toggles.text
 

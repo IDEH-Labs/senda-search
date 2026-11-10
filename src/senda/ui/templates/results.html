@@ -32,9 +32,6 @@
                 <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
                 {% if goggle %}<input type="hidden" name="goggle" value="{{ goggle }}">{% endif %}
                 {% if custom_goggle %}<input type="hidden" name="custom_goggle" value="{{ custom_goggle }}">{% endif %}
-                {% if synthesis %}<input type="hidden" name="synthesis" value="true">{% endif %}
-                {% if not anti_slop %}<input type="hidden" name="anti_slop" value="false">{% endif %}
-                {% if not clustering %}<input type="hidden" name="clustering" value="false">{% endif %}
                 {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
                 {% if time_filter %}<input type="hidden" name="time_filter" value="{{ time_filter }}">{% endif %}
                 
@@ -49,26 +46,26 @@
 
         <!-- Category navigation tabs -->
         <nav class="results-tab-row" role="tablist" aria-label="Categorías">
-            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
                 <span data-i18n="tab_web">Web</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
                 <span data-i18n="tab_images">Imágenes</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
                 <span data-i18n="tab_news">Noticias</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
                 <span data-i18n="tab_videos">Videos</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
+            <a href="/search?q={{ query | urlencode }}&category=library&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
                 <span data-i18n="tab_library">Biblioteca</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=social&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'social' %}active{% endif %}">
-                <span>Redes Abiertas</span>
+            <a href="/search?q={{ query | urlencode }}&category=social&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'social' %}active{% endif %}" title="Consultar debates, preguntas y respuestas compartidas en foros y comunidades abiertas">
+                <span>Foros</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=smallweb&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}" role="tab" class="results-tab-pill {% if category == 'smallweb' %}active{% endif %}" title="Explorar blogs personales, bitácoras y la web humana no comercial">
-                <span>Pequeña Web</span>
+            <a href="/search?q={{ query | urlencode }}&category=smallweb&region={{ region }}&theme={{ theme }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'smallweb' %}active{% endif %}" title="Explorar blogs personales, bitácoras y páginas creadas por personas">
+                <span>Webs Personales</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
                 <span>Mapas ↗</span>
@@ -216,7 +213,7 @@
                         {% elif goggle == 'tech_libre' %}Lente: Software Libre
                         {% elif goggle == 'no_content_farms' %}Lente: Sin Granjas
                         {% elif goggle == 'science_primary' %}Lente: Ciencia
-                        {% elif goggle == 'small_web' %}Lente: Web Humana
+                        {% elif goggle == 'small_web' %}Lente: Webs Personales
                         {% else %}Lentes: Estándar{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -224,24 +221,24 @@
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}" class="filter-dropdown-item {% if not goggle and not custom_goggle %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if not goggle and not custom_goggle %}active{% endif %}">
                         <span>Estándar (Sin lente)</span>
                         {% if not goggle and not custom_goggle %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=tech_libre{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}" class="filter-dropdown-item {% if goggle == 'tech_libre' %}active{% endif %}" title="Prioriza repositorios libres, wikis comunitarias y documentación oficial">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=tech_libre" class="filter-dropdown-item {% if goggle == 'tech_libre' %}active{% endif %}" title="Prioriza repositorios libres, wikis comunitarias y documentación oficial">
                         <span>Software Libre & Documentación</span>
                         {% if goggle == 'tech_libre' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=no_content_farms{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}" class="filter-dropdown-item {% if goggle == 'no_content_farms' %}active{% endif %}" title="Descarta granjas SEO, agregadores masivos y clickbait">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=no_content_farms" class="filter-dropdown-item {% if goggle == 'no_content_farms' %}active{% endif %}" title="Descarta granjas SEO, agregadores masivos y clickbait">
                         <span>Sin Granjas ni Muros</span>
                         {% if goggle == 'no_content_farms' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=science_primary{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}" class="filter-dropdown-item {% if goggle == 'science_primary' %}active{% endif %}" title="Prioriza repositorios de acceso abierto y ciencia">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=science_primary" class="filter-dropdown-item {% if goggle == 'science_primary' %}active{% endif %}" title="Prioriza repositorios de acceso abierto y ciencia">
                         <span>Ciencia & Fuentes Primarias</span>
                         {% if goggle == 'science_primary' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=small_web{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
-                        <span>Web Humana & Blogs</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=small_web" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
+                        <span>Webs Personales & Bitácoras</span>
                         {% if goggle == 'small_web' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                     <!-- Custom DSL input box (100% Zero-JS HTML form) -->
@@ -252,7 +249,6 @@
                             <input type="hidden" name="region" value="{{ region }}">
                             <input type="hidden" name="safe_search" value="{{ safe_search }}">
                             <input type="hidden" name="theme" value="{{ theme }}">
-                            {% if synthesis %}<input type="hidden" name="synthesis" value="true">{% endif %}
                             <label class="custom-dsl-label" for="custom_goggle_input">Regla DSL ($discard, $boost, $down):</label>
                             <input type="text" id="custom_goggle_input" name="custom_goggle" value="{{ custom_goggle | default('') }}" placeholder="$discard,site=spam.com" class="custom-dsl-input">
                             <button type="submit" class="custom-dsl-btn">Aplicar DSL</button>
@@ -261,17 +257,6 @@
                 </div>
             </details>
 
-            <!-- Síntesis Asistida Toggle (100% Zero-JS / Pure HTML link) -->
-            {% if synthesis %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}&synthesis=false" class="filter-dropdown-btn is-filtered synthesis-toggle-btn" title="Desactivar síntesis asistida de fuentes">
-                <span>✨ Síntesis activa (Desactivar)</span>
-            </a>
-            {% else %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}&synthesis=true" class="filter-dropdown-btn synthesis-toggle-btn" title="Generar síntesis ética fundamentada en fuentes primarias">
-                <span>✨ Síntesis de Fuentes</span>
-            </a>
-            {% endif %}
-
             <!-- Densidad Button -->
             <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="Alternar densidad visual (Cómoda / Compacta)">
                 <span id="densityLabel">Densidad: Cómoda</span>
@@ -279,32 +264,10 @@
         </div>
     </div>
 
-    <!-- Metadata stats & Real Ethical Toggles -->
+    <!-- Metadata stats -->
     <div class="results-meta-row">
         <span>{{ results.total_matches }} <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)</span>
-        <div class="results-meta-tags">
-            <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
-            
-            {% if clustering %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}&clustering=false{% if not anti_slop %}&anti_slop=false{% endif %}" class="meta-tag-feature is-active" title="Diversidad algorítmica activa (máx 2 por dominio). Clic para desactivar">
-                Diversidad: Activa
-            </a>
-            {% else %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}&clustering=true{% if not anti_slop %}&anti_slop=false{% endif %}" class="meta-tag-feature is-inactive" title="Diversidad desactivada. Clic para reactivar">
-                Diversidad: Inactiva
-            </a>
-            {% endif %}
-
-            {% if anti_slop %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}&anti_slop=false{% if not clustering %}&clustering=false{% endif %}" class="meta-tag-feature is-active" title="Filtro Anti-Slop activo. Clic para desactivar detección de granjas SEO">
-                Anti-Slop: Activo
-            </a>
-            {% else %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}&anti_slop=true{% if not clustering %}&clustering=false{% endif %}" class="meta-tag-feature is-inactive" title="Filtro Anti-Slop desactivado. Clic para reactivar">
-                Anti-Slop: Inactivo
-            </a>
-            {% endif %}
-        </div>
+        <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
     </div>
 
     <!-- Instant Sovereign Calculator Card (Cálculo Matemático Seguro) -->
@@ -504,7 +467,7 @@
     </aside>
     {% endif %}
 
-    <!-- Grounded AI Synthesis (Zero JS, Accessible, Attributed to Primary Sources) -->
+    <!-- Grounded AI Synthesis (Rendered only on explicit opt-in via ?synthesis=true) -->
     {% if grounded_synthesis %}
     <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis de fuentes primarias">
         <div class="grounded-header">
@@ -741,21 +704,21 @@
         {% if results.total_pages > 1 %}
         <nav class="pagination" role="navigation" aria-label="Páginas">
             {% if results.page > 1 %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page - 1 }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">&lsaquo; Anterior</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page - 1 }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">&lsaquo; Anterior</a>
             {% endif %}
 
             {% for p in range(1, results.total_pages + 1) %}
                 {% if p == results.page %}
                     <span class="page-btn active" aria-current="page">{{ p }}</span>
                 {% elif p <= 5 or p > results.total_pages - 2 or (p >= results.page - 2 and p <= results.page + 2) %}
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ p }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">{{ p }}</a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ p }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">{{ p }}</a>
                 {% elif p == 6 or p == results.page - 3 %}
                     <span class="page-dots">&hellip;</span>
                 {% endif %}
             {% endfor %}
 
             {% if results.page < results.total_pages %}
-            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page + 1 }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if synthesis %}&synthesis=true{% endif %}{% if not anti_slop %}&anti_slop=false{% endif %}{% if not clustering %}&clustering=false{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">Siguiente &rsaquo;</a>
+            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&page={{ results.page + 1 }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="page-btn">Siguiente &rsaquo;</a>
             {% endif %}
         </nav>
         {% endif %}
