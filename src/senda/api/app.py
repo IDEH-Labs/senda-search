@@ -43,6 +43,13 @@ from senda.worldtime import get_world_time
 from senda.reader import SovereignReader
 from senda.crawler.network_guard import SSRFSecurityViolation
 from senda.ranking.goggles import get_available_goggles
+from senda.i18n import (
+    resolve_language,
+    translate,
+    get_translation_catalog,
+    detect_query_language,
+    SUPPORTED_LANGUAGES,
+)
 
 
 # Pydantic schemas for API documentation and validation
@@ -275,11 +282,23 @@ def create_app(
             return cookie_val
         return "dark"
 
-    def render_with_theme(name: str, request: Request, context: dict, query_theme: Optional[str] = None) -> Response:
-        """Render template with theme and optionally set functional preference cookie."""
+    def render_with_theme(
+        name: str,
+        request: Request,
+        context: dict,
+        query_theme: Optional[str] = None,
+        query_lang: Optional[str] = None,
+    ) -> Response:
+        """Render template with theme, multilingual i18n, and optionally set functional preference cookies."""
         current_theme = resolve_theme(request, query_theme)
+        current_lang = resolve_language(request, query_lang or request.query_params.get("lang"))
+        catalog = get_translation_catalog(current_lang)
+
         ctx = dict(context)
         ctx["theme"] = current_theme
+        ctx["lang"] = current_lang
+        ctx["tr"] = catalog
+        ctx["supported_languages"] = SUPPORTED_LANGUAGES
         ctx["settings"] = settings
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
@@ -293,87 +312,71 @@ def create_app(
                 path="/",
                 httponly=False,
             )
+        if query_lang and query_lang.lower().strip()[:2] in SUPPORTED_LANGUAGES:
+            resp.set_cookie(
+                key="senda_lang",
+                value=current_lang,
+                max_age=31536000,
+                samesite="lax",
+                path="/",
+                httponly=False,
+            )
         return resp
 
     @app.get("/", response_class=HTMLResponse)
-    async def home(request: Request, theme: Optional[str] = Query(default=None)):
+    async def home(
+        request: Request,
+        theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
+    ):
         """Render search homepage."""
-        return render_with_theme("index.html", request, {}, theme)
+        return render_with_theme("index.html", request, {}, theme, lang)
 
     @app.get("/about", response_class=HTMLResponse)
-    async def about(request: Request, theme: Optional[str] = Query(default=None)):
+    async def about(
+        request: Request,
+        theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
+    ):
         """Render about and ethics page."""
-        return render_with_theme("about.html", request, {}, theme)
+        return render_with_theme("about.html", request, {}, theme, lang)
 
     @app.get("/how-it-works", response_class=HTMLResponse)
-    async def how_it_works(request: Request, theme: Optional[str] = Query(default=None)):
+    async def how_it_works(
+        request: Request,
+        theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
+    ):
         """Render plain language How It Works transparency page."""
-        return render_with_theme("how_it_works.html", request, {}, theme)
+        return render_with_theme("how_it_works.html", request, {}, theme, lang)
 
     @app.get("/privacy", response_class=HTMLResponse)
-    async def privacy(request: Request, theme: Optional[str] = Query(default=None)):
+    async def privacy(
+        request: Request,
+        theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
+    ):
         """Render verifiable privacy policy."""
-        return render_with_theme("privacy.html", request, {}, theme)
+        return render_with_theme("privacy.html", request, {}, theme, lang)
 
     @app.get("/javascript", response_class=HTMLResponse)
-    async def javascript_licenses(request: Request, theme: Optional[str] = Query(default=None)):
-        """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
-        return render_with_theme("javascript.html", request, {}, theme)
-
-    @app.get("/reader", response_class=HTMLResponse)
-    async def reader_view(
+    async def javascript_licenses(
         request: Request,
-        url: str = Query(default="", description="URL de la página a leer"),
-        q: Optional[str] = Query(default=None, description="Consulta original para retorno"),
         theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
     ):
-        """Sovereign Reader Mode: Distraction-free, zero-tracker reader view."""
+        """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
+        return render_with_theme("javascript.html", request, {}, theme, lang)
+
+    @app.get("/reader")
+    async def reader_view(
+        url: str = Query(default="", description="URL de la página a leer"),
+    ):
+        """Redirect legacy reader mode requests directly to target URL (browsers natively feature reader mode)."""
         clean_url = url.strip()
-        if not clean_url:
-            return render_with_theme(
-                "reader.html",
-                request,
-                {
-                    "error": "No se proporcionó ninguna URL para la vista de lectura.",
-                    "target_url": "",
-                    "return_q": q or "",
-                },
-                theme,
-            )
-
-        try:
-            article = await app_reader.extract_url(clean_url)
-            return render_with_theme(
-                "reader.html",
-                request,
-                {
-                    "article": article,
-                    "target_url": clean_url,
-                    "return_q": q or "",
-                },
-                theme,
-            )
-        except SSRFSecurityViolation:
-            err_msg = "Acceso bloqueado por seguridad: La dirección solicitada apunta a una red local o privada (protección anti-SSRF de Senda)."
-        except Exception as e:
-            err_msg = str(e)
-            if "SSRF" in err_msg or "forbidden" in err_msg.lower() or "private ip" in err_msg.lower():
-                err_msg = "Acceso bloqueado por seguridad: La dirección solicitada apunta a una red local o privada (protección anti-SSRF de Senda)."
-            elif "timed out" in err_msg.lower():
-                err_msg = "El sitio web remoto tardó demasiado en responder."
-            else:
-                err_msg = f"No se pudo extraer el artículo: {err_msg}"
-
-        return render_with_theme(
-            "reader.html",
-            request,
-            {
-                "error": err_msg,
-                "target_url": clean_url,
-                "return_q": q or "",
-            },
-            theme,
-        )
+        if clean_url and (clean_url.startswith("http://") or clean_url.startswith("https://")):
+            return RedirectResponse(url=clean_url, status_code=302)
+        return RedirectResponse(url="/", status_code=302)
 
     @app.get("/opensearch.xml")
     async def opensearch(request: Request):
@@ -451,9 +454,12 @@ def create_app(
         anti_slop: bool = Query(default=True),
         clustering: bool = Query(default=True),
         theme: Optional[str] = Query(default=None),
+        lang: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
         clean_q = q.strip()
+        user_lang = resolve_language(request, lang)
+        query_lang = detect_query_language(clean_q, fallback_lang=user_lang)
         p_val = p if isinstance(p, int) else 1
         page_val = page if isinstance(page, int) else 1
         current_page = max(p_val, page_val)
@@ -599,7 +605,7 @@ def create_app(
         # Verifiable Encyclopedic Entity Card (Wikipedia & Wikidata on-demand)
         entity_data = None
         if current_page == 1 and clean_q and cat in ("all", "web", "library"):
-            entity_card_obj = await app_wiki_entity.get_entity(clean_q, lang=settings.DEFAULT_LANGUAGE)
+            entity_card_obj = await app_wiki_entity.get_entity(clean_q, lang=query_lang)
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
 
@@ -681,7 +687,8 @@ def create_app(
                 "clustering": clustering,
                 "synthesis": synth,
             },
-            theme,
+            query_theme=theme,
+            query_lang=lang,
         )
 
     @app.post("/search")
@@ -705,6 +712,7 @@ def create_app(
             p = 1
 
         theme = form_data.get("theme", [None])[0]
+        lang = form_data.get("lang", [None])[0]
         time_filter = form_data.get("time_filter", [None])[0]
         sort = form_data.get("sort", [None])[0]
         region = form_data.get("region", [settings.DEFAULT_REGION])[0]
@@ -736,6 +744,7 @@ def create_app(
             anti_slop=anti_slop,
             clustering=clustering,
             theme=theme,
+            lang=lang,
         )
 
     @app.get("/api/v1/search", response_model=SearchResponseModel)

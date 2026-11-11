@@ -20,16 +20,18 @@
                     id="search-input"
                     value="{{ query }}"
                     class="command-bar-input"
+                    placeholder="{{ tr.search_placeholder | default('Buscar en la web libre...') }}"
                     required
                     autocomplete="off"
                     autocapitalize="none"
                     spellcheck="false"
-                    aria-label="Buscar"
+                    aria-label="{{ tr.search_placeholder | default('Buscar') }}"
                 >
                 <input type="hidden" name="category" value="{{ category }}">
                 <input type="hidden" name="region" value="{{ region }}">
                 <input type="hidden" name="safe_search" value="{{ safe_search }}">
                 <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
+                {% if lang %}<input type="hidden" name="lang" value="{{ lang }}">{% endif %}
                 {% if goggle %}<input type="hidden" name="goggle" value="{{ goggle }}">{% endif %}
                 {% if custom_goggle %}<input type="hidden" name="custom_goggle" value="{{ custom_goggle }}">{% endif %}
                 {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
@@ -46,26 +48,26 @@
 
         <!-- Category navigation tabs -->
         <nav class="results-tab-row" role="tablist" aria-label="Categorías">
-            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
-                <span data-i18n="tab_web">Web</span>
+            <a href="/search?q={{ query | urlencode }}&category=all&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'all' or category == 'web' %}active{% endif %}">
+                <span data-i18n="tab_web">{{ tr.tab_web | default('Web') }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
-                <span data-i18n="tab_images">Imágenes</span>
+            <a href="/search?q={{ query | urlencode }}&category=images&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'images' %}active{% endif %}">
+                <span data-i18n="tab_images">{{ tr.tab_images | default('Imágenes') }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
-                <span data-i18n="tab_news">Noticias</span>
+            <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'news' %}active{% endif %}">
+                <span data-i18n="tab_news">{{ tr.tab_news | default('Noticias') }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
-                <span data-i18n="tab_videos">Videos</span>
+            <a href="/search?q={{ query | urlencode }}&category=videos&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'videos' %}active{% endif %}">
+                <span data-i18n="tab_videos">{{ tr.tab_videos | default('Videos') }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=library&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
-                <span data-i18n="tab_library">Biblioteca</span>
+            <a href="/search?q={{ query | urlencode }}&category=library&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'library' %}active{% endif %}">
+                <span data-i18n="tab_library">{{ tr.tab_library | default('Biblioteca') }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=community&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'community' or category == 'social' or category == 'smallweb' %}active{% endif %}" title="Consultar debates, foros, bitácoras y aportes comunitarios independientes">
-                <span>Comunidad & Foros</span>
+            <a href="/search?q={{ query | urlencode }}&category=community&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'community' or category == 'social' or category == 'smallweb' %}active{% endif %}" title="Consultar debates, foros, bitácoras y aportes comunitarios independientes">
+                <span>{{ tr.tab_community | default('Comunidad & Foros') | safe }}</span>
             </a>
             <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
-                <span>Mapas ↗</span>
+                <span>{{ tr.tab_maps | default('Mapas ↗') }}</span>
             </a>
         </nav>
 
@@ -80,50 +82,50 @@
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                     <span class="dropdown-btn-label">
-                        {% if time_filter == '1h' %}Fecha: 1 hora
-                        {% elif time_filter == '1d' %}Fecha: 24 horas
-                        {% elif time_filter == '1w' %}Fecha: 1 semana
-                        {% elif time_filter == '1m' %}Fecha: 1 mes
-                        {% elif time_filter == '2m' %}Fecha: 2 meses
-                        {% elif time_filter == '6m' %}Fecha: 6 meses
-                        {% elif time_filter == '1y_plus' %}Fecha: 1 año+
-                        {% else %}Fecha: Todas{% endif %}
+                        {% if time_filter == '1h' %}{{ tr.filter_date }}: {{ tr.date_1h }}
+                        {% elif time_filter == '1d' %}{{ tr.filter_date }}: {{ tr.date_1d }}
+                        {% elif time_filter == '1w' %}{{ tr.filter_date }}: {{ tr.date_1w }}
+                        {% elif time_filter == '1m' %}{{ tr.filter_date }}: {{ tr.date_1m }}
+                        {% elif time_filter == '2m' %}{{ tr.filter_date }}: {{ tr.date_2m }}
+                        {% elif time_filter == '6m' %}{{ tr.filter_date }}: {{ tr.date_6m }}
+                        {% elif time_filter == '1y_plus' %}{{ tr.filter_date }}: {{ tr.date_1y }}
+                        {% else %}{{ tr.filter_date }}: {{ tr.date_all }}{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
-                        <span>Cualquier fecha</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
+                        <span>{{ tr.opt_any_date }}</span>
                         {% if not time_filter or time_filter == 'all' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1h" class="filter-dropdown-item {% if time_filter == '1h' %}active{% endif %}">
-                        <span>Última hora</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=1h" class="filter-dropdown-item {% if time_filter == '1h' %}active{% endif %}">
+                        <span>{{ tr.opt_last_hour }}</span>
                         {% if time_filter == '1h' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1d" class="filter-dropdown-item {% if time_filter == '1d' %}active{% endif %}">
-                        <span>Últimas 24 horas</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=1d" class="filter-dropdown-item {% if time_filter == '1d' %}active{% endif %}">
+                        <span>{{ tr.opt_last_24h }}</span>
                         {% if time_filter == '1d' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1w" class="filter-dropdown-item {% if time_filter == '1w' %}active{% endif %}">
-                        <span>Última semana</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=1w" class="filter-dropdown-item {% if time_filter == '1w' %}active{% endif %}">
+                        <span>{{ tr.opt_last_week }}</span>
                         {% if time_filter == '1w' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1m" class="filter-dropdown-item {% if time_filter == '1m' %}active{% endif %}">
-                        <span>Último mes</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=1m" class="filter-dropdown-item {% if time_filter == '1m' %}active{% endif %}">
+                        <span>{{ tr.opt_last_month }}</span>
                         {% if time_filter == '1m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=2m" class="filter-dropdown-item {% if time_filter == '2m' %}active{% endif %}">
-                        <span>Hace 2 meses</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=2m" class="filter-dropdown-item {% if time_filter == '2m' %}active{% endif %}">
+                        <span>{{ tr.opt_last_2m }}</span>
                         {% if time_filter == '2m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=6m" class="filter-dropdown-item {% if time_filter == '6m' %}active{% endif %}">
-                        <span>Hace 6 meses</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=6m" class="filter-dropdown-item {% if time_filter == '6m' %}active{% endif %}">
+                        <span>{{ tr.opt_last_6m }}</span>
                         {% if time_filter == '6m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1y_plus" class="filter-dropdown-item {% if time_filter == '1y_plus' %}active{% endif %}">
-                        <span>Hace 1 año o más</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&time_filter=1y_plus" class="filter-dropdown-item {% if time_filter == '1y_plus' %}active{% endif %}">
+                        <span>{{ tr.opt_last_year }}</span>
                         {% if time_filter == '1y_plus' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                 </div>
@@ -140,7 +142,22 @@
                         <path d="m21 8-4-4-4 4"></path>
                         <path d="M17 4v16"></path>
                     </svg>
-                    <span class="dropdown-btn-label">Ordenar: {% if sort == 'relevance' %}Relevancia{% else %}Recientes{% endif %}</span>
+                    <span class="dropdown-btn-label">{{ tr.filter_sort }}: {% if sort == 'relevance' %}{{ tr.sort_relevance }}{% else %}{{ tr.sort_recent }}{% endif %}</span>
+                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="filter-dropdown-menu">
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if sort == 'relevance' %}active{% endif %}">
+                        <span>{{ tr.opt_relevance }}</span>
+                        {% if sort == 'relevance' %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
+                        <span>{{ tr.opt_most_recent }}</span>
+                        {% if sort == 'date' or not sort %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                </div>
+            </details>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -168,7 +185,7 @@
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                     </svg>
                     <span class="dropdown-btn-label">
-                        {% if region and region != 'all' %}Región: {{ current_country_name }}{% else %}Región: Global{% endif %}
+                        {% if region and region != 'all' %}{{ tr.filter_region }}: {{ current_country_name }}{% else %}{{ tr.filter_region }}: {{ tr.region_global }}{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -176,12 +193,12 @@
                 </summary>
                 <div class="filter-dropdown-menu filter-country-menu">
                     <div class="country-search-box">
-                        <input type="text" id="countryQuickFilter" class="country-search-input" placeholder="Buscar país o código..." autocomplete="off">
+                        <input type="text" id="countryQuickFilter" class="country-search-input" placeholder="{{ tr.search_country }}" autocomplete="off">
                     </div>
                     
                     <div class="country-scroll-list" id="countryScrollList">
-                        <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item country-item {% if region == 'all' or not region %}active{% endif %}" data-country="global todo el mundo all">
-                            <span class="country-item-title">🌐 Global (Todo el mundo)</span>
+                        <a href="/search?q={{ query | urlencode }}&category={{ category }}&region=all&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item country-item {% if region == 'all' or not region %}active{% endif %}" data-country="global todo el mundo all">
+                            <span class="country-item-title">{{ tr.region_all_world }}</span>
                             {% if region == 'all' or not region %}<span class="item-check">✓</span>{% endif %}
                         </a>
 
@@ -189,7 +206,7 @@
                             {% if continent != 'Global' %}
                             <div class="country-continent-header">{{ continent }}</div>
                             {% for c in country_list %}
-                            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ c.code }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item country-item {% if region == c.code %}active{% endif %}" data-country="{{ c.name | lower }} {{ c.code | lower }}">
+                            <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ c.code }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item country-item {% if region == c.code %}active{% endif %}" data-country="{{ c.name | lower }} {{ c.code | lower }}">
                                 <span>{{ c.name }} <span class="country-code-pill">({{ c.code | upper }})</span></span>
                                 {% if region == c.code %}<span class="item-check">✓</span>{% endif %}
                             </a>
@@ -208,18 +225,18 @@
                     <svg class="dropdown-btn-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
-                    <span class="dropdown-btn-label">SafeSearch: {% if safe_search == 'moderate' %}Moderado{% else %}Off{% endif %}</span>
+                    <span class="dropdown-btn-label">{{ tr.filter_safesearch }}: {% if safe_search == 'moderate' %}{{ tr.safesearch_moderate }}{% else %}{{ tr.safesearch_off }}{% endif %}</span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'off' or not safe_search %}active{% endif %}">
-                        <span>Desactivado</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=off&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'off' or not safe_search %}active{% endif %}">
+                        <span>{{ tr.opt_disabled }}</span>
                         {% if safe_search == 'off' or not safe_search %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'moderate' %}active{% endif %}">
-                        <span>Moderado</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search=moderate&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if safe_search == 'moderate' %}active{% endif %}">
+                        <span>{{ tr.opt_moderate }}</span>
                         {% if safe_search == 'moderate' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                 </div>
@@ -236,36 +253,36 @@
                         <line x1="10" y1="12" x2="14" y2="12"></line>
                     </svg>
                     <span class="dropdown-btn-label">
-                        {% if custom_goggle %}Lente: DSL Personalizada
-                        {% elif goggle == 'tech_libre' %}Lente: Software Libre
-                        {% elif goggle == 'no_content_farms' %}Lente: Sin Granjas
-                        {% elif goggle == 'science_primary' %}Lente: Ciencia
-                        {% elif goggle == 'small_web' %}Lente: Comunidad & Foros
-                        {% else %}Lentes: Estándar{% endif %}
+                        {% if custom_goggle %}{{ tr.filter_lens }}: {{ tr.lens_custom_dsl }}
+                        {% elif goggle == 'tech_libre' %}{{ tr.filter_lens }}: {{ tr.lens_tech_libre }}
+                        {% elif goggle == 'no_content_farms' %}{{ tr.filter_lens }}: {{ tr.lens_no_farms }}
+                        {% elif goggle == 'science_primary' %}{{ tr.filter_lens }}: {{ tr.lens_science }}
+                        {% elif goggle == 'small_web' %}{{ tr.filter_lens }}: {{ tr.lens_community | default('Comunidad & Foros') | safe }}
+                        {% else %}{{ tr.filter_lenses }}: {{ tr.lens_standard }}{% endif %}
                     </span>
                     <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if not goggle and not custom_goggle %}active{% endif %}">
-                        <span>Estándar (Sin lente)</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="filter-dropdown-item {% if not goggle and not custom_goggle %}active{% endif %}">
+                        <span>{{ tr.opt_standard_no_lens }}</span>
                         {% if not goggle and not custom_goggle %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=tech_libre" class="filter-dropdown-item {% if goggle == 'tech_libre' %}active{% endif %}" title="Prioriza repositorios libres, wikis comunitarias y documentación oficial">
-                        <span>Software Libre & Documentación</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&goggle=tech_libre" class="filter-dropdown-item {% if goggle == 'tech_libre' %}active{% endif %}" title="Prioriza repositorios libres, wikis comunitarias y documentación oficial">
+                        <span>{{ tr.opt_tech_libre_desc }}</span>
                         {% if goggle == 'tech_libre' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=no_content_farms" class="filter-dropdown-item {% if goggle == 'no_content_farms' %}active{% endif %}" title="Descarta granjas SEO, agregadores masivos y clickbait">
-                        <span>Sin Granjas ni Muros</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&goggle=no_content_farms" class="filter-dropdown-item {% if goggle == 'no_content_farms' %}active{% endif %}" title="Descarta granjas SEO, agregadores masivos y clickbait">
+                        <span>{{ tr.opt_no_farms_desc }}</span>
                         {% if goggle == 'no_content_farms' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=science_primary" class="filter-dropdown-item {% if goggle == 'science_primary' %}active{% endif %}" title="Prioriza repositorios de acceso abierto y ciencia">
-                        <span>Ciencia & Fuentes Primarias</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&goggle=science_primary" class="filter-dropdown-item {% if goggle == 'science_primary' %}active{% endif %}" title="Prioriza repositorios de acceso abierto y ciencia">
+                        <span>{{ tr.opt_science_desc }}</span>
                         {% if goggle == 'science_primary' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}&goggle=small_web" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
-                        <span>Comunidad & Foros</span>
+                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if sort %}&sort={{ sort }}{% endif %}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&goggle=small_web" class="filter-dropdown-item {% if goggle == 'small_web' %}active{% endif %}" title="Rescata blogs personales y publicaciones independientes">
+                        <span>{{ tr.opt_community_desc | default('Comunidad & Foros') | safe }}</span>
                         {% if goggle == 'small_web' %}<span class="item-check">✓</span>{% endif %}
                     </a>
                     <!-- Custom DSL input box (100% Zero-JS HTML form) -->
@@ -276,9 +293,10 @@
                             <input type="hidden" name="region" value="{{ region }}">
                             <input type="hidden" name="safe_search" value="{{ safe_search }}">
                             <input type="hidden" name="theme" value="{{ theme }}">
-                            <label class="custom-dsl-label" for="custom_goggle_input">Regla DSL ($discard, $boost, $down):</label>
+                            {% if lang %}<input type="hidden" name="lang" value="{{ lang }}">{% endif %}
+                            <label class="custom-dsl-label" for="custom_goggle_input">{{ tr.opt_dsl_rule }}</label>
                             <input type="text" id="custom_goggle_input" name="custom_goggle" value="{{ custom_goggle | default('') }}" placeholder="$discard,site=spam.com" class="custom-dsl-input">
-                            <button type="submit" class="custom-dsl-btn">Aplicar DSL</button>
+                            <button type="submit" class="custom-dsl-btn">{{ tr.opt_apply_dsl }}</button>
                         </form>
                     </div>
                 </div>
@@ -287,13 +305,13 @@
 
             {% if category not in ('images', 'videos') %}
             <!-- Densidad Button (Solo en vistas con resultados textuales) -->
-            <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="Alternar densidad visual (Cómoda / Compacta)" aria-label="Alternar densidad visual">
+            <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="{{ tr.density_tooltip }}" aria-label="{{ tr.density_tooltip }}">
                 <svg class="dropdown-btn-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <line x1="3" y1="12" x2="21" y2="12"></line>
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
-                <span id="densityLabel">Densidad: Cómoda</span>
+                <span id="densityLabel">{{ tr.density_comfortable }}</span>
             </button>
             {% endif %}
         </div>
@@ -301,8 +319,8 @@
 
     <!-- Metadata stats -->
     <div class="results-meta-row">
-        <span>{{ results.total_matches }} <span data-i18n="results_found">resultados (</span>{{ results.duration_ms }} ms)</span>
-        <span class="meta-tag-organic">100% Orgánico &bull; Sin Publicidad</span>
+        <span>{{ results.total_matches }} <span data-i18n="results_found">{{ tr.results_found | default('resultados') }} (</span>{{ results.duration_ms }} ms)</span>
+        <span class="meta-tag-organic">{{ tr.tag_organic | default('100% Orgánico') }} &bull; {{ tr.tag_no_tracking | default('Sin Rastreo') }}</span>
     </div>
 
     <!-- Instant Sovereign Calculator Card (Cálculo Matemático Seguro) -->
@@ -715,14 +733,6 @@
                             </div>
                         </div>
                     </details>
-
-                    <a href="/reader?url={{ item.url | urlencode }}&q={{ query | urlencode }}" class="reader-pill-link" title="Leer en Modo Lectura sin distracciones, anuncios ni rastreadores">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                        </svg>
-                        <span>Lectura</span>
-                    </a>
                 </div>
                 
                 <h2 class="result-heading">
@@ -808,9 +818,9 @@
                 </ul>
 
             {% else %}
-                <h2 class="no-results-title">No se encontraron resultados</h2>
-                <p class="no-results-desc">
-                    No hay resultados para «<strong>{{ query }}</strong>».
+                <h2 class="no-results-title" data-i18n="no_results_title">{{ tr.no_results_title | default('No se encontraron resultados') }}</h2>
+                <p class="no-results-desc" data-i18n="no_results_desc">
+                    {{ tr.no_results_desc | default('Comprueba la ortografía o intenta con términos más generales.') }}
                 </p>
                 <div class="no-results-suggestions">
                     <span class="suggestions-label">Explorar la web pública con atajos directos:</span>

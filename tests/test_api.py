@@ -321,16 +321,14 @@ def test_conversion_and_world_time_cards(client):
 
 
 def test_reader_endpoint(client):
-    """Verify /reader endpoint handles missing URL, errors, and rendering."""
-    # Missing URL
-    resp_empty = client.get("/reader")
-    assert resp_empty.status_code == 200
-    assert "No se proporcionó ninguna URL" in resp_empty.text
+    """Verify /reader endpoint redirects directly to target URL without proxying."""
+    resp_redirect = client.get("/reader?url=https://fsf.org/news", follow_redirects=False)
+    assert resp_redirect.status_code == 302
+    assert resp_redirect.headers["location"] == "https://fsf.org/news"
 
-    # SSRF blocked URL
-    resp_ssrf = client.get("/reader?url=http://127.0.0.1:8000/secret")
-    assert resp_ssrf.status_code == 200
-    assert "bloqueado por seguridad" in resp_ssrf.text or "protección anti-SSRF" in resp_ssrf.text
+    resp_empty = client.get("/reader", follow_redirects=False)
+    assert resp_empty.status_code == 302
+    assert resp_empty.headers["location"] == "/"
 
 
 def test_opensearch_integration(client):
@@ -448,5 +446,55 @@ def test_purpose_built_dropdown_options_per_category_and_mobile_css(client):
     assert ".filter-dropdown[open]" in css
     assert "overflow: visible" in css
     assert ".dropdown-btn-icon" in css
+
+
+def test_multilingual_backend_resolution_and_rendering(client):
+    """Verify ethical, full Zero-JS server-side multilingual translation and Accept-Language negotiation."""
+    # Ensure client starts with clean cookie jar
+    if "senda_lang" in client.cookies:
+        del client.cookies["senda_lang"]
+
+    # 1. French language via Accept-Language header (no cookies set)
+    resp_fr = client.get(
+        "/search?q=liberte&category=all&time_filter=1d",
+        headers={"Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8"}
+    )
+    assert resp_fr.status_code == 200
+    html_fr = resp_fr.text
+    assert '<html lang="fr"' in html_fr
+    assert "Date: 24 heures" in html_fr
+    assert "Dernières 24 heures" in html_fr
+    assert "Région: Mondial" in html_fr
+    assert "Densité : Confortable" in html_fr
+
+    # 2. English language via explicit ?lang=en (sets senda_lang cookie)
+    resp_en = client.get("/search?q=freedom&category=all&time_filter=1d&lang=en")
+    assert resp_en.status_code == 200
+    html_en = resp_en.text
+    assert '<html lang="en"' in html_en
+    assert "Date: 24 hours" in html_en
+    assert "Any time" in html_en
+    assert "Region: Global" in html_en
+    assert "SafeSearch: Off" in html_en
+    assert "Density: Comfortable" in html_en
+
+    # 3. German language via cookie senda_lang=de
+    client.cookies.set("senda_lang", "de")
+    resp_de = client.get("/search?q=freiheit&category=all&time_filter=1d")
+    assert resp_de.status_code == 200
+    html_de = resp_de.text
+    assert '<html lang="de"' in html_de
+    assert "Datum: 24 Stunden" in html_de
+    assert "Beliebige Zeit" in html_de
+    assert "Dichte: Komfortabel" in html_de
+    # Clean up cookie
+    del client.cookies["senda_lang"]
+
+    # 4. News tab in English has Sort: Recent
+    resp_news_en = client.get("/search?q=open+source&category=news&sort=date&lang=en")
+    assert resp_news_en.status_code == 200
+    assert "Sort: Recent" in resp_news_en.text
+    assert "Most recent" in resp_news_en.text
+
 
 

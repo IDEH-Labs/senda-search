@@ -54,14 +54,14 @@
                 name="q"
                 id="search-input"
                 class="command-bar-input"
-                placeholder="Buscar en la web libre..."
+                placeholder="{{ tr.search_placeholder | default('Buscar en la web libre...') }}"
                 data-i18n="search_placeholder"
                 required
                 autofocus
                 autocomplete="off"
                 autocapitalize="none"
                 spellcheck="false"
-                aria-label="Buscar"
+                aria-label="{{ tr.search_placeholder | default('Buscar') }}"
             >
 
             <button type="button" id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar" style="display: none;">
@@ -77,16 +77,16 @@
         <!-- Sleek Minimalist Category Navigation -->
         <div class="home-category-row" role="tablist" aria-label="Categorías">
             <button type="button" role="tab" class="cat-chip active" data-cat="all" onclick="selectCategory('all', this)">
-                <span data-i18n="tab_web">Web</span>
+                <span data-i18n="tab_web">{{ tr.tab_web | default('Web') }}</span>
             </button>
             <button type="button" role="tab" class="cat-chip" data-cat="images" onclick="selectCategory('images', this)">
-                <span data-i18n="tab_images">Imágenes</span>
+                <span data-i18n="tab_images">{{ tr.tab_images | default('Imágenes') }}</span>
             </button>
             <button type="button" role="tab" class="cat-chip" data-cat="news" onclick="selectCategory('news', this)">
-                <span data-i18n="tab_news">Noticias</span>
+                <span data-i18n="tab_news">{{ tr.tab_news | default('Noticias') }}</span>
             </button>
             <button type="button" role="tab" class="cat-chip" data-cat="library" onclick="selectCategory('library', this)">
-                <span data-i18n="tab_library">Biblioteca</span>
+                <span data-i18n="tab_library">{{ tr.tab_library | default('Biblioteca') }}</span>
             </button>
         </div>
     </form>

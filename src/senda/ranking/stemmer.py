@@ -29,6 +29,62 @@ class MorphologicalStemmer:
         "er", "ed", "ly", "es", "s"
     )
 
+    # French suffixes
+    FRENCH_SUFFIXES = (
+        "isations", "isation", "ements", "ement", "atrices", "atrice",
+        "ateurs", "ateur", "ations", "ation", "abilites", "abilite",
+        "euses", "euse", "ment", "ique", "iste", "able", "ible",
+        "ance", "ence", "esse", "isse", "eaux", "ette", "eur", "eux",
+        "ees", "ent", "ait", "ais", "ons", "iez", "ier", "ee", "es", "e", "s"
+    )
+
+    # Portuguese suffixes
+    PORTUGUESE_SUFFIXES = (
+        "izacoes", "izacao", "amentos", "amento", "imentos", "imento",
+        "acoes", "acao", "idades", "idade", "amente", "mente",
+        "adores", "adoras", "ador", "adora", "ando", "endo", "indo",
+        "ados", "idos", "ado", "ido", "aram", "eram", "iram",
+        "oes", "ao", "ais", "eis", "as", "os", "ar", "er", "ir", "a", "o", "e", "s"
+    )
+
+    # Italian suffixes
+    ITALIAN_SUFFIXES = (
+        "izzazioni", "izzazione", "amenti", "amento", "imenti", "imento",
+        "azioni", "azione", "atrici", "atrice", "atori", "atore",
+        "mente", "ismo", "isti", "ista", "ando", "endo", "anti", "ante",
+        "abili", "abile", "ibili", "ibile", "anze", "anza", "enze", "enza",
+        "ette", "etto", "etti", "etta", "ezza", "ezze", "eranno", "iranno",
+        "arono", "erono", "irono", "iosa", "ioso", "ura", "ure",
+        "ato", "ito", "ata", "ita", "ati", "iti", "are", "ere", "ire", "a", "o", "e", "i"
+    )
+
+    # German suffixes
+    GERMAN_SUFFIXES = (
+        "ungen", "ung", "heiten", "heit", "keiten", "keit", "schaften", "schaft",
+        "ischen", "ischer", "isches", "ische", "isch", "lichen", "licher", "liches",
+        "liche", "lich", "baren", "barer", "bares", "bare", "bar",
+        "enden", "ender", "endes", "ende", "end", "eren", "erer", "eres", "ere",
+        "ern", "ers", "eln", "ens", "est", "ten", "ter", "tes", "te",
+        "en", "em", "es", "er", "st", "e", "s"
+    )
+
+    # Unified multilingual suffixes ordered strictly by length descending
+    # to guarantee greedy maximal suffix stripping across all supported language families.
+    ALL_SUFFIXES = tuple(
+        sorted(
+            set(
+                SPANISH_SUFFIXES
+                + ENGLISH_SUFFIXES
+                + FRENCH_SUFFIXES
+                + PORTUGUESE_SUFFIXES
+                + ITALIAN_SUFFIXES
+                + GERMAN_SUFFIXES
+            ),
+            key=len,
+            reverse=True,
+        )
+    )
+
     @staticmethod
     def strip_accents(text: str) -> str:
         """Strip combining diacritical marks."""
@@ -48,18 +104,11 @@ class MorphologicalStemmer:
         # Try stripped accents version
         clean_w = cls.strip_accents(w)
 
-        # Check Spanish suffixes
-        for suffix in cls.SPANISH_SUFFIXES:
+        # Check suffixes across unified multilingual catalogue (greedy longest-match first)
+        for suffix in cls.ALL_SUFFIXES:
             clean_suffix = cls.strip_accents(suffix)
             if clean_w.endswith(clean_suffix):
                 potential_root = clean_w[:-len(clean_suffix)]
-                if len(potential_root) >= min_root_length:
-                    return potential_root
-
-        # Check English suffixes
-        for suffix in cls.ENGLISH_SUFFIXES:
-            if clean_w.endswith(suffix):
-                potential_root = clean_w[:-len(suffix)]
                 if len(potential_root) >= min_root_length:
                     return potential_root
 

@@ -520,13 +520,15 @@ document.addEventListener("DOMContentLoaded", function() {
   } catch (e) {}
 
   if (selector) {
-    selector.value = initialLang;
     selector.addEventListener("change", function(e) {
       var selected = e.target.value;
       try {
         localStorage.setItem("senda_lang", selected);
       } catch (err) {}
-      applyTranslations(selected);
+      document.cookie = "senda_lang=" + selected + "; path=/; max-age=31536000; SameSite=Lax";
+      var params = new URLSearchParams(window.location.search);
+      params.set("lang", selected);
+      window.location.search = params.toString();
     });
   }
 
