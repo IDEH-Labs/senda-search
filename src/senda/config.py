@@ -4,6 +4,7 @@
 """Central configuration for the Senda Search Engine."""
 
 from pathlib import Path
+from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,6 +22,10 @@ class SendaSettings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     APP_URL: str = "https://ideh.top"
     CONTACT_EMAIL: str = "contact@ideh.top"
+    ONION_HOST: Optional[str] = Field(
+        default=None,
+        description="Public Tor v3 .onion hostname for Onion-Location header advertisement."
+    )
 
     # User-Agent strictly declaring identity and contact per RFC 9309 guidelines
     USER_AGENT: str = Field(

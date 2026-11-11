@@ -1,25 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}Privacy — Senda{% endblock %}
+{% block title %}Privacidad Soberana — Senda{% endblock %}
 
 {% block content %}
-<article class="info-card">
-    <h1 data-i18n="privacy_title">Verifiable Privacy Policy</h1>
+<article class="info-card" style="max-width: 820px; margin: 2rem auto; line-height: 1.65;">
+    <h1 data-i18n="privacy_title">Política de Privacidad y Modelo de Amenazas — Verifiable Privacy Policy</h1>
+    
     <p>
-        In Senda, privacy is an architectural constraint. We do not profile users, log searches, or track behavior.
+        En <strong>Senda</strong>, la privacidad no es una declaración comercial; es una <strong>restricción arquitectónica verificable</strong>.
+        Creemos en la minimización absoluta de datos: <em>lo que no se recopila jamás podrá ser filtrado, vendido ni confiscado</em>.
     </p>
 
-    <h2>Commitments</h2>
+    <h2>1. Principios Arquitectónicos Fundamentales</h2>
     <ul>
-        <li><strong>No Query Logs:</strong> Searches are processed in memory and never stored on disk.</li>
-        <li><strong>No IP Logging:</strong> Client IP addresses are never recorded in connection with searches.</li>
-        <li><strong>Zero Cookies &amp; Telemetry:</strong> No tracking cookies, no third-party analytics.</li>
-        <li><strong>Referrer Protection:</strong> All responses enforce <code>Referrer-Policy: no-referrer</code>.</li>
+        <li><strong>Cero registros de búsqueda (Zero Query Logs):</strong> Las consultas se procesan en la memoria volátil del servidor y se descartan inmediatamente tras entregar la respuesta. Ninguna búsqueda se almacena en disco ni en bases de datos.</li>
+        <li><strong>Cero almacenamiento de direcciones IP:</strong> El servidor de Senda no asocia ni almacena la dirección IP de los usuarios con las búsquedas realizadas.</li>
+        <li><strong>Cero cuentas y cero perfiles:</strong> No existe registro de usuarios, contraseñas, correos electrónicos ni identificadores persistentes. Cada petición es completamente anónima e independiente.</li>
+        <li><strong>Cero rastreadores y cero telemetría:</strong> Senda no incluye Google Analytics, Meta Pixel, ni scripts de telemetría de terceros. Cumple estrictamente con las directrices de <strong>GNU LibreJS</strong> y el nivel <strong>Safest</strong> de Tor Browser.</li>
+        <li><strong>Cabeceras de protección estricta:</strong> Todas las respuestas HTTP fuerzan <code>Referrer-Policy: no-referrer</code> (para que los sitios a los que accedes no sepan de dónde vienes), <code>X-Frame-Options: DENY</code> y una estricta <code>Content-Security-Policy</code> sin recursos de CDNs externos.</li>
     </ul>
 
-    <h2>Content Removal</h2>
+    <h2>2. Transparencia sobre Búsqueda Federada</h2>
     <p>
-        Webmasters wishing to exclude their sites from our index can specify it via <code>robots.txt</code> or contact IDEH Labs.
+        Para ofrecer resultados libres e independientes, Senda puede consultar de forma federada fuentes públicas y de ciencia abierta (tales como <em>Wikipedia</em>, <em>OpenAlex</em>, <em>arXiv</em>, <em>DOAJ</em> y <em>Crossref</em>):
+    </p>
+    <ul>
+        <li><strong>Aislamiento de identidad:</strong> Senda actúa como un intermediario técnico (proxy anonimizador). Los servidores de las fuentes externas <strong>nunca reciben tu dirección IP, huella digital ni cookies</strong>; únicamente ven la IP del servidor de Senda.</li>
+        <li><strong>Divulgación ética de la consulta:</strong> Dado que las fuentes externas deben devolver resultados relevantes, <strong>el texto de tu consulta de búsqueda es transmitido a dichas fuentes</strong> para obtener los datos públicos correspondientes. Senda no añade ningún identificador adicional ni metadatos personales.</li>
+    </ul>
+
+    <h2>3. Red Tor y Servicios Ocultos (.onion)</h2>
+    <p>
+        Senda está diseñado para funcionar al 100% en <strong>Tor Browser en su nivel máximo de seguridad (Safest)</strong> sin requerir JavaScript. Cuando un servicio <code>.onion</code> está habilitado en la instancia, la conexión viaja de extremo a extremo dentro de la red Tor, prescindiendo de nodos de salida (exit nodes).
+    </p>
+    <blockquote>
+        <strong>Nota de honestidad técnica:</strong> Ningún software o red proporciona "anonimato absoluto". La seguridad de un sistema depende tanto del código como de la configuración del servidor, la higiene operacional del usuario y la mitigación de ataques avanzados de correlación temporal o análisis de tráfico.
+    </blockquote>
+
+    <h2>4. Auditoría y Código Libre</h2>
+    <p>
+        Todo el código de Senda Search está publicado bajo la licencia libre <strong>GNU GPL-3.0-or-later</strong>. La comunidad y cualquier usuario pueden auditar las rutas, el backend asíncrono y los mecanismos de red de forma independiente en nuestro repositorio soberano:
+        <a href="https://codeberg.org/IDEH-Labs/senda-search" target="_blank" rel="noopener noreferrer">https://codeberg.org/IDEH-Labs/senda-search</a>.
     </p>
 </article>
 {% endblock %}
