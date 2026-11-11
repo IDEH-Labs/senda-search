@@ -13,12 +13,30 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
     <meta name="theme-color" content="#080c14">
     
+    <!-- Open Graph Protocol (WhatsApp / Telegram / Signal / Facebook) -->
+    <meta property="og:site_name" content="Senda">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://senda.ideh.top/">
+    <meta property="og:title" content="{% block og_title %}Senda — Buscador web libre, ético y sin rastreo{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Buscador web independiente y soberano. Sin rastreo, sin telemetría y sin burbujas de filtro.{% endblock %}">
+    <meta property="og:image" content="https://senda.ideh.top/static/img/senda-og.png">
+    <meta property="og:image:secure_url" content="https://senda.ideh.top/static/img/senda-og.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Senda Search Engine">
+
+    <!-- Twitter / Mastodon Summary Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Senda — Buscador web libre, ético y sin rastreo">
+    <meta name="twitter:description" content="Buscador web independiente y soberano. Sin rastreo, sin telemetría y sin burbujas de filtro.">
+    <meta name="twitter:image" content="https://senda.ideh.top/static/img/senda-og.png">
+    <meta name="twitter:image:alt" content="Senda Search Engine">
+
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon.png">
     <link rel="apple-touch-icon" href="/static/img/senda-icon-192.png">
     <link rel="manifest" href="/manifest.webmanifest">
-    <meta property="og:image" content="/static/img/senda-og.png">
-    <meta name="twitter:image" content="/static/img/senda-og.png">
 
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="Senda">
     <link rel="jslicense" href="/javascript">
