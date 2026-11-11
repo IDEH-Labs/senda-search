@@ -269,35 +269,36 @@ function initDropdownsAndFilters() {
     });
   }
 
+  function adjustMenuBoundary(d) {
+    var menu = d.querySelector('.filter-dropdown-menu');
+    if (!menu) return;
+    menu.style.left = '';
+    menu.style.right = '';
+    menu.style.transform = '';
+
+    var rect = menu.getBoundingClientRect();
+    var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+    // If menu extends beyond right edge, align right edge to button
+    if (rect.right > viewportWidth - 8) {
+      menu.style.left = 'auto';
+      menu.style.right = '0';
+    }
+
+    // If after alignment it extends beyond left edge, shift it right
+    var updatedRect = menu.getBoundingClientRect();
+    if (updatedRect.left < 8) {
+      var shift = 8 - updatedRect.left;
+      menu.style.transform = 'translateX(' + shift + 'px)';
+    }
+  }
+
   // Handle dropdown open toggle for mutual exclusion, boundary adjustment, and autofocus
   dropdowns.forEach(function(d) {
     d.addEventListener('toggle', function() {
       if (d.open) {
         closeAllDropdowns(d);
-
-        // Adjust positioning if menu bleeds past mobile screen boundaries
-        var menu = d.querySelector('.filter-dropdown-menu');
-        if (menu) {
-          menu.style.left = '';
-          menu.style.right = '';
-          menu.style.transform = '';
-
-          var rect = menu.getBoundingClientRect();
-          var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-
-          // If menu extends beyond right edge, align right edge to button
-          if (rect.right > viewportWidth - 8) {
-            menu.style.left = 'auto';
-            menu.style.right = '0';
-          }
-
-          // If after alignment it extends beyond left edge, shift it right
-          var updatedRect = menu.getBoundingClientRect();
-          if (updatedRect.left < 8) {
-            var shift = 8 - updatedRect.left;
-            menu.style.transform = 'translateX(' + shift + 'px)';
-          }
-        }
+        adjustMenuBoundary(d);
 
         var searchInput = d.querySelector('.country-search-input');
         if (searchInput) {
@@ -307,6 +308,15 @@ function initDropdownsAndFilters() {
         }
       } else {
         resetMenuPosition(d);
+      }
+    });
+  });
+
+  // Keep open dropdown inside viewport on screen orientation / resize
+  window.addEventListener('resize', function() {
+    dropdowns.forEach(function(d) {
+      if (d.open) {
+        adjustMenuBoundary(d);
       }
     });
   });
@@ -325,6 +335,7 @@ function initDropdownsAndFilters() {
       dropdowns.forEach(function(d) {
         if (d.open) {
           d.removeAttribute('open');
+          resetMenuPosition(d);
           anyClosed = true;
           var summary = d.querySelector('summary');
           if (summary) summary.focus();

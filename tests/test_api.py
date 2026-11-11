@@ -373,19 +373,26 @@ def test_goggles_and_smallweb_integration(client):
     assert "Lente: DSL Personalizada" in resp_custom.text
 
 
-def test_news_dropdown_options_and_mobile_css(client):
-    """Verify news dropdown filters (time period and sort) render properly with mobile-ready CSS."""
-    # Check news search page renders time and sort dropdowns
-    resp_news = client.get("/search?q=freedom&category=news&time_filter=1d&sort=relevance&goggle=tech_libre")
-    assert resp_news.status_code == 200
-    html = resp_news.text
-    assert "results-tools-bar" in html
-    assert "Últimas 24 horas" in html
-    assert "Ordenar: Relevancia" in html
-    assert "time_filter=1w" in html
-    assert "time_filter=1m" in html
-    # Verify goggle is preserved in news filter links
-    assert "goggle=tech_libre" in html
+def test_consistent_dropdown_options_across_all_tabs_and_mobile_css(client):
+    """Verify all search tabs (Web, News, Library, Community, Images, Videos) render the full AAA tool set."""
+    for cat in ["all", "news", "library", "community", "images", "videos"]:
+        resp = client.get(f"/search?q=freedom&category={cat}&time_filter=1d&sort=date&goggle=tech_libre")
+        assert resp.status_code == 200
+        html = resp.text
+        # Every single tab must have the exact same 6 search tools
+        assert "results-tools-bar" in html
+        assert "Fecha: 24 horas" in html
+        assert "Últimas 24 horas" in html
+        assert "Ordenar: Recientes" in html
+        assert "Región:" in html
+        assert "SafeSearch:" in html
+        assert "Lente:" in html or "Lentes:" in html
+        assert "densityBtn" in html
+        # Icons must be present for professional AAA visual hierarchy
+        assert "dropdown-btn-icon" in html
+        # Verify active category is maintained in time and sort dropdown links
+        assert f"category={cat}" in html
+        assert "goggle=tech_libre" in html
 
     # Verify CSS static file has mobile overflow fix for tools bar
     resp_css = client.get("/static/css/senda.css")
@@ -394,6 +401,6 @@ def test_news_dropdown_options_and_mobile_css(client):
     # .results-tools-bar must have overflow: visible and flex-wrap: wrap on mobile
     assert ".filter-dropdown[open]" in css
     assert "overflow: visible" in css
-    assert "max-width: calc(100vw - 1.5rem)" in css
+    assert ".dropdown-btn-icon" in css
 
 
