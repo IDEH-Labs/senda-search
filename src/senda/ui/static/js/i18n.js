@@ -562,6 +562,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  // Close sovereign language picker dropdown when clicking outside
+  document.addEventListener("click", function(e) {
+    var picker = document.querySelector("details.lang-picker[open]");
+    if (picker && !picker.contains(e.target)) {
+      picker.removeAttribute("open");
+    }
+  });
+
   applyTranslations(initialLang);
   initThemeManager();
   initDensityManager();
