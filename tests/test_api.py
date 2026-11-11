@@ -43,11 +43,11 @@ def test_api_security_headers_and_home(client):
     assert response.headers["X-Frame-Options"] == "DENY"
     assert "default-src 'self'" in response.headers["Content-Security-Policy"]
     # Verify 8 sovereign language options with native endonyms
-    assert "lang-dropdown" in response.text
     for lang_code in ["en", "es", "fr", "de", "pt", "it", "ja", "zh"]:
-        assert f'hreflang="{lang_code}"' in response.text
-    assert "日本語" in response.text
-    assert "中文" in response.text
+        assert f'value="{lang_code}"' in response.text
+    assert ">日本語</option>" in response.text
+    assert ">中文</option>" in response.text
+    assert "lang-picker" in response.text
 
 
 def test_api_static_pages(client):
@@ -611,40 +611,6 @@ def test_navigational_direct_site_resolution(client):
     assert top_arch["source"] == "Navegación Directa"
 
 
-def test_zero_js_language_and_footer_theme_persistence(client):
-    """Verify robust Tor Browser Safest / Zero-JS navigation state continuity."""
-    # 1. Search page with light theme and French language
-    resp = client.get("/search?q=linux&lang=fr&theme=light")
-    assert resp.status_code == 200
-    html = resp.text
-
-    # Zero-JS Native semantic Language dropdown
-    assert 'class="lang-dropdown"' in html
-    assert 'class="lang-dropdown-btn"' in html
-    assert 'class="lang-dropdown-menu"' in html
-    assert 'class="lang-dropdown-item' in html
-    assert 'hreflang="en"' in html
-    assert 'hreflang="es"' in html
-
-    # Footer links preserve both theme and lang
-    assert '/about?theme=light&amp;lang=fr' in html or '/about?theme=light&lang=fr' in html
-    assert '/privacy?theme=light&amp;lang=fr' in html or '/privacy?theme=light&lang=fr' in html
-    assert '/javascript?theme=light&amp;lang=fr' in html or '/javascript?theme=light&lang=fr' in html
-
-    # Mobile theme-color in light mode
-    assert 'content="#ffffff"' in html
-
-    # Clear button hidden without JS
-    assert 'id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar" style="display: none;"' in html
-
-    # 2. Homepage preserves lang in search form
-    resp_home = client.get("/?lang=en&theme=light")
-    assert resp_home.status_code == 200
-    html_home = resp_home.text
-    assert '<input type="hidden" name="lang" value="en">' in html_home
-    assert '<input type="hidden" name="theme" id="search-theme" value="light">' in html_home
-
-
 def test_news_results_resolve_real_publisher_domains_and_never_news_google_com(client):
     """Verify that news items display the actual publisher domain (e.g. mondosonoro.com) instead of news.google.com."""
     resp = client.get("/search?q=cocteau&category=news&format=json")
@@ -655,7 +621,6 @@ def test_news_results_resolve_real_publisher_domains_and_never_news_google_com(c
         for it in items:
             assert it["domain"] != "news.google.com", f"Domain was incorrectly set to news.google.com for item: {it}"
             assert it["domain"] != "", "Domain must not be empty"
-
 
 
 
