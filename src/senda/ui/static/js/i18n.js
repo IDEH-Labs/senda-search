@@ -113,6 +113,32 @@ const SENDA_TRANSLATIONS = {
     results_found: "条结果 (",
     no_results_title: "未找到符合条件的结果",
     no_results_desc: "请检查拼写或尝试使用更通用的关键词。",
+  },
+  ru: {
+    nav_about: "О проекте",
+    nav_privacy: "Конфиденциальность",
+    search_placeholder: "Поиск в свободной сети...",
+    tab_web: "Веб",
+    tab_images: "Изображения",
+    tab_news: "Новости",
+    tab_videos: "Видео",
+    tab_library: "Библиотека",
+    results_found: "результатов (",
+    no_results_title: "Ничего не найдено",
+    no_results_desc: "Проверьте правописание или используйте более общие ключевые слова.",
+  },
+  ar: {
+    nav_about: "حول",
+    nav_privacy: "الخصوصية",
+    search_placeholder: "ابحث في الويب الحر...",
+    tab_web: "ويب",
+    tab_images: "صور",
+    tab_news: "أخبار",
+    tab_videos: "فيديوهات",
+    tab_library: "المكتبة",
+    results_found: "نتائج (",
+    no_results_title: "لم يتم العثور على نتائج",
+    no_results_desc: "تحقق من الإملاء أو جرب كلمات مفتاحية أكثر عمومية.",
   }
 };
 
@@ -638,31 +664,54 @@ function initOpenSearchInstallation() {
 
 // Lifecycle Initialization
 document.addEventListener("DOMContentLoaded", function() {
-  var selector = document.getElementById("langSelector");
-  var userLang = (navigator.language || navigator.userLanguage || "es").slice(0, 2);
-  var initialLang = SENDA_TRANSLATIONS[userLang] ? userLang : "es";
+  // 1. Resolve active language following standard sovereign priority:
+  //    a) Explicit URL query param (?lang=en)
+  //    b) Server-rendered document lang (<html lang="en">)
+  //    c) Client-side stored preference (localStorage 'senda_lang')
+  //    d) Client-side functional cookie ('senda_lang')
+  //    e) Browser / device system language (navigator.language)
+  //    f) Fallback default ('es')
+  var urlParams = new URLSearchParams(window.location.search);
+  var urlLang = (urlParams.get("lang") || "").toLowerCase().slice(0, 2);
+  var htmlLang = (document.documentElement.getAttribute("lang") || "").toLowerCase().slice(0, 2);
+  var storedLang = (safeGetStorage("senda_lang") || "").toLowerCase().slice(0, 2);
+  var cookieMatch = document.cookie.match(/(?:^|;\s*)senda_lang=([^;]+)/);
+  var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]).toLowerCase().slice(0, 2) : "";
+  var navLang = (navigator.language || navigator.userLanguage || "es").toLowerCase().slice(0, 2);
 
-  try {
-    var storedLang = localStorage.getItem("senda_lang");
-    if (storedLang && SENDA_TRANSLATIONS[storedLang]) {
-      initialLang = storedLang;
-    }
-  } catch (e) {}
-
-  if (selector) {
-    selector.addEventListener("change", function(e) {
-      var selected = e.target.value;
-      try {
-        localStorage.setItem("senda_lang", selected);
-      } catch (err) {}
-      document.cookie = "senda_lang=" + selected + "; path=/; max-age=31536000; SameSite=Lax";
-      var params = new URLSearchParams(window.location.search);
-      params.set("lang", selected);
-      window.location.search = params.toString();
-    });
+  var activeLang = "es";
+  if (urlLang && SENDA_TRANSLATIONS[urlLang]) {
+    activeLang = urlLang;
+  } else if (htmlLang && SENDA_TRANSLATIONS[htmlLang]) {
+    activeLang = htmlLang;
+  } else if (storedLang && SENDA_TRANSLATIONS[storedLang]) {
+    activeLang = storedLang;
+  } else if (cookieLang && SENDA_TRANSLATIONS[cookieLang]) {
+    activeLang = cookieLang;
+  } else if (navLang && SENDA_TRANSLATIONS[navLang]) {
+    activeLang = navLang;
   }
 
-  applyTranslations(initialLang);
+  // Persist resolved language in storage and functional cookie
+  safeSetStorage("senda_lang", activeLang);
+  document.cookie = "senda_lang=" + activeLang + "; path=/; max-age=31536000; SameSite=Lax";
+
+  // When clicking any language item in the language picker, remember preference immediately
+  document.querySelectorAll('.lang-menu-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      try {
+        var href = this.getAttribute('href');
+        var match = href ? href.match(/[?&]lang=([a-zA-Z]{2})/) : null;
+        if (match && match[1]) {
+          var chosen = match[1].toLowerCase();
+          safeSetStorage("senda_lang", chosen);
+          document.cookie = "senda_lang=" + chosen + "; path=/; max-age=31536000; SameSite=Lax";
+        }
+      } catch (err) {}
+    });
+  });
+
+  applyTranslations(activeLang);
   initThemeManager();
   initDensityManager();
   initPreferencesManager();
