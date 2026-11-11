@@ -28,6 +28,23 @@ def _clean_text(text: Optional[str]) -> str:
     return " ".join(clean.split())
 
 
+def _is_relevant_news(query: str, title: str, source: str) -> bool:
+    """Verify that the syndicated news item genuinely matches the search query.
+
+    Prevents collaborative-filtering hallucinations and false positive synonym expansions
+    (such as matching fashion 'coctel' dresses when searching for 'cocteau').
+    """
+    clean_q = re.sub(r"\b(?:when|before):\S+", "", query).strip()
+    tokens = [t.lower() for t in re.findall(r"[a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]{3,}", clean_q)]
+    if not tokens:
+        return True
+
+    title_lower = title.lower()
+    source_lower = source.lower()
+
+    return any(token in title_lower or token in source_lower for token in tokens)
+
+
 def _expand_news_query(query: str) -> str:
     """Intelligently expand discovery and science terms for comprehensive press retrieval."""
     q_lower = query.lower().strip()
@@ -145,7 +162,7 @@ class RealTimeNewsProvider(SearchProvider):
                 resp = await client.get(feed_url, headers=headers)
                 if resp.status_code != 200:
                     return []
-                items = self.parse_feed(resp.text)
+                items = self.parse_feed(resp.text, query=clean_q)
 
                 # Sorting: default in news or if sort == 'date', sort by publication date descending
                 if sort == "relevance":
@@ -159,8 +176,8 @@ class RealTimeNewsProvider(SearchProvider):
         except Exception:
             return []
 
-    def parse_feed(self, xml_content: str) -> List[SearchResultItem]:
-        """Parse news items from RSS XML payload."""
+    def parse_feed(self, xml_content: str, query: str = "") -> List[SearchResultItem]:
+        """Parse news items from RSS XML payload, strictly resolving publisher origin and enforcing relevance."""
         items: List[SearchResultItem] = []
         if not xml_content:
             return items
@@ -182,6 +199,19 @@ class RealTimeNewsProvider(SearchProvider):
 
             source_elem = it.find("source")
             source_name = source_elem.text.strip() if source_elem is not None and source_elem.text else ""
+            source_url = source_elem.get("url", "").strip() if source_elem is not None else ""
+
+            source_domain = None
+            if source_url:
+                try:
+                    p_src = urllib.parse.urlparse(source_url)
+                    sd = p_src.netloc.lower()
+                    if sd.startswith("www."):
+                        sd = sd[4:]
+                    if sd:
+                        source_domain = sd
+                except Exception:
+                    pass
 
             # If source_name is not in <source>, extract from title if it ends with " - Source"
             clean_title = raw_title
@@ -194,6 +224,10 @@ class RealTimeNewsProvider(SearchProvider):
             if not source_name:
                 source_name = "Prensa Verificada"
 
+            # Relevance guard: eliminate false positives / unrelated feed items
+            if query and not _is_relevant_news(query, clean_title, source_name):
+                continue
+
             # Parse publication date to ISO 8601
             iso_date = None
             if pub_date_str:
@@ -203,9 +237,15 @@ class RealTimeNewsProvider(SearchProvider):
                 except Exception:
                     iso_date = pub_date_str
 
-            snippet = _clean_text(raw_desc)
-            if not snippet:
-                snippet = clean_title
+            clean_desc = _clean_text(raw_desc)
+            clean_desc_cmp = clean_desc.lower().replace(source_name.lower(), "").strip()
+            clean_title_cmp = clean_title.lower().strip()
+
+            if not clean_desc or clean_desc_cmp == clean_title_cmp or clean_desc_cmp.startswith(clean_title_cmp):
+                domain_hint = f" ({source_domain})" if source_domain else ""
+                snippet = f"Cobertura periodística de actualidad por «{source_name}»{domain_hint}. Consulta el reportaje completo en el medio de comunicación."
+            else:
+                snippet = clean_desc
 
             items.append(
                 SearchResultItem(
@@ -214,10 +254,11 @@ class RealTimeNewsProvider(SearchProvider):
                     snippet=snippet,
                     score=92.0,
                     source=source_name,
+                    source_domain=source_domain,
                     date=iso_date,
                     doc_type="news",
                     is_sponsored=False,
-                    canonical_url=link,
+                    canonical_url=source_url or link,
                     source_type="noticia",
                     content_type="noticia",
                     published_date=iso_date,

@@ -88,6 +88,7 @@ class SearchResultItem(BaseModel):
     security_signals: List[str] = Field(default_factory=list, description="Señales técnicas de listas de amenazas (malware, phishing)")
     source_score: Optional[SourceScoreInfo] = Field(default=None, description="Puntuación y factores de la rúbrica versionada")
     provider_origin: str = Field(default="Senda", description="Identificador técnico del proveedor")
+    source_domain: Optional[str] = Field(default=None, description="Dominio limpio del medio editorial sin intermediarios de redirección")
     ai_provenance: Optional[AIProvenance] = Field(default=None, description="Procedencia declarada de IA")
 
     @field_validator("snippet")
@@ -120,7 +121,9 @@ class SearchResultItem(BaseModel):
 
     @property
     def domain(self) -> str:
-        """Extract domain from URL safely."""
+        """Extract domain from URL safely, prioritizing verified publisher domain."""
+        if self.source_domain:
+            return self.source_domain
         try:
             from urllib.parse import urlparse
             parsed = urlparse(self.url)
