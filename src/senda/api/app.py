@@ -312,16 +312,7 @@ def create_app(
         home_query = urllib.parse.urlencode(home_params)
         home_url = f"/?{home_query}" if home_query else "/"
 
-        lang_names = {
-            "es": "Español",
-            "en": "English",
-            "fr": "Français",
-            "de": "Deutsch",
-            "pt": "Português",
-            "it": "Italiano",
-            "ja": "日本語",
-            "zh": "中文",
-        }
+        lang_names = dict(SUPPORTED_LANGUAGES)
         lang_urls = {}
         for l_code in SUPPORTED_LANGUAGES:
             l_obj = request.url.include_query_params(lang=l_code)

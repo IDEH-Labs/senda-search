@@ -12,18 +12,18 @@ import re
 from typing import Dict, Any, Optional
 from starlette.requests import Request
 
-# Supported interface languages with their native display names
+# Supported interface languages ordered alphabetically by their native endonyms
 SUPPORTED_LANGUAGES: Dict[str, str] = {
-    "es": "Español",
-    "en": "English",
-    "fr": "Français",
     "de": "Deutsch",
-    "pt": "Português",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
     "it": "Italiano",
-    "zh": "中文",
-    "ja": "日本語",
+    "pt": "Português",
     "ru": "Русский",
     "ar": "العربية",
+    "zh": "中文",
+    "ja": "日本語",
 }
 
 TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {

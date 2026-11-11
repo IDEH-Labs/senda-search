@@ -42,11 +42,13 @@ def test_api_security_headers_and_home(client):
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert response.headers["X-Frame-Options"] == "DENY"
     assert "default-src 'self'" in response.headers["Content-Security-Policy"]
-    # Verify 8 sovereign language options with native endonyms in Zero-JS details picker
-    for lang_code in ["en", "es", "fr", "de", "pt", "it", "ja", "zh"]:
+    # Verify 10 sovereign language options with native endonyms in Zero-JS details picker
+    for lang_code in ["de", "en", "es", "fr", "it", "pt", "ru", "ar", "zh", "ja"]:
         assert f'hreflang="{lang_code}"' in response.text
     assert "日本語" in response.text
     assert "中文" in response.text
+    assert "Русский" in response.text
+    assert "العربية" in response.text
     assert "lang-picker" in response.text
 
 
