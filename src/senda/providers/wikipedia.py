@@ -188,14 +188,20 @@ class WikipediaSearchProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs,
     ) -> List[SearchResultItem]:
         """Query official Wikipedia REST search API."""
         clean_q = query.strip()
         if not clean_q or not self.is_configured:
             return []
 
+        target_lang = (lang or self.lang or "es").split("-")[0].lower()
+        if target_lang not in ("ar", "de", "en", "es", "fr", "it", "ja", "pt", "ru", "zh"):
+            target_lang = self.lang or "es"
+
         encoded_q = urllib.parse.quote(clean_q)
-        api_url = f"https://{self.lang}.wikipedia.org/w/rest.php/v1/search/page?q={encoded_q}&limit={page_size}"
+        api_url = f"https://{target_lang}.wikipedia.org/w/rest.php/v1/search/page?q={encoded_q}&limit={page_size}"
         headers = {
             "User-Agent": settings.USER_AGENT,
             "Accept": "application/json",
@@ -207,11 +213,11 @@ class WikipediaSearchProvider(SearchProvider):
                 if resp.status_code != 200:
                     return []
                 data = resp.json()
-                return self.parse_pages(data)[:page_size]
+                return self.parse_pages(data, lang=target_lang)[:page_size]
         except Exception:
             return []
 
-    def parse_pages(self, data: dict) -> List[SearchResultItem]:
+    def parse_pages(self, data: dict, lang: str = "es") -> List[SearchResultItem]:
         """Convert Wikipedia search API results into normalized SearchResultItems."""
         items: List[SearchResultItem] = []
         if not isinstance(data, dict):
@@ -232,7 +238,7 @@ class WikipediaSearchProvider(SearchProvider):
             if not clean_excerpt:
                 clean_excerpt = p.get("description") or title
 
-            article_url = f"https://{self.lang}.wikipedia.org/wiki/{urllib.parse.quote(key)}"
+            article_url = f"https://{lang}.wikipedia.org/wiki/{urllib.parse.quote(key)}"
             thumb_info = p.get("thumbnail") or {}
             media_url = thumb_info.get("url") if isinstance(thumb_info, dict) else None
             if media_url and media_url.startswith("//"):
@@ -244,8 +250,9 @@ class WikipediaSearchProvider(SearchProvider):
                     title=title,
                     snippet=clean_excerpt,
                     score=85.0,
-                    source=f"Wikipedia ({self.lang.upper()})",
+                    source=f"Wikipedia ({lang.upper()})",
                     media_url=media_url,
+                    language=lang,
                     doc_type="web",
                     is_sponsored=False,
                     canonical_url=article_url,

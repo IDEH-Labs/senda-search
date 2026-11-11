@@ -11,13 +11,27 @@ from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 import html
 import re
-from typing import List, Optional
+from typing import Dict, List, Optional, Any
 import urllib.parse
 import xml.etree.ElementTree as ET
 import httpx
 
 from senda.config import settings
 from senda.providers.base import SearchProvider, SearchResultItem, AIProvenance
+
+
+NEWS_LANG_CONFIG: Dict[str, Dict[str, str]] = {
+    "ar": {"hl": "ar", "gl": "SA", "ceid": "SA:ar"},
+    "de": {"hl": "de", "gl": "DE", "ceid": "DE:de"},
+    "en": {"hl": "en-US", "gl": "US", "ceid": "US:en"},
+    "es": {"hl": "es-419", "gl": "ES", "ceid": "ES:es"},
+    "fr": {"hl": "fr", "gl": "FR", "ceid": "FR:fr"},
+    "it": {"hl": "it", "gl": "IT", "ceid": "IT:it"},
+    "ja": {"hl": "ja", "gl": "JP", "ceid": "JP:ja"},
+    "pt": {"hl": "pt-BR", "gl": "BR", "ceid": "BR:pt-419"},
+    "ru": {"hl": "ru", "gl": "RU", "ceid": "RU:ru"},
+    "zh": {"hl": "zh-CN", "gl": "CN", "ceid": "CN:zh-Hans"},
+}
 
 
 def _clean_text(text: Optional[str]) -> str:
@@ -31,11 +45,16 @@ def _clean_text(text: Optional[str]) -> str:
 def _is_relevant_news(query: str, title: str, source: str) -> bool:
     """Verify that the syndicated news item genuinely matches the search query.
 
-    Prevents collaborative-filtering hallucinations and false positive synonym expansions
-    (such as matching fashion 'coctel' dresses when searching for 'cocteau').
+    Prevents collaborative-filtering hallucinations and false positive synonym expansions.
+    Supports Unicode scripts across Cyrillic, Arabic, CJK, and European alphabets.
     """
     clean_q = re.sub(r"\b(?:when|before):\S+", "", query).strip()
-    tokens = [t.lower() for t in re.findall(r"[a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]{3,}", clean_q)]
+    if not clean_q:
+        return True
+
+    # Match alphanumeric words across all Unicode writing systems
+    raw_tokens = re.findall(r"\w+", clean_q, flags=re.UNICODE)
+    tokens = [t.lower() for t in raw_tokens if len(t) >= 2 or any(ord(c) > 127 for c in t)]
     if not tokens:
         return True
 
@@ -137,20 +156,35 @@ class RealTimeNewsProvider(SearchProvider):
         sort: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs: Any,
     ) -> List[SearchResultItem]:
         """Fetch breaking news articles matching the query from verified press feeds."""
-        clean_q = query.strip()
-        if not clean_q or not self.is_configured:
+        if not self.is_configured:
             return []
 
-        gl_code = (region or self.region).upper()
-        query_with_time = _resolve_time_query(clean_q, time_filter)
-        encoded_q = urllib.parse.quote_plus(query_with_time)
+        clean_q = query.strip()
 
-        if gl_code in ("ALL", "GLOBAL", "") or len(gl_code) != 2:
-            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}"
+        # Resolve language configuration (defaulting to Spanish or provider default)
+        target_lang = (lang or self.lang or "es").split("-")[0].lower()
+        lang_cfg = NEWS_LANG_CONFIG.get(target_lang, NEWS_LANG_CONFIG["es"])
+        hl = lang_cfg["hl"]
+        gl = lang_cfg["gl"]
+        ceid = lang_cfg["ceid"]
+
+        # Optional region/country override
+        gl_override = (region or self.region or "").upper().strip()
+        if len(gl_override) == 2 and gl_override not in ("AL", "ALL", "GLOBAL", ""):
+            gl = gl_override
+            ceid = f"{gl}:{hl}"
+
+        if clean_q:
+            query_with_time = _resolve_time_query(clean_q, time_filter)
+            encoded_q = urllib.parse.quote_plus(query_with_time)
+            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={hl}&gl={gl}&ceid={ceid}"
         else:
-            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={self.lang}&gl={gl_code}&ceid={gl_code}:{self.lang}"
+            # Query-less breaking top headlines for the target language and region
+            feed_url = f"https://news.google.com/rss?hl={hl}&gl={gl}&ceid={ceid}"
 
         headers = {
             "User-Agent": settings.USER_AGENT,
@@ -162,7 +196,7 @@ class RealTimeNewsProvider(SearchProvider):
                 resp = await client.get(feed_url, headers=headers)
                 if resp.status_code != 200:
                     return []
-                items = self.parse_feed(resp.text, query=clean_q)
+                items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
 
                 # Sorting: default in news or if sort == 'date', sort by publication date descending
                 if sort == "relevance":
@@ -176,7 +210,7 @@ class RealTimeNewsProvider(SearchProvider):
         except Exception:
             return []
 
-    def parse_feed(self, xml_content: str, query: str = "") -> List[SearchResultItem]:
+    def parse_feed(self, xml_content: str, query: str = "", lang: str = "es") -> List[SearchResultItem]:
         """Parse news items from RSS XML payload, strictly resolving publisher origin and enforcing relevance."""
         items: List[SearchResultItem] = []
         if not xml_content:
@@ -256,6 +290,7 @@ class RealTimeNewsProvider(SearchProvider):
                     source=source_name,
                     source_domain=source_domain,
                     date=iso_date,
+                    language=lang,
                     doc_type="news",
                     is_sponsored=False,
                     canonical_url=source_url or link,

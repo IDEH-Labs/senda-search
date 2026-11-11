@@ -33,6 +33,8 @@ class InternalStorageProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs,
     ) -> list[SearchResultItem]:
         cat = category.lower().strip()
         if cat in ("all", "web", "news", "images", "videos", "library"):

@@ -4,7 +4,7 @@
 """Sovereign and Open Video Search Provider querying federated PeerTube and Internet Archive."""
 
 import urllib.parse
-from typing import List, Optional
+from typing import List, Optional, Any
 import httpx
 
 from senda.config import settings
@@ -51,6 +51,8 @@ class EthicalVideoProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs: Any,
     ) -> List[SearchResultItem]:
         """Search videos across federated PeerTube (SepiaSearch) with Internet Archive fallback."""
         clean_q = query.strip()
@@ -63,6 +65,8 @@ class EthicalVideoProvider(SearchProvider):
         # 1. Primary: SepiaSearch (PeerTube federated network by Framasoft)
         encoded_q = urllib.parse.quote_plus(clean_q)
         peertube_url = f"https://sepiasearch.org/api/v1/search/videos?search={encoded_q}&count={page_size}&start={start_idx}"
+        if lang:
+            peertube_url += f"&languageOneOf={urllib.parse.quote_plus(lang[:2].lower())}"
 
         headers = {
             "User-Agent": settings.USER_AGENT,

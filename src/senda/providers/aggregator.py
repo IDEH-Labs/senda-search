@@ -115,6 +115,8 @@ class ProviderAggregator:
         custom_goggle: Optional[str] = None,
         anti_slop: bool = True,
         clustering: bool = True,
+        lang: Optional[str] = None,
+        **kwargs,
     ) -> List[SearchResultItem]:
         """Query active providers asynchronously, deduplicate, filter ads, and apply lenses."""
         boost_set = set(d.lower().strip() for d in (boost_domains or []))
@@ -131,13 +133,13 @@ class ProviderAggregator:
                 tasks.append(
                     self.images.search(
                         query, category="images", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             tasks.append(
                 self.internal.search(
                     query, category="images", page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
         elif cat == "news":
@@ -145,13 +147,13 @@ class ProviderAggregator:
                 tasks.append(
                     self.news.search(
                         query, category="news", page=page, page_size=page_size,
-                        time_filter=time_filter, sort=sort, region=region, safe_search=safe_search
+                        time_filter=time_filter, sort=sort, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             tasks.append(
                 self.internal.search(
                     query, category="news", page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
         elif cat == "videos":
@@ -159,27 +161,27 @@ class ProviderAggregator:
                 tasks.append(
                     self.videos.search(
                         query, category="videos", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.searxng and self.searxng.is_configured:
                 tasks.append(
                     self.searxng.search(
                         query, category="videos", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             tasks.append(
                 self.internal.search(
                     query, category="videos", page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
         elif cat == "library" or opt_in_academic:
             tasks.append(
                 self.internal.search(
                     query, category="library", page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
             for prov in (self.crossref, self.doaj, self.arxiv, self.pubmed):
@@ -187,14 +189,14 @@ class ProviderAggregator:
                     tasks.append(
                         prov.search(
                             query, category="library", page=page, page_size=page_size,
-                            time_filter=time_filter, region=region, safe_search=safe_search
+                            time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                         )
                     )
             if self.openalex and self.openalex.is_configured:
                 tasks.append(
                     self.openalex.search(
                         query, category="library", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
         elif cat in ("community", "social", "smallweb") or opt_in_social:
@@ -202,35 +204,35 @@ class ProviderAggregator:
             tasks.append(
                 self.internal.search(
                     query, category="web", page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
             if self.fediverse and self.fediverse.is_configured:
                 tasks.append(
                     self.fediverse.search(
                         query, category="social", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.bluesky and self.bluesky.is_configured:
                 tasks.append(
                     self.bluesky.search(
                         query, category="social", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.mojeek and self.mojeek.is_configured:
                 tasks.append(
                     self.mojeek.search(
                         query, category="all", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.searxng and self.searxng.is_configured:
                 tasks.append(
                     self.searxng.search(
                         query, category="all", page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
         else:
@@ -238,49 +240,49 @@ class ProviderAggregator:
             tasks.append(
                 self.internal.search(
                     query, category=category, page=page, page_size=page_size,
-                    time_filter=time_filter, region=region, safe_search=safe_search
+                    time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                 )
             )
             if self.wikipedia_search and self.wikipedia_search.is_configured:
                 tasks.append(
                     self.wikipedia_search.search(
                         query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.crossref and self.crossref.is_configured:
                 tasks.append(
                     self.crossref.search(
                         query, category=category, page=page, page_size=3,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.doaj and self.doaj.is_configured:
                 tasks.append(
                     self.doaj.search(
                         query, category=category, page=page, page_size=3,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.searxng and self.searxng.is_configured:
                 tasks.append(
                     self.searxng.search(
                         query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.brave and self.brave.is_configured:
                 tasks.append(
                     self.brave.search(
                         query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             if self.mojeek and self.mojeek.is_configured:
                 tasks.append(
                     self.mojeek.search(
                         query, category=category, page=page, page_size=page_size,
-                        time_filter=time_filter, region=region, safe_search=safe_search
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
 

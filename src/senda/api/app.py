@@ -549,6 +549,7 @@ def create_app(
             custom_goggle=custom_goggle_val,
             anti_slop=anti_slop,
             clustering=clustering,
+            lang=user_lang,
         )
 
         # Typo tolerance & Did-you-mean engine (Sovereign, non-tracking, offline-first)
@@ -573,6 +574,7 @@ def create_app(
                         custom_goggle=custom_goggle_val,
                         anti_slop=anti_slop,
                         clustering=clustering,
+                        lang=user_lang,
                     )
                     if len(fallback_items) > 0:
                         items_list = fallback_items
@@ -701,7 +703,10 @@ def create_app(
         # Verifiable Encyclopedic Entity Card (Wikipedia & Wikidata on-demand)
         entity_data = None
         if current_page == 1 and card_query and cat in ("all", "web", "library"):
-            entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=query_lang, fetch_official_website=True)
+            target_wiki_lang = user_lang or query_lang or "es"
+            entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=target_wiki_lang, fetch_official_website=True)
+            if not entity_card_obj and query_lang != target_wiki_lang:
+                entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=query_lang, fetch_official_website=True)
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
 

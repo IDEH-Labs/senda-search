@@ -231,6 +231,8 @@ class SearchProvider(ABC):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs: Any,
     ) -> List[SearchResultItem]:
         """Execute search, strip identifying headers, and normalize output."""
         pass

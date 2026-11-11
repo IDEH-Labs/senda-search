@@ -132,6 +132,8 @@ class OpenAlexProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs,
     ) -> list[SearchResultItem]:
         """Query OpenAlex for verified Open Access scientific publications."""
         if not self.is_configured or not query.strip():

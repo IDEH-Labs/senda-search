@@ -53,6 +53,8 @@ class FreeCultureImageProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs,
     ) -> List[SearchResultItem]:
         """Fetch Free Cultural Works images matching the query."""
         clean_q = query.strip()

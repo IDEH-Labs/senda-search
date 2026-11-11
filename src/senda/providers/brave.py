@@ -3,7 +3,7 @@
 
 """Brave Search API Provider adapter."""
 
-from typing import Optional
+from typing import Optional, Any
 import httpx
 from senda.providers.base import SearchProvider, SearchResultItem
 
@@ -31,6 +31,8 @@ class BraveSearchProvider(SearchProvider):
         time_filter: Optional[str] = None,
         region: Optional[str] = None,
         safe_search: str = "off",
+        lang: Optional[str] = None,
+        **kwargs: Any,
     ) -> list[SearchResultItem]:
         if not self.is_configured:
             return []
@@ -54,6 +56,8 @@ class BraveSearchProvider(SearchProvider):
         }
         if region:
             params["country"] = region
+        if lang:
+            params["search_lang"] = lang
         if time_filter:
             params["freshness"] = time_filter
 
