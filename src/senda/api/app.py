@@ -305,9 +305,9 @@ def create_app(
         theme_toggle_url = next_theme_url_obj.path + ("?" + next_theme_url_obj.query if next_theme_url_obj.query else "")
 
         home_params = {}
-        if current_theme != "dark":
+        if current_theme:
             home_params["theme"] = current_theme
-        if current_lang != "es":
+        if current_lang and current_lang != "es":
             home_params["lang"] = current_lang
         home_query = urllib.parse.urlencode(home_params)
         home_url = f"/?{home_query}" if home_query else "/"

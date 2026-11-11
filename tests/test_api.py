@@ -611,4 +611,38 @@ def test_navigational_direct_site_resolution(client):
     assert top_arch["source"] == "Navegación Directa"
 
 
+def test_zero_js_language_and_footer_theme_persistence(client):
+    """Verify robust Tor Browser Safest / Zero-JS navigation state continuity."""
+    # 1. Search page with light theme and French language
+    resp = client.get("/search?q=linux&lang=fr&theme=light")
+    assert resp.status_code == 200
+    html = resp.text
+
+    # Zero-JS Language form and noscript button
+    assert 'class="lang-form"' in html
+    assert 'class="lang-submit-noscript"' in html
+    assert '<noscript>' in html
+    assert 'name="q" value="linux"' in html
+    assert 'name="theme" value="light"' in html
+
+    # Footer links preserve both theme and lang
+    assert '/about?theme=light&amp;lang=fr' in html or '/about?theme=light&lang=fr' in html
+    assert '/privacy?theme=light&amp;lang=fr' in html or '/privacy?theme=light&lang=fr' in html
+    assert '/javascript?theme=light&amp;lang=fr' in html or '/javascript?theme=light&lang=fr' in html
+
+    # Mobile theme-color in light mode
+    assert 'content="#ffffff"' in html
+
+    # Clear button hidden without JS
+    assert 'id="clearSearchBtn" class="command-bar-clear" aria-label="Limpiar" style="display: none;"' in html
+
+    # 2. Homepage preserves lang in search form
+    resp_home = client.get("/?lang=en&theme=light")
+    assert resp_home.status_code == 200
+    html_home = resp_home.text
+    assert '<input type="hidden" name="lang" value="en">' in html_home
+    assert '<input type="hidden" name="theme" id="search-theme" value="light">' in html_home
+
+
+
 

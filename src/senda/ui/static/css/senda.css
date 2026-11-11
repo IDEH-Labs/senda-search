@@ -325,6 +325,29 @@ html.light .lang-selector option {
   color: var(--text-muted);
 }
 
+.lang-submit-noscript {
+  background: var(--bg-chip);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  height: 38px;
+  padding: 0 0.65rem;
+  margin-left: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.lang-submit-noscript:hover {
+  background: var(--accent);
+  color: #080c14;
+  border-color: var(--accent);
+}
+
 /* Main Content Layout */
 main.content-area {
   flex: 1;

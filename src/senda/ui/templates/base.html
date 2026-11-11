@@ -11,7 +11,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <meta name="referrer" content="no-referrer">
     <meta name="color-scheme" content="dark light">
     <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
-    <meta name="theme-color" content="#080c14">
+    <meta name="theme-color" content="{{ '#080c14' if theme != 'light' else '#ffffff' }}">
     
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon.png">
@@ -91,26 +91,41 @@ Senda — Free Software under GNU GPL-3.0-or-later
                 </svg>
             </a>
 
-            <div class="lang-picker" title="Seleccionar idioma / Select language">
-                <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
-                <select id="langSelector" class="lang-selector" aria-label="{{ tr.lang_switch | default('Idioma') }}">
-                    <option value="es" {% if lang == 'es' or not lang %}selected{% endif %}>Español</option>
-                    <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
-                    <option value="fr" {% if lang == 'fr' %}selected{% endif %}>Français</option>
-                    <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
-                    <option value="pt" {% if lang == 'pt' %}selected{% endif %}>Português</option>
-                    <option value="it" {% if lang == 'it' %}selected{% endif %}>Italiano</option>
-                    <option value="ja" {% if lang == 'ja' %}selected{% endif %}>日本語</option>
-                    <option value="zh" {% if lang == 'zh' %}selected{% endif %}>中文</option>
-                </select>
-                <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
+            <form action="" method="get" class="lang-form" style="display:inline-flex; align-items:center;">
+                {% if request and request.query_params %}
+                    {% for key, val in request.query_params.items() %}
+                        {% if key != 'lang' %}
+                        <input type="hidden" name="{{ key }}" value="{{ val }}">
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if request and 'theme' not in request.query_params and theme %}
+                    <input type="hidden" name="theme" value="{{ theme }}">
+                {% endif %}
+                <div class="lang-picker" title="Seleccionar idioma / Select language">
+                    <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    <select name="lang" id="langSelector" class="lang-selector" aria-label="{{ tr.lang_switch | default('Idioma') }}">
+                        <option value="es" {% if lang == 'es' or not lang %}selected{% endif %}>Español</option>
+                        <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+                        <option value="fr" {% if lang == 'fr' %}selected{% endif %}>Français</option>
+                        <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
+                        <option value="pt" {% if lang == 'pt' %}selected{% endif %}>Português</option>
+                        <option value="it" {% if lang == 'it' %}selected{% endif %}>Italiano</option>
+                        <option value="ja" {% if lang == 'ja' %}selected{% endif %}>日本語</option>
+                        <option value="zh" {% if lang == 'zh' %}selected{% endif %}>中文</option>
+                    </select>
+                    <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <noscript>
+                    <button type="submit" class="lang-submit-noscript" aria-label="Cambiar idioma" title="Aplicar idioma">✓</button>
+                </noscript>
+            </form>
         </div>
     </header>
 
@@ -122,11 +137,11 @@ Senda — Free Software under GNU GPL-3.0-or-later
         <div class="footer-left">
             <span>Senda</span>
             <span class="footer-dot">&bull;</span>
-            <a href="/about{% if lang and lang != 'es' %}?lang={{ lang }}{% endif %}" data-i18n="nav_about">{{ tr.nav_about | default('Acerca de') }}</a>
+            <a href="/about?theme={{ theme }}{% if lang and lang != 'es' %}&lang={{ lang }}{% endif %}" data-i18n="nav_about">{{ tr.nav_about | default('Acerca de') }}</a>
             <span class="footer-dot">&bull;</span>
-            <a href="/privacy{% if lang and lang != 'es' %}?lang={{ lang }}{% endif %}" data-i18n="nav_privacy">{{ tr.nav_privacy | default('Privacidad') }}</a>
+            <a href="/privacy?theme={{ theme }}{% if lang and lang != 'es' %}&lang={{ lang }}{% endif %}" data-i18n="nav_privacy">{{ tr.nav_privacy | default('Privacidad') }}</a>
             <span class="footer-dot">&bull;</span>
-            <a href="/javascript" rel="jslicense">LibreJS</a>
+            <a href="/javascript?theme={{ theme }}{% if lang and lang != 'es' %}&lang={{ lang }}{% endif %}" rel="jslicense">LibreJS</a>
         </div>
         <div class="footer-center">
             <details class="opensearch-details">

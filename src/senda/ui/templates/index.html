@@ -40,6 +40,7 @@
         <input type="hidden" name="theme" id="search-theme" value="{{ theme | default('dark') }}">
         <input type="hidden" name="region" id="search-region" value="all">
         <input type="hidden" name="safe_search" id="search-safesearch" value="off">
+        {% if lang %}<input type="hidden" name="lang" value="{{ lang }}">{% endif %}
         
         <div class="command-bar">
             <span class="command-bar-icon" aria-hidden="true">
@@ -76,16 +77,16 @@
 
         <!-- Sleek Minimalist Category Navigation -->
         <div class="home-category-row" role="tablist" aria-label="Categorías">
-            <button type="button" role="tab" class="cat-chip active" data-cat="all" onclick="selectCategory('all', this)">
+            <button type="button" role="tab" class="cat-chip active" data-cat="all">
                 <span data-i18n="tab_web">{{ tr.tab_web | default('Web') }}</span>
             </button>
-            <button type="button" role="tab" class="cat-chip" data-cat="images" onclick="selectCategory('images', this)">
+            <button type="button" role="tab" class="cat-chip" data-cat="images">
                 <span data-i18n="tab_images">{{ tr.tab_images | default('Imágenes') }}</span>
             </button>
-            <button type="button" role="tab" class="cat-chip" data-cat="news" onclick="selectCategory('news', this)">
+            <button type="button" role="tab" class="cat-chip" data-cat="news">
                 <span data-i18n="tab_news">{{ tr.tab_news | default('Noticias') }}</span>
             </button>
-            <button type="button" role="tab" class="cat-chip" data-cat="library" onclick="selectCategory('library', this)">
+            <button type="button" role="tab" class="cat-chip" data-cat="library">
                 <span data-i18n="tab_library">{{ tr.tab_library | default('Biblioteca') }}</span>
             </button>
         </div>
