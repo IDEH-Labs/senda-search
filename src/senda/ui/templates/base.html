@@ -4,7 +4,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 Senda — Free Software under GNU GPL-3.0-or-later
 -->
-<html lang="{{ lang | default('es') }}" data-theme="{{ theme | default('dark') }}" class="{{ 'light' if theme == 'light' else 'dark' }}">
+<html lang="{{ lang | default('es') }}" data-theme="{{ theme | default('dark') }}" class="{{ 'light' if theme == 'light' else 'dark' }}" prefix="og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,25 +13,40 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <meta name="description" content="Senda — Buscador web libre, ético y sin rastreo.">
     <meta name="theme-color" content="#080c14">
     
-    <!-- Open Graph Protocol (WhatsApp / Telegram / Signal / Facebook) -->
+    <!-- Open Graph Protocol (WhatsApp / Telegram / Signal / Facebook / LinkedIn) -->
     <meta property="og:site_name" content="Senda">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://senda.ideh.top/">
-    <meta property="og:title" content="{% block og_title %}Senda — Buscador web libre, ético y sin rastreo{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% set t = self.title() %}{{ t if t != 'Senda' else 'Senda — Buscador web libre, ético y sin rastreo' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Buscador web independiente y soberano. Sin rastreo, sin telemetría y sin burbujas de filtro.{% endblock %}">
     <meta property="og:image" content="https://senda.ideh.top/static/img/senda-og.png">
     <meta property="og:image:secure_url" content="https://senda.ideh.top/static/img/senda-og.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Senda Search Engine">
+    <meta property="og:image:alt" content="Logotipo oficial de Senda — Buscador web libre y soberano">
+    <meta property="og:image" content="https://senda.ideh.top/static/img/senda-og.jpg">
+    <meta property="og:image:secure_url" content="https://senda.ideh.top/static/img/senda-og.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
-    <!-- Twitter / Mastodon Summary Cards -->
+    <!-- Microdata / Schema.org (Google & WhatsApp Android scraper) -->
+    <meta itemprop="name" content="{{ self.og_title() }}">
+    <meta itemprop="description" content="{{ self.og_description() }}">
+    <meta itemprop="image" content="https://senda.ideh.top/static/img/senda-og.png">
+
+    <!-- WhatsApp legacy image preview fallback -->
+    <link rel="image_src" href="https://senda.ideh.top/static/img/senda-og.png">
+
+    <!-- Twitter / X / Discord / Mastodon Large Summary Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Senda — Buscador web libre, ético y sin rastreo">
-    <meta name="twitter:description" content="Buscador web independiente y soberano. Sin rastreo, sin telemetría y sin burbujas de filtro.">
+    <meta name="twitter:site" content="@SendaSearch">
+    <meta name="twitter:creator" content="@SendaSearch">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ self.og_description() }}{% endblock %}">
     <meta name="twitter:image" content="https://senda.ideh.top/static/img/senda-og.png">
-    <meta name="twitter:image:alt" content="Senda Search Engine">
+    <meta name="twitter:image:alt" content="Logotipo oficial de Senda — Buscador web libre y soberano">
 
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon.png">

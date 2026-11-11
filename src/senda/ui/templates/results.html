@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}{{ query }} — Senda{% endblock %}
+{% block og_description %}{{ tr.results_count | default('Resultados') }} para «{{ query }}» en Senda — Buscador web libre y soberano.{% endblock %}
 
 {% block content %}
 <div class="results-layout" id="resultsLayout">

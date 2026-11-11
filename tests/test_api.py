@@ -181,6 +181,22 @@ def test_api_brand_assets_and_manifest(client):
     r_og = client.get("/static/img/senda-og.png")
     assert r_og.status_code == 200
     assert r_og.headers.get("content-type") == "image/png"
+    assert len(r_og.content) > 10000
+
+    r_og_jpg = client.get("/static/img/senda-og.jpg")
+    assert r_og_jpg.status_code == 200
+    assert "image/jpeg" in r_og_jpg.headers.get("content-type", "")
+    assert len(r_og_jpg.content) > 5000
+
+    # Verify Open Graph & Twitter Cards meta tags on homepage
+    r_home = client.get("/")
+    assert r_home.status_code == 200
+    assert 'prefix="og: https://ogp.me/ns#' in r_home.text
+    assert 'property="og:image" content="https://senda.ideh.top/static/img/senda-og.png"' in r_home.text
+    assert 'property="og:image" content="https://senda.ideh.top/static/img/senda-og.jpg"' in r_home.text
+    assert 'name="twitter:card" content="summary_large_image"' in r_home.text
+    assert 'name="twitter:image" content="https://senda.ideh.top/static/img/senda-og.png"' in r_home.text
+    assert 'rel="image_src"' in r_home.text
 
 
 def test_theme_toggle_zero_js_and_cookie(client):
