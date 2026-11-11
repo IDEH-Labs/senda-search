@@ -158,21 +158,6 @@
                     </a>
                 </div>
             </details>
-                    <svg class="dropdown-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </summary>
-                <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'relevance' %}active{% endif %}">
-                        <span>Relevancia</span>
-                        {% if sort == 'relevance' %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                    <a href="/search?q={{ query | urlencode }}&category={{ category }}&region={{ region }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
-                        <span>Más recientes</span>
-                        {% if sort == 'date' or not sort %}<span class="item-check">✓</span>{% endif %}
-                    </a>
-                </div>
-            </details>
             {% endif %}
 
             {% if category in ('all', 'web', 'news', 'images', 'videos') %}

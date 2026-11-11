@@ -497,6 +497,18 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert "Most recent" in resp_news_en.text
 
 
+def test_news_sort_dropdown_no_duplication(client):
+    """Verify the news tab sort dropdown renders exactly once without duplicate tags or orphan menus."""
+    resp = client.get("/search?q=tecnologia&category=news&theme=dark")
+    assert resp.status_code == 200
+    html = resp.text
+    # Exactly 2 dropdown menus in news toolbar: Period (date) and Sort (ordenar)
+    assert html.count('class="filter-dropdown-menu"') == 2
+    # Verify the sort dropdown options appear exactly once
+    assert html.count("Ordenar:") == 1
+    assert html.count("sort=relevance") == 1
+
+
 def test_typo_correction_and_did_you_mean(tmp_path):
     """Verify sovereign typo tolerance, suggestions, and auto-fallback when zero results are found."""
     storage = StorageEngine(db_path=tmp_path / "typo_test.db")
