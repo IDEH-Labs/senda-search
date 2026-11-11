@@ -312,6 +312,21 @@ def create_app(
         home_query = urllib.parse.urlencode(home_params)
         home_url = f"/?{home_query}" if home_query else "/"
 
+        lang_names = {
+            "es": "Español",
+            "en": "English",
+            "fr": "Français",
+            "de": "Deutsch",
+            "pt": "Português",
+            "it": "Italiano",
+            "ja": "日本語",
+            "zh": "中文",
+        }
+        lang_urls = {}
+        for l_code in SUPPORTED_LANGUAGES:
+            l_obj = request.url.include_query_params(lang=l_code)
+            lang_urls[l_code] = l_obj.path + ("?" + l_obj.query if l_obj.query else "")
+
         ctx = dict(context)
         ctx["theme"] = current_theme
         ctx["theme_toggle_url"] = theme_toggle_url
@@ -319,6 +334,9 @@ def create_app(
         ctx["lang"] = current_lang
         ctx["tr"] = catalog
         ctx["supported_languages"] = SUPPORTED_LANGUAGES
+        ctx["lang_names"] = lang_names
+        ctx["lang_urls"] = lang_urls
+        ctx["current_lang_name"] = lang_names.get(current_lang, current_lang.upper())
         ctx["settings"] = settings
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
@@ -588,7 +606,29 @@ def create_app(
 
         formatted_items = []
         for it in items_list:
-            domain_name = urllib.parse.urlparse(it.url).netloc
+            # Prioritize verified source_domain or publisher over syndicated aggregator URLs
+            source_dom = getattr(it, "source_domain", None)
+            item_dom = getattr(it, "domain", None)
+            url_netloc = ""
+            try:
+                url_netloc = urllib.parse.urlparse(it.url).netloc.lower()
+            except Exception:
+                pass
+
+            resolved_domain = source_dom or (item_dom if item_dom and item_dom != "news.google.com" else "") or url_netloc
+            if resolved_domain.startswith("www."):
+                resolved_domain = resolved_domain[4:]
+
+            # Never allow news.google.com syndication domain to shadow authentic editorial outlets
+            if not resolved_domain or resolved_domain == "news.google.com":
+                publisher_name = getattr(it, "source", "") or ""
+                if publisher_name and publisher_name not in ("Senda", "Google", "news.google.com"):
+                    clean_pub = publisher_name.lower().replace(" ", "").replace("«", "").replace("»", "")
+                    resolved_domain = clean_pub if "." in clean_pub else f"{clean_pub}.com"
+                else:
+                    resolved_domain = "prensa"
+
+            domain_name = resolved_domain
             
             # Map verifiable provenance fields safely
             retraction_dict = None

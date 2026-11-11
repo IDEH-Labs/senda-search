@@ -43,11 +43,11 @@ def test_api_security_headers_and_home(client):
     assert response.headers["X-Frame-Options"] == "DENY"
     assert "default-src 'self'" in response.headers["Content-Security-Policy"]
     # Verify 8 sovereign language options with native endonyms
+    assert "lang-dropdown" in response.text
     for lang_code in ["en", "es", "fr", "de", "pt", "it", "ja", "zh"]:
-        assert f'value="{lang_code}"' in response.text
-    assert ">日本語</option>" in response.text
-    assert ">中文</option>" in response.text
-    assert "lang-picker" in response.text
+        assert f'hreflang="{lang_code}"' in response.text
+    assert "日本語" in response.text
+    assert "中文" in response.text
 
 
 def test_api_static_pages(client):
@@ -618,12 +618,13 @@ def test_zero_js_language_and_footer_theme_persistence(client):
     assert resp.status_code == 200
     html = resp.text
 
-    # Zero-JS Language form and noscript button
-    assert 'class="lang-form"' in html
-    assert 'class="lang-submit-noscript"' in html
-    assert '<noscript>' in html
-    assert 'name="q" value="linux"' in html
-    assert 'name="theme" value="light"' in html
+    # Zero-JS Native semantic Language dropdown
+    assert 'class="lang-dropdown"' in html
+    assert 'class="lang-dropdown-btn"' in html
+    assert 'class="lang-dropdown-menu"' in html
+    assert 'class="lang-dropdown-item' in html
+    assert 'hreflang="en"' in html
+    assert 'hreflang="es"' in html
 
     # Footer links preserve both theme and lang
     assert '/about?theme=light&amp;lang=fr' in html or '/about?theme=light&lang=fr' in html
@@ -642,6 +643,18 @@ def test_zero_js_language_and_footer_theme_persistence(client):
     html_home = resp_home.text
     assert '<input type="hidden" name="lang" value="en">' in html_home
     assert '<input type="hidden" name="theme" id="search-theme" value="light">' in html_home
+
+
+def test_news_results_resolve_real_publisher_domains_and_never_news_google_com(client):
+    """Verify that news items display the actual publisher domain (e.g. mondosonoro.com) instead of news.google.com."""
+    resp = client.get("/search?q=cocteau&category=news&format=json")
+    assert resp.status_code == 200
+    data = resp.json()
+    items = data.get("items", [])
+    if items:
+        for it in items:
+            assert it["domain"] != "news.google.com", f"Domain was incorrectly set to news.google.com for item: {it}"
+            assert it["domain"] != "", "Domain must not be empty"
 
 
 

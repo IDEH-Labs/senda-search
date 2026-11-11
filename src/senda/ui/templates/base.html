@@ -91,41 +91,28 @@ Senda — Free Software under GNU GPL-3.0-or-later
                 </svg>
             </a>
 
-            <form action="" method="get" class="lang-form" style="display:inline-flex; align-items:center;">
-                {% if request and request.query_params %}
-                    {% for key, val in request.query_params.items() %}
-                        {% if key != 'lang' %}
-                        <input type="hidden" name="{{ key }}" value="{{ val }}">
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                {% if request and 'theme' not in request.query_params and theme %}
-                    <input type="hidden" name="theme" value="{{ theme }}">
-                {% endif %}
-                <div class="lang-picker" title="Seleccionar idioma / Select language">
+            <!-- Native Zero-JS Language Dropdown (Tor Browser Safest & LibreJS compatible) -->
+            <details class="lang-dropdown">
+                <summary class="lang-dropdown-btn" aria-label="{{ tr.lang_switch | default('Idioma') }}" title="Seleccionar idioma / Select language">
                     <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                     </svg>
-                    <select name="lang" id="langSelector" class="lang-selector" aria-label="{{ tr.lang_switch | default('Idioma') }}">
-                        <option value="es" {% if lang == 'es' or not lang %}selected{% endif %}>Español</option>
-                        <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
-                        <option value="fr" {% if lang == 'fr' %}selected{% endif %}>Français</option>
-                        <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
-                        <option value="pt" {% if lang == 'pt' %}selected{% endif %}>Português</option>
-                        <option value="it" {% if lang == 'it' %}selected{% endif %}>Italiano</option>
-                        <option value="ja" {% if lang == 'ja' %}selected{% endif %}>日本語</option>
-                        <option value="zh" {% if lang == 'zh' %}selected{% endif %}>中文</option>
-                    </select>
-                    <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="lang-label">{{ current_lang_name | default('Español') }}</span>
+                    <svg class="lang-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
+                </summary>
+                <div class="lang-dropdown-menu">
+                    {% for l_code in supported_languages %}
+                    <a href="{{ lang_urls[l_code] | default('?lang=' + l_code) }}" class="lang-dropdown-item {% if (lang or 'es') == l_code %}active{% endif %}" hreflang="{{ l_code }}">
+                        <span>{{ lang_names.get(l_code, l_code) if lang_names else l_code }}</span>
+                        {% if (lang or 'es') == l_code %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    {% endfor %}
                 </div>
-                <noscript>
-                    <button type="submit" class="lang-submit-noscript" aria-label="Cambiar idioma" title="Aplicar idioma">✓</button>
-                </noscript>
-            </form>
+            </details>
         </div>
     </header>
 

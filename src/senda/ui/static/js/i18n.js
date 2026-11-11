@@ -562,6 +562,18 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  // Native Zero-JS & LibreJS dropdown language selector click handler
+  document.querySelectorAll(".lang-dropdown-item").forEach(function(item) {
+    item.addEventListener("click", function() {
+      var href = this.getAttribute("href") || "";
+      var match = href.match(/[?&]lang=([a-z]{2})/i);
+      if (match && match[1]) {
+        try { localStorage.setItem("senda_lang", match[1].toLowerCase()); } catch(e) {}
+        document.cookie = "senda_lang=" + match[1].toLowerCase() + "; path=/; max-age=31536000; SameSite=Lax";
+      }
+    });
+  });
+
   applyTranslations(initialLang);
   initThemeManager();
   initDensityManager();
