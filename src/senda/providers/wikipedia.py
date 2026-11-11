@@ -34,6 +34,7 @@ class WikipediaEntityCard(BaseModel):
     license: str = Field(default="Creative Commons Atribución-CompartirIgual 4.0 (CC BY-SA 4.0)")
     source: str = Field(default="Wikipedia en Español")
     lang: str = Field(default="es")
+    official_website: Optional[str] = Field(default=None, description="Official verified website URL")
 
 
 class WikipediaEntityProvider:
@@ -101,7 +102,12 @@ class WikipediaEntityProvider:
             lang=lang,
         )
 
-    async def get_entity(self, query: str, lang: str = "es") -> Optional[WikipediaEntityCard]:
+    async def get_entity(
+        self,
+        query: str,
+        lang: str = "es",
+        fetch_official_website: bool = False,
+    ) -> Optional[WikipediaEntityCard]:
         """Fetch entity summary for a query term if an exact encyclopedic article exists."""
         clean_q = query.strip()
         if not clean_q or len(clean_q) < 2:
@@ -131,6 +137,20 @@ class WikipediaEntityProvider:
                 if resp.status_code == 200:
                     data = resp.json()
                     card = self.parse_summary(data, lang=lang)
+                    if fetch_official_website and card and card.wikibase_item:
+                        try:
+                            wb_url = f"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={card.wikibase_item}&property=P856&format=json"
+                            wb_resp = await client.get(wb_url, headers=headers)
+                            if wb_resp.status_code == 200:
+                                wb_data = wb_resp.json()
+                                claims = wb_data.get("claims", {}).get("P856", [])
+                                for c in claims:
+                                    val = c.get("mainsnak", {}).get("datavalue", {}).get("value")
+                                    if isinstance(val, str) and (val.startswith("http://") or val.startswith("https://")):
+                                        card.official_website = val
+                                        break
+                        except Exception:
+                            pass
                     self._cache_set(cache_key, card)
                     return card
                 elif resp.status_code == 404:

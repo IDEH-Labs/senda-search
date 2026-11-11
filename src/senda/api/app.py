@@ -43,6 +43,7 @@ from senda.worldtime import get_world_time
 from senda.reader import SovereignReader
 from senda.crawler.network_guard import SSRFSecurityViolation
 from senda.ranking.goggles import get_available_goggles
+from senda.ranking.suggestions import SuggestionEngine
 from senda.i18n import (
     resolve_language,
     translate,
@@ -104,6 +105,10 @@ class SearchResponseModel(BaseModel):
     goggle: Optional[str] = None
     custom_goggle: Optional[str] = None
     goggles_catalog: Optional[list] = None
+    did_you_mean: Optional[str] = None
+    auto_corrected: bool = False
+    corrected_query: Optional[str] = None
+    original_query: Optional[str] = None
 
 
 class StatsResponseModel(BaseModel):
@@ -212,6 +217,7 @@ def create_app(
     app_wiki_entity = WikipediaEntityProvider()
     app_weather = WeatherProvider()
     app_reader = SovereignReader()
+    app_suggestions = SuggestionEngine()
 
     app_aggregator = ProviderAggregator(
         internal_provider=internal_prov,
@@ -453,11 +459,18 @@ def create_app(
         custom_goggle: Optional[str] = Query(default=None),
         anti_slop: bool = Query(default=True),
         clustering: bool = Query(default=True),
+        literal: bool = Query(default=False),
         theme: Optional[str] = Query(default=None),
         lang: Optional[str] = Query(default=None),
     ):
         """Search endpoint supporting HTML rendering and JSON content negotiation across verticals."""
         clean_q = q.strip()
+        is_literal = literal or (clean_q.startswith('"') and clean_q.endswith('"'))
+        auto_corrected = False
+        corrected_query: Optional[str] = None
+        original_query: Optional[str] = None
+        did_you_mean: Optional[str] = None
+
         user_lang = resolve_language(request, lang)
         query_lang = detect_query_language(clean_q, fallback_lang=user_lang)
         p_val = p if isinstance(p, int) else 1
@@ -515,11 +528,47 @@ def create_app(
             clustering=clustering,
         )
 
+        # Typo tolerance & Did-you-mean engine (Sovereign, non-tracking, offline-first)
+        if not is_literal and clean_q and len(clean_q) >= 3:
+            if len(items_list) == 0:
+                # Case A: Zero results found for imprecise query -> suggest & auto-fallback
+                suggested_q = await app_suggestions.suggest(clean_q, lang=query_lang)
+                if suggested_q and suggested_q.lower() != clean_q.lower():
+                    fallback_items = await app_aggregator.aggregate(
+                        query=suggested_q,
+                        category=cat,
+                        page=current_page,
+                        page_size=page_sz,
+                        time_filter=tf,
+                        sort=sort_val,
+                        region=reg,
+                        safe_search=ss,
+                        no_ads=na,
+                        opt_in_academic=ac,
+                        opt_in_social=(cat == "social" or soc),
+                        goggle=goggle_val,
+                        custom_goggle=custom_goggle_val,
+                        anti_slop=anti_slop,
+                        clustering=clustering,
+                    )
+                    if len(fallback_items) > 0:
+                        items_list = fallback_items
+                        auto_corrected = True
+                        corrected_query = suggested_q
+                        original_query = clean_q
+                    else:
+                        did_you_mean = suggested_q
+            else:
+                # Case B: Results exist, but check if there's an authoritative suggestion
+                suggested_q = await app_suggestions.suggest(clean_q, lang=query_lang)
+                if suggested_q and suggested_q.lower() != clean_q.lower():
+                    did_you_mean = suggested_q
 
         duration_ms = round((time.perf_counter() - start_t) * 1000, 2)
 
         # Fallback to local retriever counts for pagination estimation
-        local_res = app_retriever.search(clean_q, page=current_page, page_size=page_sz, category=cat if cat != "all" else "all")
+        search_q_for_local = corrected_query if auto_corrected and corrected_query else clean_q
+        local_res = app_retriever.search(search_q_for_local, page=current_page, page_size=page_sz, category=cat if cat != "all" else "all")
         total_matches = max(len(items_list), local_res.total_matches)
         total_pages = max(1, (total_matches + page_sz - 1) // page_sz) if total_matches > 0 else 1
 
@@ -595,17 +644,19 @@ def create_app(
                 )
             )
 
+        card_query = corrected_query if auto_corrected and corrected_query else clean_q
+
         # Grounded AI Synthesis (Strictly grounded in retrieved items; never hallucinates)
         grounded_data = None
         if (settings.ENABLE_AI_SYNTHESIS or synth) and clean_q:
-            synth_res = app_synthesizer.synthesize(clean_q, items_list, force=synth)
+            synth_res = app_synthesizer.synthesize(card_query, items_list, force=synth)
             if synth_res:
                 grounded_data = synth_res.model_dump()
 
         # Verifiable Encyclopedic Entity Card (Wikipedia & Wikidata on-demand)
         entity_data = None
-        if current_page == 1 and clean_q and cat in ("all", "web", "library"):
-            entity_card_obj = await app_wiki_entity.get_entity(clean_q, lang=query_lang)
+        if current_page == 1 and card_query and cat in ("all", "web", "library"):
+            entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=query_lang, fetch_official_website=True)
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
 
@@ -657,6 +708,10 @@ def create_app(
             goggle=goggle_val,
             custom_goggle=custom_goggle_val,
             goggles_catalog=get_available_goggles(),
+            did_you_mean=did_you_mean,
+            auto_corrected=auto_corrected,
+            corrected_query=corrected_query,
+            original_query=original_query,
         )
 
         # Content negotiation
@@ -686,6 +741,11 @@ def create_app(
                 "anti_slop": anti_slop,
                 "clustering": clustering,
                 "synthesis": synth,
+                "did_you_mean": did_you_mean,
+                "auto_corrected": auto_corrected,
+                "corrected_query": corrected_query,
+                "original_query": original_query,
+                "literal": is_literal,
             },
             query_theme=theme,
             query_lang=lang,
@@ -724,6 +784,7 @@ def create_app(
         custom_goggle = form_data.get("custom_goggle", [None])[0]
         anti_slop = form_data.get("anti_slop", ["true"])[0].lower() in ("true", "1")
         clustering = form_data.get("clustering", ["true"])[0].lower() in ("true", "1")
+        literal = form_data.get("literal", ["false"])[0].lower() in ("true", "1")
 
         return await search(
             request,
@@ -743,6 +804,7 @@ def create_app(
             custom_goggle=custom_goggle,
             anti_slop=anti_slop,
             clustering=clustering,
+            literal=literal,
             theme=theme,
             lang=lang,
         )

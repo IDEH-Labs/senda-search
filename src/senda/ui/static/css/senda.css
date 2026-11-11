@@ -979,6 +979,82 @@ body.compact-density .result-snippet {
   text-decoration: line-through;
 }
 
+/* Sovereign Typo-Tolerance and Spell Suggestion Banners */
+.search-correction-banner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.search-correction-banner.auto-corrected {
+  border-left-color: var(--accent);
+}
+
+.search-correction-banner.did-you-mean {
+  border-left-color: #38bdf8;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.correction-main {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 1.05rem;
+}
+
+.correction-label {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.correction-link-term {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.correction-link-term:hover {
+  text-decoration: underline;
+}
+
+.correction-fallback {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+.correction-fallback-label {
+  color: var(--text-faint);
+}
+
+.correction-link-literal {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  transition: color var(--transition-fast);
+}
+
+.correction-link-literal:hover {
+  color: var(--accent);
+  text-decoration-style: solid;
+}
+
 /* Custom Goggle DSL container inside dropdown */
 .custom-dsl-container {
   padding: 0.65rem 0.85rem;
@@ -2275,6 +2351,29 @@ footer.app-footer a:hover {
 .entity-action-btn.secondary:hover {
   color: var(--text-primary);
   border-color: var(--border-focus);
+}
+
+.entity-action-btn.primary-official {
+  color: #06090e;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25);
+}
+
+.entity-action-btn.primary-official:hover {
+  filter: brightness(1.1);
+}
+
+/* Navigational Result Highlights */
+.result-card.is-navigational {
+  border-left: 3px solid var(--accent);
+  background: linear-gradient(to right, rgba(74, 222, 128, 0.03), transparent);
+}
+
+.badge-navigational {
+  background: rgba(74, 222, 128, 0.15) !important;
+  color: var(--text-accent) !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
+  font-weight: 600 !important;
 }
 
 .entity-card-footer {

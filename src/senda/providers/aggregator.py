@@ -26,6 +26,7 @@ from senda.providers.pubmed import PubMedProvider
 from senda.ranking.clustering import apply_domain_clustering
 from senda.ranking.goggles import get_preset_goggle, apply_goggle_rules, parse_goggle_dsl
 from senda.ranking.anti_slop import apply_anti_slop_filter
+from senda.ranking.navigational import NavigationalEngine
 
 
 BANG_SHORTCUTS: Dict[str, Tuple[str, str]] = {
@@ -349,5 +350,13 @@ class ProviderAggregator:
         # 4. Domain clustering: guarantee diversity (max 2 per domain in top tier)
         if clustering and cat not in ("images", "videos"):
             merged = apply_domain_clustering(merged, max_per_domain=2)
+
+        # 5. Direct Navigational Site Resolution (Instant direct address for domains & verified portals)
+        if cat in ("all", "web") and page == 1 and query:
+            nav_item = NavigationalEngine.resolve(query)
+            if nav_item:
+                nav_norm = nav_item.url.rstrip("/").lower()
+                merged = [it for it in merged if it.url.rstrip("/").lower() != nav_norm]
+                merged.insert(0, nav_item)
 
         return merged[:page_size]

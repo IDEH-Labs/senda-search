@@ -96,6 +96,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "segundos",
         "no_results_title": "No se encontraron resultados",
         "no_results_desc": "Comprueba la ortografía o intenta con términos más generales.",
+        "showing_results_for": "Mostrando resultados para",
+        "search_instead_for": "Buscar en su lugar",
+        "did_you_mean": "Quizás quisiste decir:",
     },
     "en": {
         "nav_about": "About",
@@ -166,6 +169,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "seconds",
         "no_results_title": "No results found",
         "no_results_desc": "Check your spelling or try more general keywords.",
+        "showing_results_for": "Showing results for",
+        "search_instead_for": "Search instead for",
+        "did_you_mean": "Did you mean:",
     },
     "fr": {
         "nav_about": "À propos",
@@ -236,6 +242,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "secondes",
         "no_results_title": "Aucun résultat trouvé",
         "no_results_desc": "Vérifiez l'orthographe ou essayez des mots-clés plus généraux.",
+        "showing_results_for": "Résultats pour",
+        "search_instead_for": "Essayer avec l'orthographe",
+        "did_you_mean": "Essayez avec cette orthographe :",
     },
     "de": {
         "nav_about": "Über uns",
@@ -306,6 +315,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "Sekunden",
         "no_results_title": "Keine Ergebnisse gefunden",
         "no_results_desc": "Überprüfen Sie die Rechtschreibung oder verwenden Sie allgemeinere Begriffe.",
+        "showing_results_for": "Ergebnisse für",
+        "search_instead_for": "Stattdessen suchen nach",
+        "did_you_mean": "Meinten Sie:",
     },
     "pt": {
         "nav_about": "Sobre",
@@ -376,6 +388,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "segundos",
         "no_results_title": "Nenhum resultado encontrado",
         "no_results_desc": "Verifique a ortografia ou tente palavras-chave mais gerais.",
+        "showing_results_for": "Apresentando resultados para",
+        "search_instead_for": "Pesquisar por",
+        "did_you_mean": "Você quis dizer:",
     },
     "it": {
         "nav_about": "Informazioni",
@@ -446,6 +461,9 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "in_seconds": "secondi",
         "no_results_title": "Nessun risultato trovato",
         "no_results_desc": "Controlla l'ortografia o prova termini più generali.",
+        "showing_results_for": "Risultati per",
+        "search_instead_for": "Cerca invece",
+        "did_you_mean": "Forse cercavi:",
     },
 }
 

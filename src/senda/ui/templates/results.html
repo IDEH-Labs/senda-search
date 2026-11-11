@@ -323,6 +323,25 @@
         <span class="meta-tag-organic">{{ tr.tag_organic | default('100% Orgánico') }} &bull; {{ tr.tag_no_tracking | default('Sin Rastreo') }}</span>
     </div>
 
+    <!-- Sovereign Typo-Tolerance and Did-You-Mean Banners -->
+    {% if results.auto_corrected and results.corrected_query %}
+    <div class="search-correction-banner auto-corrected" role="status">
+        <div class="correction-main">
+            <span class="correction-label">{{ tr.showing_results_for | default('Mostrando resultados para') }}</span>
+            <a href="/search?q={{ results.corrected_query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="correction-link-term"><em>{{ results.corrected_query }}</em></a>
+        </div>
+        <div class="correction-fallback">
+            <span class="correction-fallback-label">{{ tr.search_instead_for | default('Buscar en su lugar') }}</span>
+            <a href="/search?q={{ results.original_query | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}&literal=1" class="correction-link-literal"><em>{{ results.original_query }}</em></a>
+        </div>
+    </div>
+    {% elif results.did_you_mean %}
+    <div class="search-correction-banner did-you-mean" role="status">
+        <span class="correction-label">{{ tr.did_you_mean | default('Quizás quisiste decir:') }}</span>
+        <a href="/search?q={{ results.did_you_mean | urlencode }}&category={{ category }}&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" class="correction-link-term"><em>{{ results.did_you_mean }}</em></a>
+    </div>
+    {% endif %}
+
     <!-- Instant Sovereign Calculator Card (Cálculo Matemático Seguro) -->
     {% if calculator %}
     <section class="calculator-card" role="region" aria-label="Calculadora matemática soberana">
@@ -496,6 +515,11 @@
                 <p class="entity-extract">{{ entity_card.extract }}</p>
                 
                 <div class="entity-actions">
+                    {% if entity_card.official_website %}
+                    <a href="{{ entity_card.official_website }}" target="_blank" rel="noopener noreferrer" class="entity-action-btn primary-official" title="Visitar el sitio web oficial">
+                        <span>🌐 Sitio web oficial ↗</span>
+                    </a>
+                    {% endif %}
                     <a href="{{ entity_card.wikipedia_url }}" target="_blank" rel="noopener noreferrer" class="entity-action-btn">
                         <span>Artículo en Wikipedia ↗</span>
                     </a>
@@ -615,11 +639,15 @@
         {% else %}
         <ol class="results-feed" role="feed">
             {% for item in results.items %}
-            <li class="result-card" data-index="{{ loop.index0 }}">
+            <li class="result-card {% if item.source == 'Navegación Directa' %}is-navigational{% endif %}" data-index="{{ loop.index0 }}">
                 <div class="result-cite">
                     <span class="result-cite-dot"></span>
                     <span class="result-domain">{{ item.domain }}</span>
+                    {% if item.source == 'Navegación Directa' %}
+                    <span class="result-source-badge badge-navigational">★ Sitio Oficial</span>
+                    {% else %}
                     <span class="result-source-badge">{{ item.source }}</span>
+                    {% endif %}
 
                     <!-- Semantic verifiable provenance tags -->
                     {% if item.retraction and item.retraction.estado == 'retractada' %}

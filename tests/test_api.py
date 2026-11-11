@@ -497,4 +497,98 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert "Most recent" in resp_news_en.text
 
 
+def test_typo_correction_and_did_you_mean(tmp_path):
+    """Verify sovereign typo tolerance, suggestions, and auto-fallback when zero results are found."""
+    storage = StorageEngine(db_path=tmp_path / "typo_test.db")
+    storage.upsert_document(
+        ExtractedDocument(
+            url="https://es.wikipedia.org/wiki/Catedral_de_Notre_Dame",
+            title="Catedral de Notre Dame",
+            description="La catedral de Notre Dame es una iglesia de culto católico en París.",
+            language="es",
+            headings="Historia y Arquitectura",
+            body_text="Notre Dame es uno de los monumentos más populares de la capital francesa.",
+            content_hash="notredame123",
+        )
+    )
+    app = create_app(
+        storage=storage,
+        openalex_provider=OpenAlexProvider(enabled=False),
+        enable_federated_providers=False,
+    )
+    test_client = TestClient(app)
+
+    # 1. Zero initial results for 'notredam' -> automatic fallback to 'Notre Dame'
+    resp = test_client.get("/search?q=notredam&format=json")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["query"] == "notredam"
+    assert data["auto_corrected"] is True
+    assert data["corrected_query"] == "Notre Dame"
+    assert data["original_query"] == "notredam"
+    assert len(data["items"]) >= 1
+
+    # HTML rendering of auto-corrected banner
+    resp_html = test_client.get("/search?q=notredam")
+    assert resp_html.status_code == 200
+    assert "search-correction-banner auto-corrected" in resp_html.text
+    assert "Mostrando resultados para" in resp_html.text
+    assert "Buscar en su lugar" in resp_html.text
+    assert "Notre Dame" in resp_html.text
+
+    # 2. Literal search bypasses auto-correction
+    resp_literal = test_client.get("/search?q=notredam&literal=1&format=json")
+    assert resp_literal.status_code == 200
+    data_lit = resp_literal.json()
+    assert data_lit["auto_corrected"] is False
+    assert data_lit["did_you_mean"] is None
+    assert len(data_lit["items"]) == 0
+
+    # 3. Did-you-mean suggestion when query has partial matches
+    # 'notre dam' matches 'notre' but triggers did_you_mean to 'Notre Dame'
+    resp_dam = test_client.get("/search?q=notre+dam&format=json")
+    assert resp_dam.status_code == 200
+    data_dam = resp_dam.json()
+    assert data_dam["did_you_mean"] == "Notre Dame"
+
+
+def test_navigational_direct_site_resolution(client):
+    """Verify sovereign navigational intent resolution for domain queries and brand queries."""
+    # 1. Direct domain query 'google.com'
+    resp_google = client.get("/search?q=google.com&format=json")
+    assert resp_google.status_code == 200
+    data_g = resp_google.json()
+    assert len(data_g["items"]) >= 1
+    top_g = data_g["items"][0]
+    assert top_g["url"] == "https://www.google.com/"
+    assert "Google" in top_g["title"]
+    assert top_g["source"] == "Navegación Directa"
+
+    # HTML check for 'google.com'
+    resp_g_html = client.get("/search?q=google.com")
+    assert resp_g_html.status_code == 200
+    assert "https://www.google.com/" in resp_g_html.text
+    assert "badge-navigational" in resp_g_html.text
+    assert "Sitio Oficial" in resp_g_html.text
+
+    # 2. Brand query without TLD 'xvideos'
+    resp_xv = client.get("/search?q=xvideos&format=json")
+    assert resp_xv.status_code == 200
+    data_xv = resp_xv.json()
+    assert len(data_xv["items"]) >= 1
+    top_xv = data_xv["items"][0]
+    assert top_xv["url"] == "https://www.xvideos.com/"
+    assert "XVideos" in top_xv["title"]
+    assert top_xv["source"] == "Navegación Directa"
+
+    # 3. Arbitrary domain query 'archlinux.org'
+    resp_arch = client.get("/search?q=archlinux.org&format=json")
+    assert resp_arch.status_code == 200
+    data_arch = resp_arch.json()
+    assert len(data_arch["items"]) >= 1
+    top_arch = data_arch["items"][0]
+    assert "archlinux.org" in top_arch["url"]
+    assert top_arch["source"] == "Navegación Directa"
+
+
 
