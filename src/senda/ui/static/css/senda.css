@@ -151,7 +151,7 @@ header.app-header {
   -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 150;
 }
 
 .brand {
@@ -279,6 +279,11 @@ details.lang-picker {
   position: relative;
   display: inline-block;
   user-select: none;
+  z-index: 160;
+}
+
+details.lang-picker[open] {
+  z-index: 210;
 }
 
 details.lang-picker summary.lang-summary {
@@ -2031,6 +2036,8 @@ body.compact-density .result-snippet {
 
 /* Footer */
 footer.app-footer {
+  position: relative;
+  z-index: 120;
   height: 56px;
   background: var(--bg-app);
   border-top: 1px solid var(--border-subtle);

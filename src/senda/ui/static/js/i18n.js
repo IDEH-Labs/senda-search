@@ -22,6 +22,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "resultados (",
     no_results_title: "No se encontraron resultados",
     no_results_desc: "Comprueba la ortografía o intenta con términos más generales.",
+    footer_add_browser: "Añadir a mi navegador",
+    footer_libre_code: "Código Libre (GPLv3+)",
   },
   en: {
     nav_about: "About",
@@ -35,6 +37,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "results (",
     no_results_title: "No results found",
     no_results_desc: "Check your spelling or try more general keywords.",
+    footer_add_browser: "Add to my browser",
+    footer_libre_code: "Free Software (GPLv3+)",
   },
   fr: {
     nav_about: "À propos",
@@ -48,6 +52,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "résultats (",
     no_results_title: "Aucun résultat trouvé",
     no_results_desc: "Vérifiez l'orthographe ou essayez des mots-clés plus généraux.",
+    footer_add_browser: "Ajouter à mon navigateur",
+    footer_libre_code: "Logiciel Libre (GPLv3+)",
   },
   de: {
     nav_about: "Über uns",
@@ -61,6 +67,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "Ergebnisse (",
     no_results_title: "Keine Ergebnisse gefunden",
     no_results_desc: "Prüfen Sie die Schreibweise oder versuchen Sie allgemeinere Suchbegriffe.",
+    footer_add_browser: "Zu meinem Browser hinzufügen",
+    footer_libre_code: "Freie Software (GPLv3+)",
   },
   pt: {
     nav_about: "Sobre",
@@ -74,6 +82,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "resultados (",
     no_results_title: "Nenhum resultado encontrado",
     no_results_desc: "Verifique a ortografia ou tente palavras-chave mais gerais.",
+    footer_add_browser: "Adicionar ao meu navegador",
+    footer_libre_code: "Código Livre (GPLv3+)",
   },
   it: {
     nav_about: "Info",
@@ -87,6 +97,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "risultati (",
     no_results_title: "Nessun risultato trovato",
     no_results_desc: "Controlla l'ortografia o prova parole chiave più generali.",
+    footer_add_browser: "Aggiungi al mio browser",
+    footer_libre_code: "Software Libero (GPLv3+)",
   },
   ja: {
     nav_about: "概要",
@@ -100,6 +112,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "件の検索結果 (",
     no_results_title: "一致する結果が見つかりませんでした",
     no_results_desc: "スペルを確認するか、より一般的なキーワードをお試しください。",
+    footer_add_browser: "ブラウザに追加",
+    footer_libre_code: "自由ソフトウェア (GPLv3+)",
   },
   zh: {
     nav_about: "关于",
@@ -113,6 +127,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "条结果 (",
     no_results_title: "未找到符合条件的结果",
     no_results_desc: "请检查拼写或尝试使用更通用的关键词。",
+    footer_add_browser: "添加至浏览器",
+    footer_libre_code: "自由软件源码 (GPLv3+)",
   },
   ru: {
     nav_about: "О проекте",
@@ -126,6 +142,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "результатов (",
     no_results_title: "Ничего не найдено",
     no_results_desc: "Проверьте правописание или используйте более общие ключевые слова.",
+    footer_add_browser: "Добавить в браузер",
+    footer_libre_code: "Свободный код (GPLv3+)",
   },
   ar: {
     nav_about: "حول",
@@ -139,6 +157,8 @@ const SENDA_TRANSLATIONS = {
     results_found: "نتائج (",
     no_results_title: "لم يتم العثور على نتائج",
     no_results_desc: "تحقق من الإملاء أو جرب كلمات مفتاحية أكثر عمومية.",
+    footer_add_browser: "إضافة إلى متصفحي",
+    footer_libre_code: "برمجيات حرة (GPLv3+)",
   }
 };
 
