@@ -87,30 +87,32 @@ Senda — Free Software under GNU GPL-3.0-or-later
                     <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
                 </svg>
                 <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </a>
 
-            <div class="lang-picker" title="Seleccionar idioma / Select language">
-                <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
-                <select id="langSelector" class="lang-selector" aria-label="{{ tr.lang_switch | default('Idioma') }}">
-                    <option value="es" {% if lang == 'es' or not lang %}selected{% endif %}>Español</option>
-                    <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
-                    <option value="fr" {% if lang == 'fr' %}selected{% endif %}>Français</option>
-                    <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
-                    <option value="pt" {% if lang == 'pt' %}selected{% endif %}>Português</option>
-                    <option value="it" {% if lang == 'it' %}selected{% endif %}>Italiano</option>
-                    <option value="ja" {% if lang == 'ja' %}selected{% endif %}>日本語</option>
-                    <option value="zh" {% if lang == 'zh' %}selected{% endif %}>中文</option>
-                </select>
-                <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
+            <!-- Native Zero-JS Language Picker (Identical Glass Pill Aesthetic, 100% Tor Safest & LibreJS compatible) -->
+            <details class="lang-picker" title="Seleccionar idioma / Select language">
+                <summary class="lang-summary" aria-label="{{ tr.lang_switch | default('Idioma') }}">
+                    <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    <span class="lang-text">{{ current_lang_name | default('Español') }}</span>
+                    <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="lang-menu">
+                    {% for l_code in supported_languages %}
+                    <a href="{{ lang_urls[l_code] | default('?lang=' + l_code) }}" class="lang-menu-item {% if (lang or 'es') == l_code %}active{% endif %}" hreflang="{{ l_code }}">
+                        <span>{{ lang_names[l_code] if lang_names else l_code }}</span>
+                        {% if (lang or 'es') == l_code %}<span class="item-check">✓</span>{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </details>
         </div>
     </header>
 

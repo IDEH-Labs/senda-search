@@ -312,6 +312,21 @@ def create_app(
         home_query = urllib.parse.urlencode(home_params)
         home_url = f"/?{home_query}" if home_query else "/"
 
+        lang_names = {
+            "es": "Español",
+            "en": "English",
+            "fr": "Français",
+            "de": "Deutsch",
+            "pt": "Português",
+            "it": "Italiano",
+            "ja": "日本語",
+            "zh": "中文",
+        }
+        lang_urls = {}
+        for l_code in SUPPORTED_LANGUAGES:
+            l_obj = request.url.include_query_params(lang=l_code)
+            lang_urls[l_code] = l_obj.path + ("?" + l_obj.query if l_obj.query else "")
+
         ctx = dict(context)
         ctx["theme"] = current_theme
         ctx["theme_toggle_url"] = theme_toggle_url
@@ -319,6 +334,9 @@ def create_app(
         ctx["lang"] = current_lang
         ctx["tr"] = catalog
         ctx["supported_languages"] = SUPPORTED_LANGUAGES
+        ctx["lang_names"] = lang_names
+        ctx["lang_urls"] = lang_urls
+        ctx["current_lang_name"] = lang_names.get(current_lang, current_lang.upper())
         ctx["settings"] = settings
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
