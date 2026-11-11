@@ -161,7 +161,13 @@ function initThemeManager() {
 
   function updateToggleState(theme) {
     var next = theme === 'dark' ? 'light' : 'dark';
-    toggleBtn.setAttribute('href', '?theme=' + next);
+    try {
+      var currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('theme', next);
+      toggleBtn.setAttribute('href', currentUrl.pathname + currentUrl.search);
+    } catch(e) {
+      toggleBtn.setAttribute('href', '?theme=' + next);
+    }
     toggleBtn.setAttribute('title', next === 'dark' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
     toggleBtn.setAttribute('aria-label', next === 'dark' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
 
@@ -169,6 +175,30 @@ function initThemeManager() {
     document.querySelectorAll('input[name="theme"]').forEach(function(inp) {
       inp.value = theme;
     });
+
+    // Update all internal links that carry theme parameter (tabs, filters, pagination)
+    document.querySelectorAll('a[href*="theme="]').forEach(function(link) {
+      if (link === toggleBtn) return;
+      try {
+        var href = link.getAttribute('href');
+        if (href && (href.startsWith('/') || href.startsWith('?'))) {
+          var targetUrl = new URL(href, window.location.origin);
+          targetUrl.searchParams.set('theme', theme);
+          link.setAttribute('href', targetUrl.pathname + targetUrl.search);
+        }
+      } catch (err) {}
+    });
+
+    // Synchronize browser address bar so F5 / reload preserves the chosen theme
+    try {
+      if (window.history && window.history.replaceState) {
+        var u = new URL(window.location.href);
+        if (u.searchParams.get('theme') !== theme) {
+          u.searchParams.set('theme', theme);
+          window.history.replaceState(null, '', u.pathname + u.search);
+        }
+      }
+    } catch(err) {}
   }
 
   toggleBtn.addEventListener('click', function(e) {

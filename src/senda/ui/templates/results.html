@@ -66,7 +66,7 @@
             <a href="/search?q={{ query | urlencode }}&category=community&theme={{ theme }}{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill {% if category == 'community' or category == 'social' or category == 'smallweb' %}active{% endif %}" title="Consultar debates, foros, bitácoras y aportes comunitarios independientes">
                 <span>{{ tr.tab_community | default('Comunidad & Foros') | safe }}</span>
             </a>
-            <a href="/search?q={{ query | urlencode }}&category=maps" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
+            <a href="/search?q={{ query | urlencode }}&category=maps&theme={{ theme }}{% if lang %}&lang={{ lang }}{% endif %}" role="tab" class="results-tab-pill external-tab" title="Abrir en OpenStreetMap sin rastreo">
                 <span>{{ tr.tab_maps | default('Mapas ↗') }}</span>
             </a>
         </nav>

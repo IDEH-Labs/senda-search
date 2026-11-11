@@ -203,9 +203,17 @@ def test_theme_toggle_zero_js_and_cookie(client):
     assert 'data-theme="light"' in r_cookie.text
 
     # 4. Search results with light theme
-    r_search_light = client.get("/search?q=freedom&theme=light")
+    r_search_light = client.get("/search?q=freedom&category=images&theme=light")
     assert r_search_light.status_code == 200
     assert 'data-theme="light"' in r_search_light.text
+    # Verify theme toggle button preserves search query and category in Zero-JS
+    assert '/search?q=freedom&amp;category=images&amp;theme=dark' in r_search_light.text or '/search?q=freedom&category=images&theme=dark' in r_search_light.text
+
+    # 5. Search results with dark theme
+    r_search_dark = client.get("/search?q=freedom&category=images&theme=dark")
+    assert r_search_dark.status_code == 200
+    assert 'data-theme="dark"' in r_search_dark.text
+    assert '/search?q=freedom&amp;category=images&amp;theme=light' in r_search_dark.text or '/search?q=freedom&category=images&theme=light' in r_search_dark.text
 
 
 def test_api_head_requests(client):

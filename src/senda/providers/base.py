@@ -4,8 +4,20 @@
 """Base schemas and interface for interchangeable SearchProviders and Verifiable Provenance."""
 
 from abc import ABC, abstractmethod
+import html
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+def sanitize_snippet(snippet: str) -> str:
+    """Safely escapes all HTML characters while preserving only safe <mark> and </mark> tags."""
+    if not snippet:
+        return ""
+    # Idempotent unescape first to prevent double-escaping &amp;lt;
+    unescaped = html.unescape(snippet)
+    tokenized = unescaped.replace("<mark>", "\x02").replace("</mark>", "\x03")
+    escaped = html.escape(tokenized, quote=True)
+    return escaped.replace("\x02", "<mark>").replace("\x03", "</mark>")
 
 
 class RetractionInfo(BaseModel):
@@ -77,6 +89,34 @@ class SearchResultItem(BaseModel):
     source_score: Optional[SourceScoreInfo] = Field(default=None, description="Puntuación y factores de la rúbrica versionada")
     provider_origin: str = Field(default="Senda", description="Identificador técnico del proveedor")
     ai_provenance: Optional[AIProvenance] = Field(default=None, description="Procedencia declarada de IA")
+
+    @field_validator("snippet")
+    @classmethod
+    def validate_snippet(cls, v: str) -> str:
+        return sanitize_snippet(v)
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        clean = (v or "").strip()
+        if not clean:
+            return "#"
+        lower = clean.lower()
+        if lower.startswith("http://") or lower.startswith("https://"):
+            return clean
+        # Disallow javascript:, data:, file:, etc.
+        return "#"
+
+    @field_validator("media_url")
+    @classmethod
+    def validate_media_url(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return None
+        clean = v.strip()
+        lower = clean.lower()
+        if lower.startswith("http://") or lower.startswith("https://") or lower.startswith("data:image/"):
+            return clean
+        return None
 
     @property
     def domain(self) -> str:

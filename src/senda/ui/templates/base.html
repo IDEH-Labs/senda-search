@@ -58,7 +58,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
     <header class="app-header" role="banner">
-        <a href="/" class="brand" aria-label="Senda">
+        <a href="{{ home_url | default('/') }}" class="brand" aria-label="Senda">
             <div class="brand-logo-wrapper" aria-hidden="true">
                 <svg class="brand-logo" width="28" height="28" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -78,7 +78,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
         </a>
 
         <div class="header-tools">
-            <a href="?theme={{ 'light' if theme != 'light' else 'dark' }}" id="themeToggle" class="theme-btn" role="button" aria-label="Cambiar tema" title="Cambiar tema (Claro / Oscuro)">
+            <a href="{{ theme_toggle_url | default('?theme=' + ('light' if theme != 'light' else 'dark')) }}" id="themeToggle" class="theme-btn" role="button" aria-label="Cambiar tema" title="Cambiar tema (Claro / Oscuro)">
                 <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2"></path><path d="M12 20v2"></path>

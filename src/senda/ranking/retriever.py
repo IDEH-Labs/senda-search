@@ -18,6 +18,17 @@ from senda.indexer.storage import StorageEngine
 from senda.ranking.stemmer import MorphologicalStemmer
 
 
+def sanitize_snippet(snippet: str) -> str:
+    """Safely escapes all HTML characters while preserving only safe <mark> and </mark> tags."""
+    if not snippet:
+        return ""
+    # Idempotent unescape first to prevent double-escaping &amp;lt;
+    unescaped = html.unescape(snippet)
+    tokenized = unescaped.replace("<mark>", "\x02").replace("</mark>", "\x03")
+    escaped = html.escape(tokenized, quote=True)
+    return escaped.replace("\x02", "<mark>").replace("\x03", "</mark>")
+
+
 @dataclass(frozen=True)
 class SearchResultItem:
     """A single ranked search result item."""
@@ -265,10 +276,10 @@ class SearchRetriever:
 
                 image_items = [
                     SearchResultItem(
-                        url=row["page_url"],
+                        url=row["page_url"] if (row["page_url"] or "").lower().startswith(("http://", "https://")) else "#",
                         domain=row["domain"],
                         title=row["alt_text"] or row["page_title"],
-                        snippet=f"License: {row['license']} • Source: {row['domain']}",
+                        snippet=sanitize_snippet(f"License: {row['license']} • Source: {row['domain']}"),
                         relevance_score=round(-float(row["bm25_score"]), 6),
                         doc_type="image",
                         media_url=row["image_url"],
@@ -394,10 +405,10 @@ class SearchRetriever:
 
                 items.append(
                     SearchResultItem(
-                        url=row["url"],
+                        url=row["url"] if (row["url"] or "").lower().startswith(("http://", "https://")) else "#",
                         domain=row["domain"],
                         title=row["title"],
-                        snippet=snippet_text,
+                        snippet=sanitize_snippet(snippet_text),
                         relevance_score=final_score,
                         doc_type=row["doc_type"],
                         published_at=row["published_at"],

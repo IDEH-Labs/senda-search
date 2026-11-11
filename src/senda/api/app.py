@@ -300,8 +300,22 @@ def create_app(
         current_lang = resolve_language(request, query_lang or request.query_params.get("lang"))
         catalog = get_translation_catalog(current_lang)
 
+        next_theme = "light" if current_theme == "dark" else "dark"
+        next_theme_url_obj = request.url.include_query_params(theme=next_theme)
+        theme_toggle_url = next_theme_url_obj.path + ("?" + next_theme_url_obj.query if next_theme_url_obj.query else "")
+
+        home_params = {}
+        if current_theme != "dark":
+            home_params["theme"] = current_theme
+        if current_lang != "es":
+            home_params["lang"] = current_lang
+        home_query = urllib.parse.urlencode(home_params)
+        home_url = f"/?{home_query}" if home_query else "/"
+
         ctx = dict(context)
         ctx["theme"] = current_theme
+        ctx["theme_toggle_url"] = theme_toggle_url
+        ctx["home_url"] = home_url
         ctx["lang"] = current_lang
         ctx["tr"] = catalog
         ctx["supported_languages"] = SUPPORTED_LANGUAGES

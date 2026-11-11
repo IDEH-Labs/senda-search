@@ -239,3 +239,36 @@ def test_search_verticals_and_images(tmp_path):
     assert img_res.items[0].media_url == "https://upload.wikimedia.org/wikipedia/commons/gplv3.png"
     assert "Wikimedia" in img_res.items[0].license
 
+
+def test_snippet_sanitization_and_url_scheme_hardening():
+    """Verify XSS payloads in document snippets are escaped while <mark> tags are safely preserved."""
+    from senda.providers.base import SearchResultItem, sanitize_snippet
+
+    # 1. Sanitize snippet escaping dangerous HTML
+    raw_snippet = '<script>alert("xss")</script> and <img src=x onerror=alert(1)> with <mark>safe term</mark>'
+    clean = sanitize_snippet(raw_snippet)
+    assert "<script>" not in clean
+    assert "&lt;script&gt;" in clean
+    assert "<img" not in clean
+    assert "&lt;img" in clean
+    assert "<mark>safe term</mark>" in clean
+
+    # 2. SearchResultItem sanitizes snippets automatically
+    item = SearchResultItem(
+        title="Test Page",
+        url="https://example.com/clean",
+        snippet='<script>evil()</script> <mark>highlight</mark>',
+    )
+    assert "<script>" not in item.snippet
+    assert "&lt;script&gt;" in item.snippet
+    assert "<mark>highlight</mark>" in item.snippet
+
+    # 3. SearchResultItem blocks dangerous URI schemes
+    bad_item = SearchResultItem(
+        title="Malicious Link",
+        url="javascript:alert(document.cookie)",
+        media_url="javascript:steal()",
+    )
+    assert bad_item.url == "#"
+    assert bad_item.media_url is None
+
