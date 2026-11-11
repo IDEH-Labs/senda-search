@@ -24,36 +24,36 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <link rel="jslicense" href="/javascript">
     
     <title>{% block title %}Senda{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/senda.css?v=2.10.0">
+    <link rel="stylesheet" href="/static/css/senda.css?v=3.0.0">
     <style>
-      /* Critical Sovereign CSS (Zero-latency layout stability & cache resilience) */
+      /* W3C / MDN Standard Sovereign Header & Controls (Immune to Cache & GeckoView Quirks) */
       .theme-btn {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        min-height: 38px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        text-decoration: none;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        color: #94a3b8;
-        cursor: pointer;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        text-decoration: none !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        color: #94a3b8 !important;
+        cursor: pointer !important;
       }
       [data-theme="light"] .theme-btn,
       html.light .theme-btn {
-        background: #f1f5f9;
-        border-color: #cbd5e1;
-        color: #475569;
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #475569 !important;
       }
       .theme-btn svg {
-        width: 16px !important;
-        height: 16px !important;
-        min-width: 16px !important;
-        min-height: 16px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        min-height: 18px !important;
         flex-shrink: 0 !important;
         stroke: currentColor !important;
       }
@@ -64,112 +64,126 @@ Senda — Free Software under GNU GPL-3.0-or-later
       [data-theme="light"] .theme-btn .icon-moon,
       html.light .theme-btn .icon-moon { display: block !important; color: #475569 !important; stroke: #475569 !important; }
 
+      /* MDN Standard Details Dropdown with Inner Flex Container */
       details.lang-picker {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        user-select: none;
+        position: relative !important;
+        display: inline-block !important;
+        user-select: none !important;
       }
       details.lang-picker summary.lang-summary {
+        display: block !important;
         list-style: none !important;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 8px;
-        height: 38px;
-        padding: 0 1.85rem 0 2.15rem;
-        font-size: 0.82rem;
-        font-weight: 500;
-        color: #f8fafc;
-        position: relative;
-        outline: none;
-        font-family: inherit;
-      }
-      [data-theme="light"] details.lang-picker summary.lang-summary,
-      html.light details.lang-picker summary.lang-summary {
-        background: #f1f5f9;
-        border-color: #cbd5e1;
-        color: #0f172a;
+        cursor: pointer !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
       }
       details.lang-picker summary.lang-summary::-webkit-details-marker,
       details.lang-picker summary.lang-summary::marker {
         display: none !important;
       }
-      details.lang-picker .lang-icon {
-        position: absolute;
-        left: 0.65rem;
-        color: #94a3b8;
-        pointer-events: none;
+      .lang-summary-inner {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        border-radius: 8px !important;
+        height: 38px !important;
+        padding: 0 0.85rem !important;
+        font-size: 0.82rem !important;
+        font-weight: 500 !important;
+        color: #f8fafc !important;
+        font-family: inherit !important;
+        box-sizing: border-box !important;
       }
-      [data-theme="light"] details.lang-picker .lang-icon,
-      html.light details.lang-picker .lang-icon {
-        color: #64748b;
+      [data-theme="light"] .lang-summary-inner,
+      html.light .lang-summary-inner {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
       }
-      details.lang-picker .lang-arrow {
-        position: absolute;
-        right: 0.6rem;
-        color: #64748b;
-        pointer-events: none;
-        transition: transform 0.15s ease;
+      .lang-summary-inner .lang-icon {
+        width: 15px !important;
+        height: 15px !important;
+        min-width: 15px !important;
+        min-height: 15px !important;
+        flex-shrink: 0 !important;
+        color: #94a3b8 !important;
+        stroke: currentColor !important;
       }
-      details.lang-picker[open] .lang-arrow {
-        transform: rotate(180deg);
+      [data-theme="light"] .lang-summary-inner .lang-icon,
+      html.light .lang-summary-inner .lang-icon {
+        color: #64748b !important;
+      }
+      .lang-summary-inner .lang-arrow {
+        width: 12px !important;
+        height: 12px !important;
+        min-width: 12px !important;
+        min-height: 12px !important;
+        flex-shrink: 0 !important;
+        color: #64748b !important;
+        stroke: currentColor !important;
+        transition: transform 0.15s ease !important;
+      }
+      details.lang-picker[open] .lang-summary-inner .lang-arrow {
+        transform: rotate(180deg) !important;
       }
       details.lang-picker .lang-menu {
-        position: absolute;
-        top: calc(100% + 6px);
-        right: 0;
-        min-width: 150px;
-        background: #0f172a;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.35);
-        padding: 0.35rem 0;
-        z-index: 200;
-        display: flex;
-        flex-direction: column;
-        backdrop-filter: blur(16px);
+        position: absolute !important;
+        top: calc(100% + 6px) !important;
+        right: 0 !important;
+        min-width: 155px !important;
+        background: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.35) !important;
+        padding: 0.35rem 0 !important;
+        z-index: 200 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-sizing: border-box !important;
       }
       [data-theme="light"] details.lang-picker .lang-menu,
       html.light details.lang-picker .lang-menu {
-        background: #ffffff;
-        border-color: #cbd5e1;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06) !important;
       }
       .lang-menu-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5rem 1rem;
-        font-size: 0.83rem;
-        color: #94a3b8;
-        text-decoration: none;
-        white-space: nowrap;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.83rem !important;
+        color: #94a3b8 !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
       }
       [data-theme="light"] .lang-menu-item,
       html.light .lang-menu-item {
-        color: #475569;
+        color: #475569 !important;
       }
       .lang-menu-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
       }
       [data-theme="light"] .lang-menu-item:hover,
       html.light .lang-menu-item:hover {
-        background: #e2e8f0;
-        color: #0f172a;
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
       }
       .lang-menu-item.active {
-        color: #10b981;
-        font-weight: 600;
-        background: rgba(16, 185, 129, 0.08);
+        color: #10b981 !important;
+        font-weight: 600 !important;
+        background: rgba(16, 185, 129, 0.08) !important;
       }
       .lang-menu-item .item-check {
-        font-size: 0.82rem;
-        margin-left: 0.65rem;
-        color: #10b981;
+        font-size: 0.82rem !important;
+        margin-left: 0.65rem !important;
+        color: #10b981 !important;
       }
     </style>
     
@@ -226,30 +240,36 @@ Senda — Free Software under GNU GPL-3.0-or-later
 
         <div class="header-tools">
             <a href="{{ theme_toggle_url | default('?theme=' + ('light' if theme != 'light' else 'dark')) }}" id="themeToggle" class="theme-btn" role="button" aria-label="Cambiar tema" title="Cambiar tema (Claro / Oscuro)">
-                <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path><path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path><path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
-                <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </a>
 
-            <!-- Native Zero-JS Language Picker (Identical Glass Pill Aesthetic, 100% Tor Safest & LibreJS compatible) -->
+            <!-- Native Zero-JS Language Picker (W3C/MDN Semantic Summary Structure) -->
             <details class="lang-picker" title="Seleccionar idioma / Select language">
                 <summary class="lang-summary" aria-label="{{ tr.lang_switch | default('Idioma') }}">
-                    <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                    <span class="lang-text">{{ current_lang_name | default('Español') }}</span>
-                    <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+                    <span class="lang-summary-inner">
+                        <svg class="lang-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        <span class="lang-text">{{ current_lang_name | default('Español') }}</span>
+                        <svg class="lang-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </span>
                 </summary>
                 <div class="lang-menu">
                     {% for l_code in supported_languages %}

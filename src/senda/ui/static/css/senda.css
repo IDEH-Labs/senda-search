@@ -274,24 +274,38 @@ html.light .theme-btn .icon-moon {
   display: block !important;
 }
 
-/* Language Selector (Modern minimal glass pill) */
+/* Language Selector (Modern minimal glass pill - W3C/MDN Details Standard) */
 details.lang-picker {
   position: relative;
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   user-select: none;
 }
 
 details.lang-picker summary.lang-summary {
+  display: block;
   list-style: none !important;
   cursor: pointer;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+details.lang-picker summary.lang-summary::-webkit-details-marker,
+details.lang-picker summary.lang-summary::marker {
+  display: none !important;
+}
+
+.lang-summary-inner {
   display: inline-flex;
   align-items: center;
+  gap: 0.55rem;
   background: var(--bg-chip);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   height: 38px;
-  padding: 0 1.85rem 0 2.15rem;
+  padding: 0 0.85rem;
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-main);
@@ -300,46 +314,60 @@ details.lang-picker summary.lang-summary {
   position: relative;
   outline: none;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
-details.lang-picker summary.lang-summary::-webkit-details-marker,
-details.lang-picker summary.lang-summary::marker {
-  display: none !important;
+[data-theme="light"] .lang-summary-inner,
+html.light .lang-summary-inner {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
-details.lang-picker:hover summary.lang-summary,
-details.lang-picker[open] summary.lang-summary {
+details.lang-picker:hover .lang-summary-inner,
+details.lang-picker[open] .lang-summary-inner {
   border-color: var(--border-strong);
   background: var(--bg-chip-hover);
   box-shadow: 0 0 0 1px var(--border-strong);
 }
 
-details.lang-picker .lang-icon {
-  position: absolute;
-  left: 0.65rem;
+.lang-summary-inner .lang-icon {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  min-height: 15px;
+  flex-shrink: 0;
   color: var(--text-muted);
-  pointer-events: none;
+  stroke: currentColor;
   transition: color var(--transition-fast);
 }
 
-details.lang-picker:hover .lang-icon,
-details.lang-picker[open] .lang-icon {
+[data-theme="light"] .lang-summary-inner .lang-icon,
+html.light .lang-summary-inner .lang-icon {
+  color: #64748b;
+}
+
+details.lang-picker:hover .lang-summary-inner .lang-icon,
+details.lang-picker[open] .lang-summary-inner .lang-icon {
   color: var(--text-accent);
 }
 
-details.lang-picker .lang-arrow {
-  position: absolute;
-  right: 0.6rem;
+.lang-summary-inner .lang-arrow {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  flex-shrink: 0;
   color: var(--text-faint);
-  pointer-events: none;
+  stroke: currentColor;
   transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
-details.lang-picker:hover .lang-arrow {
+details.lang-picker:hover .lang-summary-inner .lang-arrow {
   color: var(--text-muted);
 }
 
-details.lang-picker[open] .lang-arrow {
+details.lang-picker[open] .lang-summary-inner .lang-arrow {
   transform: rotate(180deg);
   color: var(--text-muted);
 }
