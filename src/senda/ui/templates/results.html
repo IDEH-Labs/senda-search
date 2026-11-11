@@ -289,17 +289,6 @@
             </details>
             {% endif %}
 
-            {% if category not in ('images', 'videos') %}
-            <!-- Densidad Button (Solo en vistas con resultados textuales) -->
-            <button type="button" id="densityBtn" class="filter-dropdown-btn density-btn" title="{{ tr.density_tooltip }}" aria-label="{{ tr.density_tooltip }}">
-                <svg class="dropdown-btn-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-                <span id="densityLabel">{{ tr.density_comfortable }}</span>
-            </button>
-            {% endif %}
         </div>
     </div>
 

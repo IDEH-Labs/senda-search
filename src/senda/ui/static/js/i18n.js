@@ -277,35 +277,6 @@ function initThemeManager() {
 }
 
 /**
- * Density Manager: Toggle comfortable / compact view modes.
- */
-function initDensityManager() {
-  var densityBtn = document.getElementById('densityBtn');
-  var densityLabel = document.getElementById('densityLabel');
-  
-  try {
-    var saved = localStorage.getItem('senda_density');
-    if (saved === 'compact') {
-      document.body.classList.add('compact-density');
-      if (densityLabel) densityLabel.textContent = "Densidad: Compacta";
-    }
-  } catch(e) {}
-
-  if (densityBtn) {
-    densityBtn.addEventListener('click', function() {
-      var isCompact = document.body.classList.toggle('compact-density');
-      var mode = isCompact ? 'compact' : 'comfortable';
-      if (densityLabel) {
-        densityLabel.textContent = isCompact ? "Densidad: Compacta" : "Densidad: Cómoda";
-      }
-      try {
-        localStorage.setItem('senda_density', mode);
-      } catch(e) {}
-    });
-  }
-}
-
-/**
  * Sovereign Dropdown & Accessible Filter Manager (GNU LibreJS Compliant)
  * - Closes dropdowns on Escape key press (with focus restore to summary)
  * - Closes dropdowns on Outside Click
@@ -733,7 +704,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
   applyTranslations(activeLang);
   initThemeManager();
-  initDensityManager();
   initPreferencesManager();
   initDropdownsAndFilters();
   initCommandBar();

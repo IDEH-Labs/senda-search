@@ -391,21 +391,19 @@ def test_purpose_built_dropdown_options_per_category_and_mobile_css(client):
     assert "Región:" in html_web
     assert "SafeSearch:" in html_web
     assert "Lente: Software Libre" in html_web
-    assert "densityBtn" in html_web
     assert "Ordenar:" not in html_web
 
-    # 2. News tab: Fecha, Ordenar, Región, Densidad (No 'Lente', No 'SafeSearch')
+    # 2. News tab: Fecha, Ordenar, Región (No 'Lente', No 'SafeSearch')
     resp_news = client.get("/search?q=freedom&category=news&time_filter=1d&sort=date")
     assert resp_news.status_code == 200
     html_news = resp_news.text
     assert "Fecha: 24 horas" in html_news
     assert "Ordenar: Recientes" in html_news
     assert "Región:" in html_news
-    assert "densityBtn" in html_news
     assert "Lente:" not in html_news and "Lentes:" not in html_news
     assert "SafeSearch:" not in html_news
 
-    # 3. Images tab: Región, SafeSearch (Clean visual mode: No Fecha, No Ordenar, No Lente, No Densidad)
+    # 3. Images tab: Región, SafeSearch (Clean visual mode: No Fecha, No Ordenar, No Lente)
     resp_img = client.get("/search?q=freedom&category=images")
     assert resp_img.status_code == 200
     html_img = resp_img.text
@@ -414,9 +412,8 @@ def test_purpose_built_dropdown_options_per_category_and_mobile_css(client):
     assert "Fecha:" not in html_img
     assert "Ordenar:" not in html_img
     assert "Lente:" not in html_img and "Lentes:" not in html_img
-    assert "densityBtn" not in html_img
 
-    # 4. Videos tab: Fecha, Región, SafeSearch (No Ordenar, No Lente, No Densidad)
+    # 4. Videos tab: Fecha, Región, SafeSearch (No Ordenar, No Lente)
     resp_vid = client.get("/search?q=freedom&category=videos&time_filter=1w")
     assert resp_vid.status_code == 200
     html_vid = resp_vid.text
@@ -425,26 +422,23 @@ def test_purpose_built_dropdown_options_per_category_and_mobile_css(client):
     assert "SafeSearch:" in html_vid
     assert "Ordenar:" not in html_vid
     assert "Lente:" not in html_vid and "Lentes:" not in html_vid
-    assert "densityBtn" not in html_vid
 
-    # 5. Library tab: Fecha, Densidad (Peer-reviewed science: No SafeSearch, No Lente, No Región, No Ordenar)
+    # 5. Library tab: Fecha (Peer-reviewed science: No SafeSearch, No Lente, No Región, No Ordenar)
     resp_lib = client.get("/search?q=freedom&category=library&time_filter=1m")
     assert resp_lib.status_code == 200
     html_lib = resp_lib.text
     assert "Fecha: 1 mes" in html_lib
-    assert "densityBtn" in html_lib
     assert "Región:" not in html_lib
     assert "SafeSearch:" not in html_lib
     assert "Lente:" not in html_lib and "Lentes:" not in html_lib
     assert "Ordenar:" not in html_lib
 
-    # 6. Community tab: Fecha, Lentes, Densidad (IndieWeb/SmallWeb: No Región, No SafeSearch, No Ordenar)
+    # 6. Community tab: Fecha, Lentes (IndieWeb/SmallWeb: No Región, No SafeSearch, No Ordenar)
     resp_comm = client.get("/search?q=freedom&category=community&time_filter=1d&goggle=tech_libre")
     assert resp_comm.status_code == 200
     html_comm = resp_comm.text
     assert "Fecha: 24 horas" in html_comm
     assert "Lente: Software Libre" in html_comm
-    assert "densityBtn" in html_comm
     assert "Región:" not in html_comm
     assert "SafeSearch:" not in html_comm
     assert "Ordenar:" not in html_comm
@@ -475,7 +469,6 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert "Date: 24 heures" in html_fr
     assert "Dernières 24 heures" in html_fr
     assert "Région: Mondial" in html_fr
-    assert "Densité : Confortable" in html_fr
 
     # 2. English language via explicit ?lang=en (sets senda_lang cookie)
     resp_en = client.get("/search?q=freedom&category=all&time_filter=1d&lang=en")
@@ -486,7 +479,6 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert "Any time" in html_en
     assert "Region: Global" in html_en
     assert "SafeSearch: Off" in html_en
-    assert "Density: Comfortable" in html_en
 
     # 3. German language via cookie senda_lang=de
     client.cookies.set("senda_lang", "de")
@@ -496,7 +488,6 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert '<html lang="de"' in html_de
     assert "Datum: 24 Stunden" in html_de
     assert "Beliebige Zeit" in html_de
-    assert "Dichte: Komfortabel" in html_de
     # Clean up cookie
     del client.cookies["senda_lang"]
 

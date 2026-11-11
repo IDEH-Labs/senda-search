@@ -987,35 +987,6 @@ html.light .country-search-box {
   align-items: center;
 }
 
-.density-btn {
-  background: var(--bg-chip);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  border-radius: 9999px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-
-.density-btn:hover {
-  background: var(--bg-chip-hover);
-  border-color: var(--border-strong);
-  color: var(--text-main);
-}
-
-body.compact-density .density-btn {
-  border-color: rgba(74, 222, 128, 0.45);
-  background: rgba(74, 222, 128, 0.08);
-  color: var(--text-accent);
-  font-weight: 600;
-}
-
 .synthesis-toggle-btn {
   text-decoration: none;
   display: inline-flex;
@@ -1029,21 +1000,6 @@ body.compact-density .density-btn {
   border-color: rgba(74, 222, 128, 0.4);
   background: rgba(74, 222, 128, 0.08);
   color: var(--text-accent);
-}
-
-/* Compact Density Mode */
-body.compact-density .result-card {
-  padding: 0.85rem 1.15rem;
-  gap: 0.2rem;
-}
-
-body.compact-density .result-heading {
-  font-size: 1.1rem;
-}
-
-body.compact-density .result-snippet {
-  font-size: 0.85rem;
-  line-height: 1.45;
 }
 
 /* Results Meta Row */
@@ -2134,8 +2090,7 @@ footer.app-footer a:hover {
     z-index: 130;
   }
 
-  .filter-dropdown-btn,
-  .density-btn {
+  .filter-dropdown-btn {
     padding: 0.32rem 0.65rem;
     font-size: 0.77rem;
     gap: 0.3rem;
@@ -2181,10 +2136,6 @@ footer.app-footer a:hover {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-  }
-
-  .filter-density-toggle {
-    margin-top: 0.25rem;
   }
 
   .results-meta-row {
@@ -2233,8 +2184,7 @@ footer.app-footer a:hover {
     gap: 0.3rem 0.35rem;
   }
 
-  .filter-dropdown-btn,
-  .density-btn {
+  .filter-dropdown-btn {
     padding: 0.28rem 0.55rem;
     font-size: 0.74rem;
     min-height: 34px;
