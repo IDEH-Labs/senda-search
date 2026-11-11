@@ -251,25 +251,62 @@ window.selectCategory = function(cat, btn) {
 function initDropdownsAndFilters() {
   var dropdowns = document.querySelectorAll('.filter-dropdown, .why-seen-disclosure');
 
+  function resetMenuPosition(d) {
+    var menu = d.querySelector('.filter-dropdown-menu');
+    if (menu) {
+      menu.style.left = '';
+      menu.style.right = '';
+      menu.style.transform = '';
+    }
+  }
+
   function closeAllDropdowns(except) {
     dropdowns.forEach(function(d) {
       if (d !== except && d.hasAttribute('open')) {
         d.removeAttribute('open');
+        resetMenuPosition(d);
       }
     });
   }
 
-  // Handle dropdown open toggle for mutual exclusion and autofocus
+  // Handle dropdown open toggle for mutual exclusion, boundary adjustment, and autofocus
   dropdowns.forEach(function(d) {
     d.addEventListener('toggle', function() {
       if (d.open) {
         closeAllDropdowns(d);
+
+        // Adjust positioning if menu bleeds past mobile screen boundaries
+        var menu = d.querySelector('.filter-dropdown-menu');
+        if (menu) {
+          menu.style.left = '';
+          menu.style.right = '';
+          menu.style.transform = '';
+
+          var rect = menu.getBoundingClientRect();
+          var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+          // If menu extends beyond right edge, align right edge to button
+          if (rect.right > viewportWidth - 8) {
+            menu.style.left = 'auto';
+            menu.style.right = '0';
+          }
+
+          // If after alignment it extends beyond left edge, shift it right
+          var updatedRect = menu.getBoundingClientRect();
+          if (updatedRect.left < 8) {
+            var shift = 8 - updatedRect.left;
+            menu.style.transform = 'translateX(' + shift + 'px)';
+          }
+        }
+
         var searchInput = d.querySelector('.country-search-input');
         if (searchInput) {
           setTimeout(function() {
             searchInput.focus();
           }, 50);
         }
+      } else {
+        resetMenuPosition(d);
       }
     });
   });

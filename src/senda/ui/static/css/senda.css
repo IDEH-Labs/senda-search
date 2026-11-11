@@ -702,6 +702,10 @@ details summary::marker {
   color: var(--text-main);
 }
 
+.filter-dropdown[open] {
+  z-index: 100;
+}
+
 .filter-dropdown[open] .filter-dropdown-btn {
   background: var(--bg-chip-active);
   border-color: var(--border-strong);
@@ -1870,7 +1874,15 @@ footer.app-footer a:hover {
     min-height: 40px;
   }
 
-  .results-tools-bar,
+  .results-tools-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.1rem;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
   .results-filters-row {
     display: flex;
     align-items: center;
@@ -1878,6 +1890,38 @@ footer.app-footer a:hover {
     padding: 0.4rem 0.1rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-dropdown {
+    position: relative;
+  }
+
+  .filter-dropdown[open] {
+    z-index: 100;
+  }
+
+  .filter-dropdown-btn {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .filter-dropdown-menu {
+    max-width: calc(100vw - 1.5rem);
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Right-align even/trailing dropdowns on mobile to prevent clipping on right edge */
+  .filter-dropdown:nth-child(even) .filter-dropdown-menu,
+  .filter-dropdown:last-of-type .filter-dropdown-menu {
+    left: auto;
+    right: 0;
+  }
+
+  .filter-country-menu {
+    min-width: min(280px, calc(100vw - 1.5rem));
+    max-width: calc(100vw - 1.5rem);
   }
 
   .filter-group {
@@ -1930,6 +1974,25 @@ footer.app-footer a:hover {
 
   .command-bar {
     padding: 0 0.75rem;
+  }
+
+  .results-tools-bar {
+    gap: 0.3rem;
+  }
+
+  .filter-dropdown-btn {
+    padding: 0.28rem 0.55rem;
+    font-size: 0.74rem;
+  }
+
+  .filter-dropdown-menu {
+    min-width: min(180px, calc(100vw - 1rem));
+    max-width: calc(100vw - 1rem);
+  }
+
+  .filter-country-menu {
+    min-width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
   }
 
   .why-seen-dropdown {

@@ -372,3 +372,28 @@ def test_goggles_and_smallweb_integration(client):
     assert resp_custom.status_code == 200
     assert "Lente: DSL Personalizada" in resp_custom.text
 
+
+def test_news_dropdown_options_and_mobile_css(client):
+    """Verify news dropdown filters (time period and sort) render properly with mobile-ready CSS."""
+    # Check news search page renders time and sort dropdowns
+    resp_news = client.get("/search?q=freedom&category=news&time_filter=1d&sort=relevance&goggle=tech_libre")
+    assert resp_news.status_code == 200
+    html = resp_news.text
+    assert "results-tools-bar" in html
+    assert "Últimas 24 horas" in html
+    assert "Ordenar: Relevancia" in html
+    assert "time_filter=1w" in html
+    assert "time_filter=1m" in html
+    # Verify goggle is preserved in news filter links
+    assert "goggle=tech_libre" in html
+
+    # Verify CSS static file has mobile overflow fix for tools bar
+    resp_css = client.get("/static/css/senda.css")
+    assert resp_css.status_code == 200
+    css = resp_css.text
+    # .results-tools-bar must have overflow: visible and flex-wrap: wrap on mobile
+    assert ".filter-dropdown[open]" in css
+    assert "overflow: visible" in css
+    assert "max-width: calc(100vw - 1.5rem)" in css
+
+

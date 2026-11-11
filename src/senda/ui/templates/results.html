@@ -90,35 +90,35 @@
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" class="filter-dropdown-item {% if not time_filter or time_filter == 'all' %}active{% endif %}">
                         <span>Cualquier fecha</span>
                         {% if not time_filter or time_filter == 'all' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1h" class="filter-dropdown-item {% if time_filter == '1h' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1h" class="filter-dropdown-item {% if time_filter == '1h' %}active{% endif %}">
                         <span>Última hora</span>
                         {% if time_filter == '1h' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1d" class="filter-dropdown-item {% if time_filter == '1d' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1d" class="filter-dropdown-item {% if time_filter == '1d' %}active{% endif %}">
                         <span>Últimas 24 horas</span>
                         {% if time_filter == '1d' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1w" class="filter-dropdown-item {% if time_filter == '1w' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1w" class="filter-dropdown-item {% if time_filter == '1w' %}active{% endif %}">
                         <span>Última semana</span>
                         {% if time_filter == '1w' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1m" class="filter-dropdown-item {% if time_filter == '1m' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1m" class="filter-dropdown-item {% if time_filter == '1m' %}active{% endif %}">
                         <span>Último mes</span>
                         {% if time_filter == '1m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=2m" class="filter-dropdown-item {% if time_filter == '2m' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=2m" class="filter-dropdown-item {% if time_filter == '2m' %}active{% endif %}">
                         <span>Hace 2 meses</span>
                         {% if time_filter == '2m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=6m" class="filter-dropdown-item {% if time_filter == '6m' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=6m" class="filter-dropdown-item {% if time_filter == '6m' %}active{% endif %}">
                         <span>Hace 6 meses</span>
                         {% if time_filter == '6m' %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}&time_filter=1y_plus" class="filter-dropdown-item {% if time_filter == '1y_plus' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort={{ sort | default('date') }}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}&time_filter=1y_plus" class="filter-dropdown-item {% if time_filter == '1y_plus' %}active{% endif %}">
                         <span>Hace 1 año o más</span>
                         {% if time_filter == '1y_plus' %}<span class="item-check">✓</span>{% endif %}
                     </a>
@@ -134,11 +134,11 @@
                     </svg>
                 </summary>
                 <div class="filter-dropdown-menu">
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=date{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" class="filter-dropdown-item {% if sort == 'date' or not sort %}active{% endif %}">
                         <span>Más recientes</span>
                         {% if sort == 'date' or not sort %}<span class="item-check">✓</span>{% endif %}
                     </a>
-                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}" class="filter-dropdown-item {% if sort == 'relevance' %}active{% endif %}">
+                    <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&safe_search={{ safe_search }}&theme={{ theme }}&sort=relevance{% if time_filter %}&time_filter={{ time_filter }}{% endif %}{% if goggle %}&goggle={{ goggle }}{% endif %}{% if custom_goggle %}&custom_goggle={{ custom_goggle | urlencode }}{% endif %}" class="filter-dropdown-item {% if sort == 'relevance' %}active{% endif %}">
                         <span>Relevancia</span>
                         {% if sort == 'relevance' %}<span class="item-check">✓</span>{% endif %}
                     </a>
