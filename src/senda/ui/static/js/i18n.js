@@ -302,12 +302,21 @@ function initDropdownsAndFilters() {
   function adjustMenuBoundary(d) {
     var menu = d.querySelector('.filter-dropdown-menu');
     if (!menu) return;
+
+    var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    // On mobile screens (<= 640px), the dropdown menu is anchored full-width under the toolbar via CSS
+    if (viewportWidth <= 640) {
+      menu.style.left = '';
+      menu.style.right = '';
+      menu.style.transform = '';
+      return;
+    }
+
     menu.style.left = '';
     menu.style.right = '';
     menu.style.transform = '';
 
     var rect = menu.getBoundingClientRect();
-    var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 
     // If menu extends beyond right edge, align right edge to button
     if (rect.right > viewportWidth - 8) {
