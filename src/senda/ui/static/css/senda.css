@@ -758,6 +758,25 @@ details summary::marker {
   display: none !important;
 }
 
+/* Sovereign Backdrop for Filter Dropdowns and Disclosures (Zero-JS resilient) */
+.filter-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 110;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.dropdown-open .filter-backdrop {
+  display: block;
+}
+
 .results-tools-bar {
   display: flex;
   align-items: center;
@@ -766,6 +785,8 @@ details summary::marker {
   padding: 0.4rem 0.1rem;
   flex-wrap: wrap;
   border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  z-index: 115;
 }
 
 .filter-dropdown {
@@ -2080,6 +2101,7 @@ footer.app-footer a:hover {
 
   .results-tools-bar {
     position: relative;
+    z-index: 115;
     display: flex;
     align-items: center;
     gap: 0.35rem 0.4rem;

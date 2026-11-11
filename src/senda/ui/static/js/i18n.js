@@ -281,6 +281,24 @@ window.selectCategory = function(cat, btn) {
 function initDropdownsAndFilters() {
   var dropdowns = document.querySelectorAll('.filter-dropdown, .why-seen-disclosure');
 
+  var backdrop = document.getElementById('filterBackdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'filterBackdrop';
+    backdrop.className = 'filter-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(backdrop);
+  }
+
+  function updateBackdrop() {
+    var anyOpen = document.querySelector('.filter-dropdown[open], .why-seen-disclosure[open], details.lang-picker[open], details.opensearch-details[open]');
+    if (anyOpen) {
+      document.body.classList.add('dropdown-open');
+    } else {
+      document.body.classList.remove('dropdown-open');
+    }
+  }
+
   function resetMenuPosition(d) {
     var menu = d.querySelector('.filter-dropdown-menu');
     if (menu) {
@@ -291,12 +309,15 @@ function initDropdownsAndFilters() {
   }
 
   function closeAllDropdowns(except) {
-    dropdowns.forEach(function(d) {
-      if (d !== except && d.hasAttribute('open')) {
+    var allOpen = document.querySelectorAll('.filter-dropdown[open], .why-seen-disclosure[open], details.lang-picker[open], details.opensearch-details[open]');
+    allOpen.forEach(function(d) {
+      if (d !== except) {
         d.removeAttribute('open');
+        d.open = false;
         resetMenuPosition(d);
       }
     });
+    updateBackdrop();
   }
 
   function adjustMenuBoundary(d) {
@@ -338,6 +359,7 @@ function initDropdownsAndFilters() {
       if (d.open) {
         closeAllDropdowns(d);
         adjustMenuBoundary(d);
+        updateBackdrop();
 
         var searchInput = d.querySelector('.country-search-input');
         if (searchInput) {
@@ -347,6 +369,19 @@ function initDropdownsAndFilters() {
         }
       } else {
         resetMenuPosition(d);
+        updateBackdrop();
+      }
+    });
+  });
+
+  // Also coordinate lang-picker and opensearch details
+  document.querySelectorAll('details.lang-picker, details.opensearch-details').forEach(function(d) {
+    d.addEventListener('toggle', function() {
+      if (d.open) {
+        closeAllDropdowns(d);
+        updateBackdrop();
+      } else {
+        updateBackdrop();
       }
     });
   });
@@ -360,27 +395,83 @@ function initDropdownsAndFilters() {
     });
   });
 
-  // Close dropdowns on outside click
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.filter-dropdown, .why-seen-disclosure')) {
+  // Dismiss open dropdowns immediately upon outside touch or click
+  function handleOutside(e) {
+    var target = e.target;
+    var el = target && target.nodeType === 1 ? target : (target ? target.parentElement : null);
+    if (!el) return;
+
+    // If click or touch is on backdrop, dismiss all
+    if (el === backdrop || el.id === 'filterBackdrop' || el.classList.contains('filter-backdrop')) {
+      e.preventDefault();
       closeAllDropdowns(null);
+      return;
     }
-  });
+
+    var inside = el.closest('.filter-dropdown, .why-seen-disclosure, details.lang-picker, details.opensearch-details');
+
+    var openDropdowns = document.querySelectorAll('.filter-dropdown[open], .why-seen-disclosure[open], details.lang-picker[open], details.opensearch-details[open]');
+    if (!openDropdowns || openDropdowns.length === 0) return;
+
+    var anyClosed = false;
+    openDropdowns.forEach(function(d) {
+      if (d !== inside) {
+        d.removeAttribute('open');
+        d.open = false;
+        resetMenuPosition(d);
+        anyClosed = true;
+      }
+    });
+
+    if (anyClosed) {
+      updateBackdrop();
+      // If user touched an outside element while closing, unfocus any active inputs
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+    }
+  }
+
+  // Dismiss listeners:
+  // 1. pointerdown (fires instantaneously on finger touch or mouse press)
+  // 2. touchstart (fallback for mobile environments)
+  // 3. click (desktop & accessibility fallback)
+  if (window.PointerEvent) {
+    document.addEventListener('pointerdown', handleOutside, true);
+  }
+  document.addEventListener('touchstart', handleOutside, { capture: true, passive: true });
+  document.addEventListener('click', handleOutside, true);
+
+  if (backdrop) {
+    backdrop.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
+      closeAllDropdowns(null);
+    });
+    backdrop.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      closeAllDropdowns(null);
+    });
+    backdrop.addEventListener('click', function(e) {
+      e.preventDefault();
+      closeAllDropdowns(null);
+    });
+  }
 
   // Close dropdowns on Escape key press and restore focus to summary
   window.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
       var anyClosed = false;
-      dropdowns.forEach(function(d) {
-        if (d.open) {
-          d.removeAttribute('open');
-          resetMenuPosition(d);
-          anyClosed = true;
-          var summary = d.querySelector('summary');
-          if (summary) summary.focus();
-        }
+      var openDropdowns = document.querySelectorAll('.filter-dropdown[open], .why-seen-disclosure[open], details.lang-picker[open], details.opensearch-details[open]');
+      openDropdowns.forEach(function(d) {
+        d.removeAttribute('open');
+        d.open = false;
+        resetMenuPosition(d);
+        anyClosed = true;
+        var summary = d.querySelector('summary');
+        if (summary) summary.focus();
       });
       if (anyClosed) {
+        updateBackdrop();
         e.preventDefault();
       }
     }
@@ -570,14 +661,6 @@ document.addEventListener("DOMContentLoaded", function() {
       window.location.search = params.toString();
     });
   }
-
-  // Close sovereign language picker dropdown when clicking outside
-  document.addEventListener("click", function(e) {
-    var picker = document.querySelector("details.lang-picker[open]");
-    if (picker && !picker.contains(e.target)) {
-      picker.removeAttribute("open");
-    }
-  });
 
   applyTranslations(initialLang);
   initThemeManager();

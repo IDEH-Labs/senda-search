@@ -206,7 +206,7 @@ async def test_aggregator_routes_news_with_sort_and_time():
     )
     mock_news.search.assert_called_once_with(
         "atentado", category="news", page=1, page_size=10,
-        time_filter="1d", sort="date", region=None, safe_search="off"
+        time_filter="1d", sort="date", region=None, safe_search="off", lang=None
     )
 
 

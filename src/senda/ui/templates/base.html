@@ -42,7 +42,7 @@ Senda — Free Software under GNU GPL-3.0-or-later
     <link rel="jslicense" href="/javascript">
     
     <title>{% block title %}Senda{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/senda.css?v=3.1.0">
+    <link rel="stylesheet" href="/static/css/senda.css?v=3.2.0">
     <style>
       /* W3C / MDN Standard Sovereign Header & Controls (Immune to Cache & GeckoView Quirks) */
       .theme-btn {
@@ -305,6 +305,9 @@ Senda — Free Software under GNU GPL-3.0-or-later
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Sovereign Accessible Backdrop for Dropdown Filters & Disclosures -->
+    <div id="filterBackdrop" class="filter-backdrop" aria-hidden="true"></div>
+
     <footer class="app-footer" role="contentinfo">
         <div class="footer-left">
             <span>Senda</span>
@@ -345,6 +348,6 @@ Senda — Free Software under GNU GPL-3.0-or-later
         </div>
     </footer>
 
-    <script src="/static/js/i18n.js?v=3.1.0"></script>
+    <script src="/static/js/i18n.js?v=3.2.0"></script>
 </body>
 </html>
