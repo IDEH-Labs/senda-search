@@ -373,32 +373,78 @@ def test_goggles_and_smallweb_integration(client):
     assert "Lente: DSL Personalizada" in resp_custom.text
 
 
-def test_consistent_dropdown_options_across_all_tabs_and_mobile_css(client):
-    """Verify all search tabs (Web, News, Library, Community, Images, Videos) render the full AAA tool set."""
-    for cat in ["all", "news", "library", "community", "images", "videos"]:
-        resp = client.get(f"/search?q=freedom&category={cat}&time_filter=1d&sort=date&goggle=tech_libre")
-        assert resp.status_code == 200
-        html = resp.text
-        # Every single tab must have the exact same 6 search tools
-        assert "results-tools-bar" in html
-        assert "Fecha: 24 horas" in html
-        assert "Últimas 24 horas" in html
-        assert "Ordenar: Recientes" in html
-        assert "Región:" in html
-        assert "SafeSearch:" in html
-        assert "Lente:" in html or "Lentes:" in html
-        assert "densityBtn" in html
-        # Icons must be present for professional AAA visual hierarchy
-        assert "dropdown-btn-icon" in html
-        # Verify active category is maintained in time and sort dropdown links
-        assert f"category={cat}" in html
-        assert "goggle=tech_libre" in html
+def test_purpose_built_dropdown_options_per_category_and_mobile_css(client):
+    """Verify each category tab renders strictly relevant tools to avoid saturation and cognitive clutter."""
+    # 1. Web tab: Fecha, Región, SafeSearch, Lentes, Densidad (No 'Ordenar')
+    resp_web = client.get("/search?q=freedom&category=all&time_filter=1d&goggle=tech_libre")
+    assert resp_web.status_code == 200
+    html_web = resp_web.text
+    assert "Fecha: 24 horas" in html_web
+    assert "Región:" in html_web
+    assert "SafeSearch:" in html_web
+    assert "Lente: Software Libre" in html_web
+    assert "densityBtn" in html_web
+    assert "Ordenar:" not in html_web
+
+    # 2. News tab: Fecha, Ordenar, Región, Densidad (No 'Lente', No 'SafeSearch')
+    resp_news = client.get("/search?q=freedom&category=news&time_filter=1d&sort=date")
+    assert resp_news.status_code == 200
+    html_news = resp_news.text
+    assert "Fecha: 24 horas" in html_news
+    assert "Ordenar: Recientes" in html_news
+    assert "Región:" in html_news
+    assert "densityBtn" in html_news
+    assert "Lente:" not in html_news and "Lentes:" not in html_news
+    assert "SafeSearch:" not in html_news
+
+    # 3. Images tab: Región, SafeSearch (Clean visual mode: No Fecha, No Ordenar, No Lente, No Densidad)
+    resp_img = client.get("/search?q=freedom&category=images")
+    assert resp_img.status_code == 200
+    html_img = resp_img.text
+    assert "Región:" in html_img
+    assert "SafeSearch:" in html_img
+    assert "Fecha:" not in html_img
+    assert "Ordenar:" not in html_img
+    assert "Lente:" not in html_img and "Lentes:" not in html_img
+    assert "densityBtn" not in html_img
+
+    # 4. Videos tab: Fecha, Región, SafeSearch (No Ordenar, No Lente, No Densidad)
+    resp_vid = client.get("/search?q=freedom&category=videos&time_filter=1w")
+    assert resp_vid.status_code == 200
+    html_vid = resp_vid.text
+    assert "Fecha: 1 semana" in html_vid
+    assert "Región:" in html_vid
+    assert "SafeSearch:" in html_vid
+    assert "Ordenar:" not in html_vid
+    assert "Lente:" not in html_vid and "Lentes:" not in html_vid
+    assert "densityBtn" not in html_vid
+
+    # 5. Library tab: Fecha, Densidad (Peer-reviewed science: No SafeSearch, No Lente, No Región, No Ordenar)
+    resp_lib = client.get("/search?q=freedom&category=library&time_filter=1m")
+    assert resp_lib.status_code == 200
+    html_lib = resp_lib.text
+    assert "Fecha: 1 mes" in html_lib
+    assert "densityBtn" in html_lib
+    assert "Región:" not in html_lib
+    assert "SafeSearch:" not in html_lib
+    assert "Lente:" not in html_lib and "Lentes:" not in html_lib
+    assert "Ordenar:" not in html_lib
+
+    # 6. Community tab: Fecha, Lentes, Densidad (IndieWeb/SmallWeb: No Región, No SafeSearch, No Ordenar)
+    resp_comm = client.get("/search?q=freedom&category=community&time_filter=1d&goggle=tech_libre")
+    assert resp_comm.status_code == 200
+    html_comm = resp_comm.text
+    assert "Fecha: 24 horas" in html_comm
+    assert "Lente: Software Libre" in html_comm
+    assert "densityBtn" in html_comm
+    assert "Región:" not in html_comm
+    assert "SafeSearch:" not in html_comm
+    assert "Ordenar:" not in html_comm
 
     # Verify CSS static file has mobile overflow fix for tools bar
     resp_css = client.get("/static/css/senda.css")
     assert resp_css.status_code == 200
     css = resp_css.text
-    # .results-tools-bar must have overflow: visible and flex-wrap: wrap on mobile
     assert ".filter-dropdown[open]" in css
     assert "overflow: visible" in css
     assert ".dropdown-btn-icon" in css
