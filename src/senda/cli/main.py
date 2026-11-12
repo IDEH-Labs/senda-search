@@ -209,14 +209,14 @@ def cmd_serve(args):
         or os.environ.get("FORWARDED_ALLOW_IPS")
         or settings.FORWARDED_ALLOW_IPS
     )
-    try:
-        uvicorn.run("senda.api.app:app", host=host, port=port, log_level="info", proxy_headers=True, forwarded_allow_ips=forwarded_ips)
-    except TypeError:
-        from uvicorn.config import Config
-        from uvicorn.server import Server
-        cfg = Config("senda.api.app:app", host=host, port=port, log_level="info", proxy_headers=True, forwarded_allow_ips=forwarded_ips)
-        server = Server(config=cfg)
-        server.run()
+    uvicorn.run(
+        "senda.api.app:app",
+        host=host,
+        port=port,
+        log_level="info",
+        proxy_headers=True,
+        forwarded_allow_ips=forwarded_ips,
+    )
 
 
 

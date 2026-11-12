@@ -143,13 +143,12 @@ def test_cli_serve_env_and_defaults(monkeypatch, capsys):
         assert kwargs["forwarded_allow_ips"] == "127.0.0.1,::1,10.0.0.0/8"
 
 
-def test_cli_serve_type_error_fallback(monkeypatch, capsys):
-    """Verify senda serve gracefully falls back to uvicorn.Server if uvicorn.run raises TypeError."""
+def test_cli_serve_uvicorn_exception_bubbles_up(monkeypatch, capsys):
+    """Verify senda serve does not mask real uvicorn errors and raises them cleanly."""
     monkeypatch.setattr(sys, "argv", ["senda", "serve", "--host", "127.0.0.1", "--port", "8000"])
-    with patch("uvicorn.run", side_effect=TypeError("mocked legacy signature")), \
-         patch("uvicorn.server.Server.run") as mock_server_run:
-        main()
-        assert mock_server_run.called
+    with patch("uvicorn.run", side_effect=RuntimeError("Bind address in use")):
+        with pytest.raises(RuntimeError, match="Bind address in use"):
+            main()
 
     captured = capsys.readouterr()
     assert "Starting Senda Sovereign Search Web UI" in captured.out
