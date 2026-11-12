@@ -9,6 +9,7 @@ and DNS rebinding attacks during web crawling.
 
 import ipaddress
 import socket
+from typing import Optional
 from urllib.parse import urlparse
 
 

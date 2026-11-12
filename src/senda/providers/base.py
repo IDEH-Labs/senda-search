@@ -83,7 +83,7 @@ class SearchResultItem(BaseModel):
     authors: List[str] = Field(default_factory=list, description="Lista nominal de autor(es)")
     corrections: List[str] = Field(default_factory=list, description="Registro formal de correcciones o fe de erratas")
     retraction: Optional[RetractionInfo] = Field(default=None, description="Estado de retractación auditable")
-    primary_citations: List[str] = Field(default_factory=list, description="Citas y enlaces directos a fuentes primarias")
+    primary_citations: List[str] = Field(default_factory=list, description="Citas y enlaces directos a documentos fuente consultados")
     verifications: List[VerificationItem] = Field(default_factory=list, description="Verificaciones de terceros atribuidas")
     security_signals: List[str] = Field(default_factory=list, description="Señales técnicas de listas de amenazas (malware, phishing)")
     source_score: Optional[SourceScoreInfo] = Field(default=None, description="Puntuación y factores de la rúbrica versionada")

@@ -341,9 +341,37 @@ def create_app(
         ctx["current_country_name"] = get_country_name(context.get("region"))
         resp = templates.TemplateResponse(request=request, name=name, context=ctx)
         client_host = request.client.host if request.client else None
-        trusted_ips = {ip.strip() for ip in settings.FORWARDED_ALLOW_IPS.split(",") if ip.strip()}
-        trusted_ips.update({"127.0.0.1", "::1", "localhost", "testclient"})
-        is_trusted_proxy = settings.FORWARDED_ALLOW_IPS.strip() == "*" or (client_host in trusted_ips)
+        
+        # Verify if incoming connection is from a trusted reverse proxy (supporting CIDRs e.g. 172.16.0.0/12)
+        import ipaddress
+        def _check_trusted_proxy(host: Optional[str], allowed_spec: str) -> bool:
+            if not host:
+                return False
+            if allowed_spec.strip() == "*":
+                return True
+            if host in ("testclient", "localhost"):
+                return True
+            try:
+                c_ip = ipaddress.ip_address(host)
+            except ValueError:
+                return False
+            if c_ip.is_loopback:
+                return True
+            for entry in allowed_spec.split(","):
+                spec = entry.strip()
+                if not spec:
+                    continue
+                try:
+                    if "/" in spec:
+                        if c_ip in ipaddress.ip_network(spec, strict=False):
+                            return True
+                    elif c_ip == ipaddress.ip_address(spec):
+                        return True
+                except ValueError:
+                    continue
+            return False
+
+        is_trusted_proxy = _check_trusted_proxy(client_host, settings.FORWARDED_ALLOW_IPS)
 
         if request.url.scheme == "https":
             is_secure = True

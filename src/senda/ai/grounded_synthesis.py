@@ -7,6 +7,7 @@ The synthesis engine has been migrated to `senda.synthesis.extractive`.
 """
 
 from senda.synthesis.extractive import (
+    CitationItem,
     GroundedCitation,
     GroundedSynthesisResult,
     GroundedSynthesizer,
@@ -14,6 +15,7 @@ from senda.synthesis.extractive import (
 )
 
 __all__ = [
+    "CitationItem",
     "GroundedCitation",
     "GroundedSynthesisResult",
     "GroundedSynthesizer",

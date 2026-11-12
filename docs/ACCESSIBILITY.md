@@ -42,20 +42,25 @@ Senda está diseñado y auditado para cumplir y superar las pautas de las **Paut
 
 ---
 
-## 3. Matriz de Verificación WCAG
+## 3. Matriz de Verificación y Estado de Cumplimiento
 
-| Criterio WCAG 2.1 / 2.2 | Nivel | Estado en Senda | Verificación Técnica |
+### 3.1. Propiedades Verificadas Empírica y Técnicamente en el Código Base
+
+| Dimensión Técnica | Criterio WCAG | Estado | Evidencia y Verificación en el Repositorio |
 | :--- | :--- | :--- | :--- |
-| **1.1.1 Contenido no textual** | A | **Cumplido** | Placeholders SVG locales accesibles, iconos con `aria-hidden`, enlaces salientes con texto explícito. |
-| **1.3.1 Información y relaciones** | A | **Cumplido** | HTML5 semántico (`<main>`, `<header>`, `<nav>`, `<aside>`), formularios con `<label>` asociados. |
-| **1.4.3 Contraste mínimo** | AA | **Cumplido** | Contraste superior a 4.5:1 verificado en paletas claro y oscuro. |
-| **1.4.11 Contraste no textual** | AA | **Cumplido** | Bordes de campos de entrada y botones con contraste superior a 3:1. |
-| **2.1.1 Teclado** | A | **Cumplido** | Operable al 100% mediante teclado (`Tab`, `Shift+Tab`, `Enter`, `Space`). |
-| **2.1.2 Sin trampas de teclado** | A | **Cumplido** | El foco se mueve libremente por el documento sin quedar retenido. |
-| **2.4.1 Evitar bloques** | A | **Cumplido** | Enlace de salto al contenido principal disponible en todas las vistas. |
-| **2.4.7 Foco visible** | AA | **Cumplido** | Indicador de foco evidente en todos los elementos interactivos. |
-| **3.1.1 Idioma de la página** | A | **Cumplido** | Atributo `lang="..."` dinámico en la etiqueta `<html>` sincronizado con la preferencia del usuario. |
-| **4.1.2 Nombre, función, valor** | A | **Cumplido** | Controles de interfaz nativos sin sobrecarga de widgets opacos. |
+| **Operación Zero-JS** | 2.1.1 (A) | **Verificado** | Búsqueda, paginación, cambio de idioma y tema funcionan exclusivamente con formularios HTTP GET/POST nativos y HTML estándar sin requerir JavaScript. |
+| **Estructura Semántica** | 1.3.1 (A) | **Verificado** | Uso consistente de elementos semánticos de HTML5 (`<main>`, `<header>`, `<nav>`, `<section>`), jerarquía estricta de encabezados y controles de formulario con `<label for="...">` asociados. |
+| **Contraste de Paleta** | 1.4.3 / 1.4.11 (AA) | **Verificado** | Relación de contraste calculada matemáticamente en `static/css/main.css`: Modo Claro 17.5:1 (`#0f172a` sobre `#ffffff`), Modo Oscuro 16.8:1 (`#f1f5f9` sobre `#080c14`). |
+| **Indicadores de Foco** | 2.4.7 (AA) | **Verificado** | Reglas `:focus-visible` explícitas en CSS (`outline: 2px solid var(--accent)`) sin `outline: none` en elementos interactivos. |
+| **Idioma del Documento** | 3.1.1 (A) | **Verificado** | Atributo `<html lang="...">` generado dinámicamente por la plantilla Jinja2 (`app.py` / `index.html` / `results.html`) en concordancia con la preferencia seleccionada. |
+| **Contenido no textual** | 1.1.1 (A) | **Verificado** | Ausencia de imágenes externas de terceros; iconos vectoriales SVG marcados con `aria-hidden="true"`, placeholders accesibles con texto descriptivo. |
+| **Sin trampas de teclado** | 2.1.2 (A) | **Verificado** | Estructura DOM lineal sin scripts de captura de foco; tabulación secuencial predecible. |
+
+### 3.2. Alcance, Limitaciones y Pruebas con Usuarios Reales
+
+> [!NOTE]
+> **Declaración de Transparencia Metodológica:**  
+> La presente especificación certifica la conformidad del diseño arquitectónico, las plantillas HTML5 y las hojas de estilo CSS con las directrices WCAG 2.1/2.2 Nivel AA. No obstante, **no sustituye la validación de campo con usuarios humanos y diversidad de tecnologías de asistencia**. Las pruebas interactivas exhaustivas con personas usuarias de lectores de pantalla específicos (Orca en Linux, NVDA/JAWS en Windows, VoiceOver en macOS/iOS) y líneas braille están planificadas como un proceso de auditoría continua en coordinación con la comunidad de usuarios de software libre.
 
 ---
 

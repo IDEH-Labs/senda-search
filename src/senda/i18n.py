@@ -85,7 +85,7 @@ TRANSLATION_CATALOGS: Dict[str, Dict[str, str]] = {
         "opt_standard_no_lens": "Estándar (Sin lente)",
         "opt_tech_libre_desc": "Software Libre & Documentación",
         "opt_no_farms_desc": "Sin Granjas ni Muros",
-        "opt_science_desc": "Ciencia & Fuentes Primarias",
+        "opt_science_desc": "Ciencia & Fuentes Académicas",
         "opt_community_desc": "Comunidad & Foros",
         "opt_dsl_rule": "Regla DSL ($discard, $boost, $down):",
         "opt_apply_dsl": "Aplicar DSL",

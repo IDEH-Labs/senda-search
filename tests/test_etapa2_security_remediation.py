@@ -298,3 +298,30 @@ def test_accessibility_doc_and_markdown_links_resolve():
     assert readme.exists()
     readme_text = readme.read_text(encoding="utf-8")
     assert "docs/ACCESSIBILITY.md" in readme_text
+
+
+def test_proxy_cidr_range_trusted_and_untrusted(monkeypatch, tmp_path):
+    """Verify CIDR notation in FORWARDED_ALLOW_IPS correctly allows trusted subnets and rejects outside IPs."""
+    from senda.config import settings
+
+    monkeypatch.setattr(settings, "FORWARDED_ALLOW_IPS", "172.16.0.0/12,10.0.0.0/8")
+
+    storage = StorageEngine(db_path=tmp_path / "cidr_test.db")
+    app = create_app(storage=storage, enable_federated_providers=False)
+
+    # 1. IP inside 172.16.0.0/12 subnet (e.g. Docker container reverse proxy at 172.20.4.10)
+    trusted_docker_client = TestClient(app, client=("172.20.4.10", 39124))
+    resp_trusted = trusted_docker_client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "https"})
+    assert resp_trusted.status_code == 200
+    cookies_trusted = resp_trusted.headers.get_list("set-cookie")
+    theme_cookie_trusted = next(c for c in cookies_trusted if c.startswith("senda_theme="))
+    assert "Secure" in theme_cookie_trusted
+
+    # 2. IP outside 172.16.0.0/12 (e.g. 172.32.0.1 is outside the /12 mask)
+    untrusted_external_client = TestClient(app, client=("172.32.0.1", 39124))
+    resp_untrusted = untrusted_external_client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "https"})
+    assert resp_untrusted.status_code == 200
+    cookies_untrusted = resp_untrusted.headers.get_list("set-cookie")
+    theme_cookie_untrusted = next(c for c in cookies_untrusted if c.startswith("senda_theme="))
+    assert "Secure" not in theme_cookie_untrusted
+

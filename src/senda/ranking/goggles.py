@@ -61,7 +61,7 @@ PRESET_GOGGLES: Dict[str, SovereignGoggle] = {
     ),
     "science_primary": SovereignGoggle(
         id="science_primary",
-        name="Ciencia & Fuentes Primarias",
+        name="Ciencia & Fuentes Académicas",
         description="Prioriza repositorios de acceso abierto, artículos revisados por pares y registros enciclopédicos.",
         boost_domains={
             "arxiv.org", "doaj.org", "openalex.org", "crossref.org", "ncbi.nlm.nih.gov",

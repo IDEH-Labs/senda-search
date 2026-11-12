@@ -508,7 +508,7 @@
                     <a href="{{ entity_card.history_url }}" target="_blank" rel="noopener noreferrer" class="entity-action-btn secondary" title="Auditar historial y autores de esta información">
                         <span>Historial de cambios ↗</span>
                     </a>
-                    <a href="/search?q={{ entity_card.title | urlencode }}&category=library" class="entity-action-btn secondary" title="Explorar publicaciones científicas primarias">
+                    <a href="/search?q={{ entity_card.title | urlencode }}&category=library" class="entity-action-btn secondary" title="Explorar publicaciones científicas y académicas">
                         <span>Ver obras en Biblioteca</span>
                     </a>
                 </div>
@@ -707,12 +707,12 @@
                                     </span>
                                 </div>
                                 <div class="provenance-row">
-                                    <span class="provenance-key">Citas a Primarias:</span>
+                                    <span class="provenance-key">Citas a Documentos Fuente:</span>
                                     <span class="provenance-val">
                                         {% if item.primary_citations %}
                                             {{ item.primary_citations | join(', ') }}
                                         {% else %}
-                                            <span class="text-unverified">Sin citas primarias detectadas</span>
+                                            <span class="text-unverified">Sin citas directas registradas</span>
                                         {% endif %}
                                     </span>
                                 </div>

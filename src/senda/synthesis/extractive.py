@@ -37,6 +37,10 @@ class GroundedCitation(BaseModel):
     domain: str = ""
 
 
+# Backward-compatible alias
+CitationItem = GroundedCitation
+
+
 class GroundedSynthesisResult(BaseModel):
     """Structured synthesis result with bracketed citations and ethical disclaimer."""
 
@@ -149,11 +153,17 @@ class GroundedSynthesizer:
             raw_text = (src_item.snippet or src_item.title or "").strip()
             clean_snip = _clean_and_truncate_snippet(raw_text, max_chars=180)
 
+            # Distinct quotation typography: complete sentence vs truncated extract
+            if clean_snip.endswith("…"):
+                quote_text = f"«{clean_snip.rstrip('…')} [...]»"
+            else:
+                quote_text = f"«{clean_snip}»"
+
             # Clean attribution without awkward placeholders
             if c.author and c.author not in ("No declarada", "Dato no disponible"):
-                summary_lines.append(f"Según {c.author} en {c.source}: «{clean_snip}» [{c.index}].")
+                summary_lines.append(f"Según {c.author} en {c.source}: {quote_text} [{c.index}].")
             else:
-                summary_lines.append(f"Según {c.source}: «{clean_snip}» [{c.index}].")
+                summary_lines.append(f"Según {c.source}: {quote_text} [{c.index}].")
 
         body_text = " ".join(summary_lines)
 

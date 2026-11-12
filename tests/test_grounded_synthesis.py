@@ -166,3 +166,45 @@ def test_clean_and_truncate_snippet_handles_sentences_and_word_boundaries():
     assert truncated.endswith("…")
     assert not truncated.endswith(" …")
     assert len(truncated) <= 80
+
+
+def test_legacy_alias_grounded_synthesis():
+    """Verify backwards compatibility of the senda.ai.grounded_synthesis module alias."""
+    import senda.ai.grounded_synthesis as legacy_module
+    import senda.synthesis.extractive as canonical_module
+
+    assert legacy_module.GroundedSynthesizer is canonical_module.GroundedSynthesizer
+    assert legacy_module.GroundedSynthesisResult is canonical_module.GroundedSynthesisResult
+    assert legacy_module.CitationItem is canonical_module.CitationItem
+
+
+def test_extractive_quote_formatting_distinguishes_complete_and_truncated():
+    """Verify that complete sentences use «...» while truncated snippets use bracketed ellipsis «... [...]»."""
+    synth = GroundedSynthesizer(enabled=True)
+
+    # Item with complete sentence ending in period
+    item_complete = SearchResultItem(
+        url="https://complete.example.org",
+        title="Complete Sentence",
+        snippet="La privacidad es un derecho humano fundamental protegido por tratados internacionales.",
+        source="Derechos",
+    )
+
+    # Item with long clause requiring truncation
+    item_truncated = SearchResultItem(
+        url="https://truncated.example.org",
+        title="Truncated Sentence",
+        snippet="Este es un texto excesivamente largo diseñado para superar el umbral máximo de ciento ochenta caracteres y forzar la elisión léxica en una frontera de palabra exacta sin puntuación final",
+        source="Extenso",
+    )
+
+    res = synth.synthesize("test", [item_complete, item_truncated], force=True)
+    assert res is not None
+
+    # Complete sentence must use regular guillemets without bracketed ellipsis
+    assert "Según Derechos: «La privacidad es un derecho humano fundamental protegido por tratados internacionales.» [1]." in res.summary
+    assert "[...]» [1]" not in res.summary
+
+    # Truncated sentence must use bracketed ellipsis inside guillemets
+    assert " [...]» [2]." in res.summary
+
