@@ -99,3 +99,20 @@ def test_cli_crawl_daemon_once(test_db_env, tmp_path, monkeypatch, capsys):
     assert "Cycle #1 completed. Indexed/Updated: 2 docs." in captured.out
     assert "Senda Indexer Daemon stopped cleanly." in captured.out
 
+
+def test_cli_serve(monkeypatch, capsys):
+    """Verify senda serve executes cleanly with uvicorn and handles forwarded_allow_ips."""
+    monkeypatch.setattr(sys, "argv", ["senda", "serve", "--host", "127.0.0.1", "--port", "8000"])
+    with patch("uvicorn.run") as mock_run:
+        main()
+        assert mock_run.called
+        kwargs = mock_run.call_args.kwargs
+        assert kwargs["host"] == "127.0.0.1"
+        assert kwargs["port"] == 8000
+        assert kwargs["proxy_headers"] is True
+        assert "forwarded_allow_ips" in kwargs
+
+    captured = capsys.readouterr()
+    assert "Starting Senda Sovereign Search Web UI" in captured.out
+
+
