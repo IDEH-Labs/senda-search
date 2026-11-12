@@ -35,13 +35,20 @@ if ! "$PYTHON_EXEC" -m pip --version &>/dev/null; then
     "$PYTHON_EXEC" -m ensurepip --upgrade 2>/dev/null || (apt-get update && apt-get install -y python3-pip python3-venv git && python3 -m venv --upgrade "$VENV_DIR")
 fi
 
-# 2. Instalar la última versión de Senda (Prioridad: Codeberg > GitHub > GitLab)
-echo "[1/4] Instalando la versión de Senda (Prioridad: Codeberg)..."
-if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://codeberg.org/IDEH-Labs/senda-search.git"; then
+# 2. Instalar dependencias fijadas y versión de Senda
+SENDA_TARGET_REF="${1:-${SENDA_TARGET_REF:-main}}"
+echo "[1/4] Verificando e instalando dependencias desde lockfile..."
+curl -sSL "https://codeberg.org/IDEH-Labs/senda-search/raw/branch/main/requirements-lock.txt" -o /tmp/requirements-lock.txt 2>/dev/null || true
+if [ -s /tmp/requirements-lock.txt ]; then
+    "$PYTHON_EXEC" -m pip install --no-cache-dir -r /tmp/requirements-lock.txt
+fi
+
+echo "[2/4] Instalando la versión de Senda (Ref: $SENDA_TARGET_REF)..."
+if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://codeberg.org/IDEH-Labs/senda-search.git@$SENDA_TARGET_REF"; then
     echo "Fallo en Codeberg, intentando con GitHub..."
-    if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://github.com/IDEH-Labs/senda-search.git"; then
+    if ! "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://github.com/IDEH-Labs/senda-search.git@$SENDA_TARGET_REF"; then
         echo "Fallo en GitHub, intentando con GitLab..."
-        "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://gitlab.com/ideh-labs/senda-search.git"
+        "$PYTHON_EXEC" -m pip install --no-cache-dir --force-reinstall --no-deps "git+https://gitlab.com/ideh-labs/senda-search.git@$SENDA_TARGET_REF"
     fi
 fi
 
