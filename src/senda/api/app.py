@@ -276,7 +276,11 @@ def create_app(
         is_head = request.method == "HEAD"
         if is_head:
             request.scope["method"] = "GET"
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        finally:
+            if is_head:
+                request.scope["method"] = "HEAD"
         if is_head:
             return Response(
                 content=b"",
