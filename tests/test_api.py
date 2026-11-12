@@ -216,9 +216,11 @@ def test_theme_toggle_zero_js_and_cookie(client):
     assert "senda_theme=light" in r_light.headers.get("set-cookie", "")
 
     # 3. Subsequent request with cookie keeps light mode
-    r_cookie = client.get("/", cookies={"senda_theme": "light"})
+    client.cookies.set("senda_theme", "light")
+    r_cookie = client.get("/")
     assert r_cookie.status_code == 200
     assert 'data-theme="light"' in r_cookie.text
+    del client.cookies["senda_theme"]
 
     # 4. Search results with light theme
     r_search_light = client.get("/search?q=freedom&category=images&theme=light")

@@ -4,22 +4,45 @@
 """
 Tests for Etapa 2 Remediation:
 - Strict CSP with dynamic cryptographic nonces on inline scripts
-- Removal of inline event handlers (onclick, etc.)
+- Complete removal of inline event handlers (onclick, etc.) across static pages, search results, and disk templates
 - Strict object-src 'none', base-uri 'self', form-action 'self', frame-ancestors 'none'
 - Documented functional preference cookies (senda_theme, senda_lang) with proper flags
-  (SameSite=Lax, Secure over HTTPS, Path=/, Max-Age=31536000) and zero tracking identifiers.
+  (SameSite=Lax, Secure over HTTPS and behind reverse proxies with X-Forwarded-Proto, Path=/, Max-Age=31536000)
+  and zero tracking identifiers.
 """
 
 import re
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from senda.api.app import create_app
+from senda.extractor.parser import ExtractedDocument, ExtractedImage
 from senda.indexer.storage import StorageEngine
 
 
 @pytest.fixture
 def client(tmp_path):
     storage = StorageEngine(db_path=tmp_path / "etapa2_test.db")
+    # Seed storage with rich results for all categories
+    doc = ExtractedDocument(
+        url="https://example.org/article",
+        title="Software Freedom Article",
+        description="Comprehensive article about sovereign software.",
+        language="en",
+        headings="Principles and Architecture",
+        body_text="Ethical technology ensures user autonomy and strict digital sovereignty.",
+        content_hash="etapa2hash1",
+        images=[
+            ExtractedImage(
+                image_url="https://example.org/thumb.jpg",
+                alt_text="Visual diagram of software freedom",
+                page_url="https://example.org/article",
+                page_title="Software Freedom Article",
+                domain="example.org",
+            )
+        ],
+    )
+    storage.upsert_document(doc)
     app = create_app(storage=storage, enable_federated_providers=False)
     return TestClient(app)
 
@@ -72,15 +95,40 @@ def test_csp_nonce_rendered_in_html_script_tags(client):
     assert f'<script nonce="{nonce}">' in resp.text
 
 
-def test_zero_inline_event_handlers_in_rendered_html(client):
-    """Rendered HTML pages must not contain inline event handlers like onclick, onload, etc."""
-    pages = ["/", "/about", "/privacy", "/javascript"]
-    for path in pages:
+def test_zero_inline_event_handlers_in_rendered_html_and_results(client):
+    """Rendered HTML pages and search results must not contain inline event handlers like onclick, onload, etc."""
+    pages_to_check = [
+        "/",
+        "/about",
+        "/privacy",
+        "/javascript",
+        "/search?q=software",
+        "/search?q=software&category=images",
+        "/search?q=software&category=videos",
+        "/search?q=software&category=news",
+        "/search?q=software&category=library",
+    ]
+    for path in pages_to_check:
         resp = client.get(path)
         assert resp.status_code == 200
-        # Check for inline handlers (e.g. onclick="...", onload="...", etc.)
+        # Check for inline event handlers (e.g. onclick="...", onload="...", etc.)
         inline_handlers = re.findall(r"\s(on[a-z]{3,15})\s*=", resp.text, re.IGNORECASE)
-        assert inline_handlers == [], f"Found inline event handler(s) {inline_handlers} in {path}"
+        assert inline_handlers == [], f"Found inline event handler(s) {inline_handlers} in rendered {path}"
+
+
+def test_zero_inline_event_handlers_in_template_files():
+    """All Jinja2 HTML template source files on disk must be free of inline event handlers and javascript: URLs."""
+    template_dir = Path(__file__).resolve().parent.parent / "src" / "senda" / "ui" / "templates"
+    assert template_dir.exists() and template_dir.is_dir()
+
+    template_files = list(template_dir.glob("*.html"))
+    assert len(template_files) > 0
+
+    for tf in template_files:
+        content = tf.read_text(encoding="utf-8")
+        handlers = re.findall(r"\s(on[a-zA-Z]{3,15})\s*=", content)
+        assert handlers == [], f"Found static inline handler(s) {handlers} in template file {tf.name}"
+        assert "javascript:" not in content.lower(), f"Found 'javascript:' URI in template file {tf.name}"
 
 
 def test_functional_cookies_attributes_http(client):
@@ -110,7 +158,7 @@ def test_functional_cookies_attributes_http(client):
 
 
 def test_functional_cookies_attributes_https(tmp_path):
-    """Setting functional cookies over HTTPS must include the Secure flag."""
+    """Setting functional cookies over direct HTTPS must include the Secure flag."""
     storage = StorageEngine(db_path=tmp_path / "https_cookie.db")
     app = create_app(storage=storage, enable_federated_providers=False)
     client_https = TestClient(app, base_url="https://senda.example.org")
@@ -126,6 +174,32 @@ def test_functional_cookies_attributes_https(tmp_path):
     lang_cookie = next(c for c in set_cookies if c.startswith("senda_lang="))
     assert "senda_lang=en" in lang_cookie
     assert "Secure" in lang_cookie
+
+
+def test_functional_cookies_secure_behind_reverse_proxy(client):
+    """When running behind a reverse proxy (Nginx/Caddy/Traefik) terminating TLS, X-Forwarded-Proto enables Secure."""
+    # 1. Reverse proxy with X-Forwarded-Proto: https
+    resp_xfp = client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "https"})
+    assert resp_xfp.status_code == 200
+    cookies_xfp = resp_xfp.headers.get_list("set-cookie")
+    theme_cookie_xfp = next(c for c in cookies_xfp if c.startswith("senda_theme="))
+    assert "Secure" in theme_cookie_xfp
+    lang_cookie_xfp = next(c for c in cookies_xfp if c.startswith("senda_lang="))
+    assert "Secure" in lang_cookie_xfp
+
+    # 2. Reverse proxy with standard RFC 7239 Forwarded: proto=https
+    resp_fwd = client.get("/?theme=dark&lang=es", headers={"Forwarded": "proto=https;for=203.0.113.1"})
+    assert resp_fwd.status_code == 200
+    cookies_fwd = resp_fwd.headers.get_list("set-cookie")
+    theme_cookie_fwd = next(c for c in cookies_fwd if c.startswith("senda_theme="))
+    assert "Secure" in theme_cookie_fwd
+
+    # 3. Reverse proxy without TLS (X-Forwarded-Proto: http)
+    resp_http = client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "http"})
+    assert resp_http.status_code == 200
+    cookies_http = resp_http.headers.get_list("set-cookie")
+    theme_cookie_http = next(c for c in cookies_http if c.startswith("senda_theme="))
+    assert "Secure" not in theme_cookie_http
 
 
 def test_functional_cookies_contain_no_tracking_identifiers(client):

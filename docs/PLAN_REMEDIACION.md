@@ -85,41 +85,46 @@
    - Inyección del nonce en la cabecera `Content-Security-Policy`:
      * `script-src 'self' 'nonce-{csp_nonce}';` (eliminado `'unsafe-inline'` de scripts).
      * `object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';`.
-     * `style-src 'self' 'unsafe-inline';` (preservado para variables dinámicas de interfaz y tema).
+     * `style-src 'self' 'unsafe-inline';` (preservado como riesgo residual aceptado por conveniencia de desarrollo).
    - Propagación de `csp_nonce` al contexto de plantillas Jinja2.
-   - Atributo `secure=is_secure` automático en `set_cookie` para `senda_theme` y `senda_lang` en peticiones HTTPS.
-2. **`src/senda/ui/templates/base.html`:**
+   - Atributo `secure=is_secure` automático en `set_cookie` para `senda_theme` y `senda_lang` en peticiones directas HTTPS y detrás de proxies inversos (`X-Forwarded-Proto: https` y RFC 7239 `Forwarded: proto=https`).
+2. **`src/senda/cli/main.py`:**
+   - Configuración de Uvicorn con `proxy_headers=True, forwarded_allow_ips="*"` para terminación TLS en proxies inversos.
+3. **`src/senda/ui/templates/base.html`:**
    - Se aplicó `nonce="{{ csp_nonce }}"` al bloque `<script>` inline institucional.
-3. **`src/senda/ui/templates/index.html`:**
-   - Se eliminaron los manejadores de eventos en línea (`onclick="selectCategory(...)"`), unificando la interacción mediante listeners discretos en `i18n.js`.
-4. **`PRIVACY.md`:**
-   - Documentación exhaustiva y transparente de las dos cookies funcionales técnicas (`senda_theme` y `senda_lang`) requeridas para soporte Zero-JS y Tor Safest, con garantía formal de ausencia de identificadores, rastreo o correlación.
-5. **`tests/test_etapa2_security_remediation.py`:**
-   - 7 pruebas automatizadas que verifican directivas completas de CSP, rotación criptográfica de nonces por petición, renderizado de nonces en plantillas, ausencia de manejadores `onclick`, atributos de cookies técnicas en HTTP/HTTPS y rechazo de identificadores arbitrarios.
+4. **`src/senda/ui/templates/index.html` y resultados:**
+   - Se eliminaron todos los manejadores de eventos en línea (`onclick=`, etc.) en plantillas y diseños de resultados, unificando la interacción mediante listeners desacoplados en `i18n.js`.
+5. **`PRIVACY.md`:**
+   - Documentación exhaustiva y transparente de las dos cookies funcionales técnicas (`senda_theme` y `senda_lang`) requeridas para soporte Zero-JS y Tor Safest, con garantía formal de ausencia de identificadores, rastreo o correlación. Se aclara que `HttpOnly=False` se destina a sincronización opcional con scripts en clientes con JS, no para Zero-JS (que las envía vía cabeceras HTTP).
+6. **`tests/test_etapa2_security_remediation.py`:**
+   - 9 pruebas automatizadas que verifican directivas completas de CSP, rotación criptográfica de nonces por petición, renderizado de nonces en plantillas, ausencia de manejadores `on*` en páginas estáticas y dinámicas de resultados, verificación estática de plantillas en disco, atributos de cookies técnicas en HTTP/HTTPS, activación de `Secure` tras proxy inverso y rechazo de identificadores arbitrarios.
 
 ---
 
 ## 5. Resultados de Pruebas Automatizadas
 
-* **Pruebas preexistentes (Línea base):** 207 (207 superadas, 0 regresiones).
+* **Pruebas preexistentes (Línea base):** 207 (207 superadas, 0 regresiones en pruebas HTTP).
 * **Pruebas de Etapa 1 (`tests/test_p0_security_remediation.py`):** 24 pruebas:
   * **21 pruebas de seguridad de red y anti-SSRF:** validación `.onion`, verificación de handshake SOCKS5 local (`ATYP=0x03`), proxy HTTP rechazado para `.onion`, manejo de proxy inaccesible (fail-closed sin fallback), revalidación en redirecciones (a otro `.onion`, a destino público, a loopback, a IP privada, a metadatos de nube y con esquemas no permitidos), bloqueo de rangos reservados/CGNAT, IPv4 mapeada en IPv6 y pinning anti-TOCTOU directo.
   * **3 pruebas de privacidad de recursos remotos:** ausencia de etiquetas `<img>` externas en resultados de imágenes y videos, presencia de placeholders SVG locales, y cabecera CSP estricta `img-src 'self' data:;`.
-* **Pruebas de Etapa 2 (`tests/test_etapa2_security_remediation.py`):** 7 pruebas:
+* **Pruebas de Etapa 2 (`tests/test_etapa2_security_remediation.py`):** 9 pruebas:
   * Directivas completas de CSP y anti-inyección.
   * Generación y unicidad de nonces criptográficos de 16 bytes.
   * Renderizado exacto del nonce en `<script nonce="...">`.
-  * Ausencia de manejadores de eventos en línea (`onclick=`, etc.) en todas las páginas clave.
+  * Ausencia de manejadores de eventos en línea (`onclick=`, etc.) en todas las páginas clave y rutas de resultados de búsqueda (`/search` en categorías `all`, `images`, `videos`, `news`, `library`).
+  * Ausencia estática de manejadores de eventos o URIs `javascript:` en las plantillas HTML en disco.
   * Atributos de cookies técnicas (`senda_theme`, `senda_lang`) en HTTP (`SameSite=Lax`, `Path=/`, `Max-Age=31536000`).
-  * Atributo `Secure` forzado en cookies cuando la petición se realiza por HTTPS.
+  * Atributo `Secure` forzado en cookies cuando la petición se realiza por conexión directa HTTPS.
+  * Atributo `Secure` forzado en cookies cuando la petición llega tras un proxy inverso con cabeceras `X-Forwarded-Proto: https` o `Forwarded: proto=https`.
   * Rechazo estricto de parámetros de cookie con valores o identificadores arbitrarios.
-* **Total de pruebas en la suite actual:** **238 superadas (100% de éxito).**
+* **Total de pruebas en la suite actual:** **240 superadas (100% de éxito en ejecución de pruebas automatizadas).**
+* **Avisos de ejecución (Warnings):** 1 aviso residual de deprecación en biblioteca externa (`StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead`), originado en la importación de `starlette.testclient` en el entorno de pruebas, sin impacto en el código fuente de Senda.
 
 ---
 
 ## 6. Riesgos Residuales Técnicos y Limitaciones
 
 1. **Riesgo TOCTOU y fuga DNS local en proxy para destinos públicos (no-.onion):** Conforme a la Decisión D1, se mantuvo la pre-validación DNS/IP local en el servidor antes de entregar la petición al proxy para evitar conexiones a redes privadas. Existe una ventana teórica de TOCTOU si el registro DNS cambia entre la comprobación local y la conexión del proxy, así como exposición de las consultas al resolvedor DNS local de la máquina anfitriona para dominios públicos.
-2. **Entorno de pruebas y alcance empírico:** Las validaciones de SOCKS y `.onion` se ejecutaron sobre un servidor SOCKS5 simulado local y mocks controlados; no constituyen una prueba en la red Tor viva ni certifican el comportamiento ante demonios `tor` mal configurados o latencias de red extremas.
-3. **CSP `'unsafe-inline'` en `style-src`:** La directiva `script-src` ha sido completamente migrada a nonces criptográficos de un solo uso; sin embargo, `style-src` retiene `'unsafe-inline'` por diseño para permitir la reactividad de variables CSS y estilos de presentación sin sobrecargar el pipeline estático.
+2. **Entorno de pruebas y alcance empírico:** Las validaciones de SOCKS y `.onion` se ejecutaron sobre un servidor SOCKS5 simulado local y mocks controlados; no constituyen una prueba en la red Tor viva ni certifican el comportamiento ante demonios `tor` mal configurados o latencias de red extremas. Asimismo, las pruebas automatizadas HTTP verifican cabeceras y renderizado HTML, pero no sustituyen una verificación visual interactiva en múltiples navegadores reales.
+3. **CSP `'unsafe-inline'` en `style-src` (Riesgo residual aceptado):** La directiva `script-src` ha sido completamente migrada a nonces criptográficos de un solo uso; sin embargo, `style-src` retiene `'unsafe-inline'` como un riesgo residual aceptado por conveniencia de desarrollo (evitando la refactorización inmediata de estilos dinámicos en clases estáticas o nonces). Amenaza: inyección teórica de CSS (exfiltración vía selectores de atributos o redressing); Mitigación sustancial: la restricción estricta de `img-src 'self' data;` y `default-src 'self'` impide que reglas CSS carguen recursos externos vía `url()`, bloqueando canales de exfiltración hacia terceros.
 4. **Especificidad del entorno:** El entorno local de ejecución utiliza una distribución rolling-release (Gentoo) con Python 3.14.6 experimental; estos resultados deben ser reproducidos en entornos estándar (Python 3.12 / 3.13) en etapas de CI/CD.

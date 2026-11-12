@@ -340,7 +340,13 @@ def create_app(
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
         resp = templates.TemplateResponse(request=request, name=name, context=ctx)
-        is_secure = request.url.scheme == "https"
+        xf_proto = request.headers.get("x-forwarded-proto", "").lower().split(",")[0].strip()
+        forwarded = request.headers.get("forwarded", "").lower()
+        is_secure = (
+            request.url.scheme == "https"
+            or xf_proto == "https"
+            or "proto=https" in forwarded
+        )
         if query_theme in ("light", "dark"):
             resp.set_cookie(
                 key="senda_theme",

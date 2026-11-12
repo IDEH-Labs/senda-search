@@ -29,7 +29,7 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
    - **En entornos sin JavaScript (Zero-JS, GNU LibreJS, Tor Browser en modo *Safest*):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
      * `senda_theme`: almacena exclusivamente el valor de tema (`"light"` o `"dark"`).
      * `senda_lang`: almacena exclusivamente el código de idioma (`"es"`, `"en"`, etc.).
-     * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones HTTPS.
+     * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones directas HTTPS o detrás de proxy inverso (`X-Forwarded-Proto: https`, `Forwarded: proto=https`). El atributo `HttpOnly=False` se establece para permitir que clientes con JavaScript activo puedan sincronizar sus preferencias con `localStorage`; los entornos en modo Zero-JS no dependen de esta lectura y transmiten sus opciones directamente mediante las cabeceras HTTP de cada petición.
      * **Finalidad exclusiva:** Mantener la coherencia visual y el idioma elegido al navegar o paginar resultados en clientes que no ejecutan scripts.
      * **Garantía estricta:** Estas cookies NO contienen identificadores de usuario, hashes de sesión, marcas temporales de rastreo ni datos personales. Jamás se emplean para correlacionar búsquedas ni se comparten con terceros.
 5. **Autocompletado Local:**
