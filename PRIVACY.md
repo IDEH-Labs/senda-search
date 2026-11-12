@@ -23,8 +23,15 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
    `{ título, url, fragmento, fuente, fecha, idioma, tipo, es_patrocinado, por_qué_veo_esto }`.
 3. **Botón de Transparencia "¿Por qué veo esto?":**
    Cada enlace muestra el proveedor de origen (Índice Soberano FTS5, SearXNG, Brave, Mojeek), la fecha de indexación si está disponible, y si ha intervenido algún filtro o lente local aplicado por el usuario. Si no hay datos adicionales de ordenamiento, el sistema lo indica explícitamente sin inventar explicaciones.
-4. **Almacenamiento Estrictamente Local en el Dispositivo del Usuario:**
-   Toda preferencia (modo visual claro/oscuro/alto contraste, densidad compacta/cómoda, idioma de interfaz, filtros de región y lentes personalizados de reordenamiento de dominios) se almacena única y exclusivamente en el navegador del usuario (`localStorage`). Jamás se envían al servidor ni se guardan en bases de datos remotas.
+4. **Gestión de Preferencias y Cookies Funcionales de Interfaz:**
+   Para respetar la privacidad de las personas y garantizar la accesibilidad universal sin discriminación de entorno tecnológico:
+   - **En navegadores con JavaScript:** Las preferencias seleccionadas (modo visual, idioma, región y filtros) se gestionan localmente en el cliente mediante `localStorage`.
+   - **En entornos sin JavaScript (Zero-JS, GNU LibreJS, Tor Browser en modo *Safest*):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
+     * `senda_theme`: almacena exclusivamente el valor de tema (`"light"` o `"dark"`).
+     * `senda_lang`: almacena exclusivamente el código de idioma (`"es"`, `"en"`, etc.).
+     * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones HTTPS.
+     * **Finalidad exclusiva:** Mantener la coherencia visual y el idioma elegido al navegar o paginar resultados en clientes que no ejecutan scripts.
+     * **Garantía estricta:** Estas cookies NO contienen identificadores de usuario, hashes de sesión, marcas temporales de rastreo ni datos personales. Jamás se emplean para correlacionar búsquedas ni se comparten con terceros.
 5. **Autocompletado Local:**
    Las sugerencias de búsqueda se generan a partir de la memoria local del navegador o índices estáticos descargados, **sin enviar cada pulsación de teclado a servidores de terceros**.
 6. **Política de Referencia Estricta (`no-referrer`):**
@@ -41,7 +48,7 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
 - ❌ **NO registra consultas de búsqueda (*Zero Query Logging*):** Las consultas se procesan en la memoria volátil del proceso durante el ciclo de vida de la petición HTTP y nunca se escriben en disco, bases de datos o archivos de registro.
 - ❌ **NO almacena direcciones IP:** Las direcciones IP de conexión son descartadas o enmascaradas inmediatamente a nivel de servidor web y aplicación.
 - ❌ **NO crea perfiles de comportamiento:** Senda no rastrea sesiones repetidas, no crea identidades de usuario, ni correlaciona búsquedas a lo largo del tiempo.
-- ❌ **NO utiliza cookies de seguimiento ni no esenciales:** Cero cookies de sesión de rastreo, cero cookies analíticas, cero cookies de terceros.
+- ❌ **NO utiliza cookies de seguimiento, analítica ni de terceros:** Cero cookies de sesión de rastreo, cero cookies analíticas, cero píxeles de seguimiento. Únicamente se utilizan las dos cookies técnicas funcionales de interfaz descritas en el numeral 4 para navegación Zero-JS.
 - ❌ **NO incluye analítica de terceros ni balizas (*web beacons*):** Cero Google Analytics, cero píxeles de Meta, cero scripts de telemetría remota.
 - ❌ **NO realiza cargas automáticas de recursos o imágenes remotas:** Las páginas de resultados no cargan miniaturas ni elementos multimedia directamente desde servidores de terceros (evitando que los servidores de origen capturen la IP del usuario). Se emplean marcadores visuales locales y enlaces directos explícitos. La política de seguridad CSP restringe estrictamente el origen de imágenes a `img-src 'self' data:`.
 - ❌ **NO depende de CDNs externas:** Todos los estilos, tipografías SVG y scripts se sirven localmente desde el propio servidor de Senda, impidiendo que terceros rastreen las descargas de recursos.

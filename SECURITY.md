@@ -47,16 +47,21 @@ Senda operates as both a web client (crawler/indexer) and a web server (search A
    - 100% parameterized SQLite queries. No dynamic string concatenation for FTS5 queries or schema modifications.
    - Strict sanitization and quoting of search terms for the FTS5 query parser.
 
-2. **Cross-Site Scripting (XSS) Prevention & Content Security Policy:**
+2. **Cross-Site Scripting (XSS) Prevention & Content Security Policy (CSP):**
    - HTML entity escaping for all search results, snippets, and user-supplied parameters.
-   - Content Security Policy (`CSP`) restricting image origins strictly to `img-src 'self' data;` to prevent user IP leakage through third-party media.
-   - Note on script/style execution: inline scripts and styles currently utilize `'unsafe-inline'` for legacy templating compatibility, pending the comprehensive CSP and nonce migration scheduled for Etapa 2.
+   - Strict Content Security Policy (`CSP`) featuring:
+     - Dynamic per-request cryptographic nonces (`script-src 'self' 'nonce-{csp_nonce}'`) for authorized inline scripts, eliminating `'unsafe-inline'` script execution.
+     - Inline event handlers (e.g., `onclick`) completely eliminated from templates.
+     - Strict media boundary: `img-src 'self' data;` preventing IP leakage to third-party CDNs and trackers.
+     - Anti-injection directives: `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, and `frame-ancestors 'none'`.
+     - `style-src 'self' 'unsafe-inline'` is retained exclusively for dynamic theme tokens and CSS variables.
    - `X-Content-Type-Options: nosniff`.
    - `X-Frame-Options: DENY`.
 
 3. **Referrer & Privacy Leakage Mitigation:**
    - `Referrer-Policy: no-referrer` on all responses and outgoing result links.
    - Direct outgoing links with `rel="noopener noreferrer"`. No click-tracking redirects.
+   - Functional cookies (`senda_theme`, `senda_lang`) carry `SameSite=Lax`, `Path=/`, `Max-Age=31536000`, and automatic `Secure` enforcement over HTTPS. Zero tracking cookies, zero session identifiers.
 
 ## 2. Reporting a Security Vulnerability
 

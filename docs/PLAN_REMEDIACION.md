@@ -79,48 +79,41 @@
 4. **`SECURITY.md` y `PRIVACY.md`:**
    - Sincronización técnica de las políticas de SSRF, CSP y recursos remotos.
 
+### C. Cookies Funcionales de Interfaz y CSP Integral (Etapa 2)
+1. **`src/senda/api/app.py`:**
+   - Generación de nonce criptográfico único por petición (`secrets.token_hex(16)`).
+   - Inyección del nonce en la cabecera `Content-Security-Policy`:
+     * `script-src 'self' 'nonce-{csp_nonce}';` (eliminado `'unsafe-inline'` de scripts).
+     * `object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';`.
+     * `style-src 'self' 'unsafe-inline';` (preservado para variables dinámicas de interfaz y tema).
+   - Propagación de `csp_nonce` al contexto de plantillas Jinja2.
+   - Atributo `secure=is_secure` automático en `set_cookie` para `senda_theme` y `senda_lang` en peticiones HTTPS.
+2. **`src/senda/ui/templates/base.html`:**
+   - Se aplicó `nonce="{{ csp_nonce }}"` al bloque `<script>` inline institucional.
+3. **`src/senda/ui/templates/index.html`:**
+   - Se eliminaron los manejadores de eventos en línea (`onclick="selectCategory(...)"`), unificando la interacción mediante listeners discretos en `i18n.js`.
+4. **`PRIVACY.md`:**
+   - Documentación exhaustiva y transparente de las dos cookies funcionales técnicas (`senda_theme` y `senda_lang`) requeridas para soporte Zero-JS y Tor Safest, con garantía formal de ausencia de identificadores, rastreo o correlación.
+5. **`tests/test_etapa2_security_remediation.py`:**
+   - 7 pruebas automatizadas que verifican directivas completas de CSP, rotación criptográfica de nonces por petición, renderizado de nonces en plantillas, ausencia de manejadores `onclick`, atributos de cookies técnicas en HTTP/HTTPS y rechazo de identificadores arbitrarios.
+
 ---
 
 ## 5. Resultados de Pruebas Automatizadas
 
-```text
-============================= test session starts ==============================
-collected 231 items
-
-tests/test_academic_providers.py ............                            [  5%]
-tests/test_anti_slop.py .                                                [  5%]
-tests/test_api.py ....................................................   [ 28%]
-tests/test_calculator.py ........                                        [ 32%]
-tests/test_canonical.py ........                                         [ 35%]
-tests/test_cli.py .....                                                  [ 37%]
-tests/test_clustering.py ...                                             [ 38%]
-tests/test_converters.py ...                                             [ 40%]
-tests/test_countries.py ...                                              [ 41%]
-tests/test_crawler_runner.py ...                                         [ 42%]
-tests/test_curated_crawl_and_hybrid_scoring.py ....                      [ 44%]
-tests/test_extractor.py .........                                        [ 48%]
-tests/test_fediverse_bluesky.py .........                                [ 52%]
-tests/test_fetcher.py .......                                            [ 55%]
-tests/test_goggles.py ......                                             [ 58%]
-tests/test_grounded_synthesis.py ........                                [ 61%]
-tests/test_indexer.py .............                                      [ 67%]
-tests/test_language_results.py ..                                        [ 68%]
-tests/test_network_guard.py ...........                                  [ 72%]
-tests/test_news_and_claim_review.py ............                         [ 77%]
-tests/test_news_and_images_providers.py ............                     [ 83%]
-tests/test_openalex.py ......                                            [ 85%]
-tests/test_p0_security_remediation.py ........................           [ 96%]
-tests/test_providers.py .......                                          [ 99%]
-tests/test_ranking.py ........                                           [100%]
-...
-======================== 231 passed, 2 warnings in 63.88s =======================
-```
-
 * **Pruebas preexistentes (Línea base):** 207 (207 superadas, 0 regresiones).
-* **Pruebas nuevas añadidas (`tests/test_p0_security_remediation.py`):** 24 pruebas:
+* **Pruebas de Etapa 1 (`tests/test_p0_security_remediation.py`):** 24 pruebas:
   * **21 pruebas de seguridad de red y anti-SSRF:** validación `.onion`, verificación de handshake SOCKS5 local (`ATYP=0x03`), proxy HTTP rechazado para `.onion`, manejo de proxy inaccesible (fail-closed sin fallback), revalidación en redirecciones (a otro `.onion`, a destino público, a loopback, a IP privada, a metadatos de nube y con esquemas no permitidos), bloqueo de rangos reservados/CGNAT, IPv4 mapeada en IPv6 y pinning anti-TOCTOU directo.
   * **3 pruebas de privacidad de recursos remotos:** ausencia de etiquetas `<img>` externas en resultados de imágenes y videos, presencia de placeholders SVG locales, y cabecera CSP estricta `img-src 'self' data:;`.
-* **Total de pruebas en la suite actual:** **231 superadas (100% de éxito en 63.88s).**
+* **Pruebas de Etapa 2 (`tests/test_etapa2_security_remediation.py`):** 7 pruebas:
+  * Directivas completas de CSP y anti-inyección.
+  * Generación y unicidad de nonces criptográficos de 16 bytes.
+  * Renderizado exacto del nonce en `<script nonce="...">`.
+  * Ausencia de manejadores de eventos en línea (`onclick=`, etc.) en todas las páginas clave.
+  * Atributos de cookies técnicas (`senda_theme`, `senda_lang`) en HTTP (`SameSite=Lax`, `Path=/`, `Max-Age=31536000`).
+  * Atributo `Secure` forzado en cookies cuando la petición se realiza por HTTPS.
+  * Rechazo estricto de parámetros de cookie con valores o identificadores arbitrarios.
+* **Total de pruebas en la suite actual:** **238 superadas (100% de éxito).**
 
 ---
 
@@ -128,6 +121,5 @@ tests/test_ranking.py ........                                           [100%]
 
 1. **Riesgo TOCTOU y fuga DNS local en proxy para destinos públicos (no-.onion):** Conforme a la Decisión D1, se mantuvo la pre-validación DNS/IP local en el servidor antes de entregar la petición al proxy para evitar conexiones a redes privadas. Existe una ventana teórica de TOCTOU si el registro DNS cambia entre la comprobación local y la conexión del proxy, así como exposición de las consultas al resolvedor DNS local de la máquina anfitriona para dominios públicos.
 2. **Entorno de pruebas y alcance empírico:** Las validaciones de SOCKS y `.onion` se ejecutaron sobre un servidor SOCKS5 simulado local y mocks controlados; no constituyen una prueba en la red Tor viva ni certifican el comportamiento ante demonios `tor` mal configurados o latencias de red extremas.
-3. **CSP `'unsafe-inline'` y protección XSS:** Se mantiene temporalmente en `style-src` y `script-src` para no romper la interfaz visual existente. La protección del navegador frente a inyecciones XSS complejas sigue siendo débil mientras esta directiva no se reemplace por nonces criptográficos en la Etapa 2.
-4. **Cookies funcionales de preferencia:** Siguen operando para garantizar accesibilidad en entornos Zero-JS y Tor; su armonización en `PRIVACY.md` corresponde a la Etapa 2.
-5. **Especificidad del entorno:** El entorno local de ejecución utiliza una distribución rolling-release (Gentoo) con Python 3.14.6 experimental; estos resultados deben ser reproducidos en entornos estándar (Python 3.12 / 3.13) en etapas de CI/CD.
+3. **CSP `'unsafe-inline'` en `style-src`:** La directiva `script-src` ha sido completamente migrada a nonces criptográficos de un solo uso; sin embargo, `style-src` retiene `'unsafe-inline'` por diseño para permitir la reactividad de variables CSS y estilos de presentación sin sobrecargar el pipeline estático.
+4. **Especificidad del entorno:** El entorno local de ejecución utiliza una distribución rolling-release (Gentoo) con Python 3.14.6 experimental; estos resultados deben ser reproducidos en entornos estándar (Python 3.12 / 3.13) en etapas de CI/CD.

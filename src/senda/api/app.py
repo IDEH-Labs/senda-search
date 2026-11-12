@@ -241,6 +241,10 @@ def create_app(
     @app.middleware("http")
     async def sovereign_privacy_headers(request: Request, call_next):
         """Enforce zero-leakage HTTP security headers on all responses."""
+        import secrets
+        csp_nonce = secrets.token_hex(16)
+        request.state.csp_nonce = csp_nonce
+
         response = await call_next(request)
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -248,9 +252,12 @@ def create_app(
         response.headers["Permissions-Policy"] = "interest-cohort=(), geolocation=(), microphone=(), camera=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
+            f"script-src 'self' 'nonce-{csp_nonce}'; "
             "style-src 'self' 'unsafe-inline'; "
-            "script-src 'self' 'unsafe-inline'; "
             "img-src 'self' data:; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
             "frame-ancestors 'none';"
         )
         # Advertise Tor Onion Service to Tor Browser per RFC / Tor Project standard
@@ -329,9 +336,11 @@ def create_app(
         ctx["lang_urls"] = lang_urls
         ctx["current_lang_name"] = lang_names.get(current_lang, current_lang.upper())
         ctx["settings"] = settings
+        ctx["csp_nonce"] = getattr(request.state, "csp_nonce", "")
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
         resp = templates.TemplateResponse(request=request, name=name, context=ctx)
+        is_secure = request.url.scheme == "https"
         if query_theme in ("light", "dark"):
             resp.set_cookie(
                 key="senda_theme",
@@ -340,6 +349,7 @@ def create_app(
                 samesite="lax",
                 path="/",
                 httponly=False,
+                secure=is_secure,
             )
         if query_lang and query_lang.lower().strip()[:2] in SUPPORTED_LANGUAGES:
             resp.set_cookie(
@@ -349,6 +359,7 @@ def create_app(
                 samesite="lax",
                 path="/",
                 httponly=False,
+                secure=is_secure,
             )
         return resp
 
