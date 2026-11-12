@@ -90,13 +90,21 @@ def test_dns_resolution_returning_private_ip_is_blocked():
 def test_tor_onion_address_validation():
     # Valid v3 onion (56 chars base32)
     valid_v3 = "expyuzz5wqqfdgah56trgahphgahpagah56trgahphgahpagah56trga.onion"
-    ips = NetworkGuard.resolve_and_validate(valid_v3)
-    assert ips == ["127.0.0.1"]
+    
+    # Without allow_onion=True, resolve_and_validate MUST raise SSRFSecurityViolation
+    with pytest.raises(SSRFSecurityViolation, match="Destino .onion denegado sin proxy"):
+        NetworkGuard.resolve_and_validate(valid_v3, allow_onion=False)
+
+    # With allow_onion=True, returns empty list of IPs (remote SOCKS proxy resolution)
+    # MUST NEVER return 127.0.0.1 (loopback SSRF vector)
+    ips = NetworkGuard.resolve_and_validate(valid_v3, allow_onion=True)
+    assert ips == []
+    assert "127.0.0.1" not in ips
 
     # Invalid characters in onion address
     with pytest.raises(SSRFSecurityViolation, match="Invalid Tor .onion address format"):
-        NetworkGuard.resolve_and_validate("invalid_onion_address!@#.onion")
+        NetworkGuard.resolve_and_validate("invalid_onion_address!@#.onion", allow_onion=True)
 
     # Invalid length
     with pytest.raises(SSRFSecurityViolation, match="Invalid Tor .onion address format"):
-        NetworkGuard.resolve_and_validate("short.onion")
+        NetworkGuard.resolve_and_validate("short.onion", allow_onion=True)

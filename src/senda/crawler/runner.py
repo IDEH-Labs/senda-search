@@ -198,9 +198,13 @@ class CrawlerRunner:
 
                     # 5. Enqueue outgoing links if depth permits
                     if current_depth < max_depth:
+                        allow_onion = getattr(self.fetcher, "allow_onion", False)
                         for link in extracted.outgoing_links:
                             parsed_link = urlparse(link)
                             link_domain = parsed_link.netloc.lower()
+                            # Never enqueue .onion destinations unless an authorized SOCKS proxy is configured
+                            if link_domain.endswith(".onion") and not allow_onion:
+                                continue
                             if self.frontier.add_url(link, depth=current_depth + 1):
                                 self.storage.enqueue_frontier_url(link, link_domain, depth=current_depth + 1)
                 finally:

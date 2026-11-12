@@ -69,7 +69,30 @@ class NetworkGuard:
         return True
 
     @classmethod
-    def resolve_and_validate(cls, hostname: str, port: int = 443) -> list[str]:
+    def is_onion_hostname(cls, hostname: Optional[str]) -> bool:
+        """Check if hostname is a Tor Special-Use Domain (.onion per RFC 7686)."""
+        if not hostname:
+            return False
+        return hostname.lower().strip().endswith(".onion")
+
+    @classmethod
+    def validate_onion_format(cls, hostname: str) -> str:
+        """Validate format of a .onion hostname (RFC 7686 / Tor v3 56 chars or v2 16 chars).
+        
+        Raises SSRFSecurityViolation if malformed.
+        Returns normalized lowercase hostname.
+        """
+        clean = hostname.lower().strip()
+        if not clean.endswith(".onion"):
+            raise SSRFSecurityViolation(f"Host '{hostname}' is not a .onion address.")
+        onion_label = clean[:-6]
+        base32_chars = set("abcdefghijklmnopqrstuvwxyz234567")
+        if len(onion_label) in (16, 56) and set(onion_label).issubset(base32_chars):
+            return clean
+        raise SSRFSecurityViolation(f"Invalid Tor .onion address format: '{hostname}'.")
+
+    @classmethod
+    def resolve_and_validate(cls, hostname: str, port: int = 443, allow_onion: bool = False) -> list[str]:
         """Resolve DNS for a hostname and verify all returned IP addresses are public.
 
         Returns a list of validated IP address strings.
@@ -88,13 +111,16 @@ class NetworkGuard:
             pass  # It's a standard domain name or special-use domain
 
         # Tor Special-Use Domain (.onion per RFC 7686)
-        if hostname.lower().endswith(".onion"):
-            onion_label = hostname.lower()[:-6]
-            # Valid Tor v3 (56 chars base32) or legacy v2 (16 chars base32)
-            base32_chars = set("abcdefghijklmnopqrstuvwxyz234567")
-            if len(onion_label) in (16, 56) and set(onion_label).issubset(base32_chars):
-                return ["127.0.0.1"]
-            raise SSRFSecurityViolation(f"Invalid Tor .onion address format: '{hostname}'.")
+        if cls.is_onion_hostname(hostname):
+            if not allow_onion:
+                raise SSRFSecurityViolation(
+                    f"Destino .onion denegado sin proxy Tor SOCKS autorizado: '{hostname}'. "
+                    f"Se prohíbe terminantemente la resolución directa y la conexión sin proxy."
+                )
+            cls.validate_onion_format(hostname)
+            # Never resolve .onion via local DNS, and never substitute by 127.0.0.1.
+            # Remote SOCKS proxy will handle onion circuit resolution.
+            return []
 
         # Resolve through system resolver
         try:
@@ -126,7 +152,7 @@ class NetworkGuard:
         return validated_ips
 
     @classmethod
-    def validate_url(cls, url: str) -> tuple[str, list[str]]:
+    def validate_url(cls, url: str, allow_onion: bool = False) -> tuple[str, list[str]]:
         """Validate an entire URL against scheme, structure, and SSRF restrictions.
 
         Returns a tuple of (normalized_scheme_and_host, list_of_validated_ips).
@@ -144,6 +170,6 @@ class NetworkGuard:
             raise SSRFSecurityViolation(f"URL '{url}' does not contain a valid hostname.")
 
         port = parsed.port or (443 if parsed.scheme.lower() == "https" else 80)
-        validated_ips = cls.resolve_and_validate(hostname, port)
+        validated_ips = cls.resolve_and_validate(hostname, port, allow_onion=allow_onion)
 
         return f"{parsed.scheme.lower()}://{hostname}", validated_ips

@@ -103,6 +103,18 @@ class SafeFetcher:
         self.max_redirects = max_redirects or settings.MAX_REDIRECTS
         self.proxy = proxy or settings.CRAWLER_PROXY or None
 
+        # Tor .onion destinations require a configured SOCKS5 / SOCKS5h proxy with remote DNS resolution
+        self.allow_onion = False
+        if self.proxy:
+            proxy_clean = self.proxy.strip().lower()
+            if proxy_clean.startswith("socks5://") or proxy_clean.startswith("socks5h://"):
+                self.allow_onion = True
+            elif not (proxy_clean.startswith("http://") or proxy_clean.startswith("https://")):
+                raise ValueError(
+                    f"Esquema de proxy no soportado: '{self.proxy}'. "
+                    f"Solo se admiten esquemas válidos: http://, https://, socks5:// o socks5h://"
+                )
+
         if transport:
             self.transport = transport
         elif self.proxy:
@@ -133,7 +145,12 @@ class SafeFetcher:
         ) as client:
             while True:
                 # 1. Anti-SSRF check on the current target URL
-                NetworkGuard.validate_url(current_url)
+                # Non-.onion URLs retain local DNS/IP validation (Decision D1).
+                # .onion URLs are strictly forbidden unless allow_onion is enabled.
+                if self.allow_onion:
+                    NetworkGuard.validate_url(current_url, allow_onion=True)
+                else:
+                    NetworkGuard.validate_url(current_url)
 
                 try:
                     # Stream request so we can inspect headers before buffering body
@@ -148,7 +165,13 @@ class SafeFetcher:
                             if redirect_count > self.max_redirects:
                                 raise FetchError(f"Exceeded maximum redirect limit of {self.max_redirects}.")
 
-                            current_url = urljoin(current_url, location)
+                            new_target = urljoin(current_url, location)
+                            # Re-validate redirect target immediately against SSRF and onion policies
+                            if self.allow_onion:
+                                NetworkGuard.validate_url(new_target, allow_onion=True)
+                            else:
+                                NetworkGuard.validate_url(new_target)
+                            current_url = new_target
                             continue
 
                         # 3. Content-Type inspection
