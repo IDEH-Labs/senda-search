@@ -15,9 +15,10 @@ Senda está diseñado y auditado para cumplir y superar las pautas de las **Paut
 
 ## 2. Dimensiones Técnicas de Accesibilidad Implementadas
 
-### 2.1. Navegación Completa sin JavaScript (Zero-JS)
-* **Resiliencia Operativa:** El 100% de la funcionalidad esencial de búsqueda, consulta, paginación, filtros de categorías, cambio de modo de visualización e idioma de interfaz opera exclusivamente mediante HTML5 semántico estándar y envío de formularios HTTP GET/POST nativos.
-* **Compatibilidad Estricta:** Compatible con **GNU LibreJS**, navegación en modo *Safest* de **Tor Browser**, navegadores en modo texto (`w3m`, `lynx`) y entornos donde la ejecución de scripts está restringida por políticas de seguridad o limitaciones de hardware.
+### 2.1. Navegación sin JavaScript (Zero-JS) y Alcance Técnico
+* **Resiliencia Operativa:** El flujo nuclear de búsqueda, paginación, filtros de categorías en la vista de resultados (`/search?q=...&category=...`), selección de idioma por URL y modo de lectura opera exclusivamente mediante HTML5 semántico estándar y peticiones HTTP GET/POST nativas sin requerir la ejecución de scripts.
+* **Limitación en Página de Inicio (`/`):** En la portada de inicio, los chips de cambio rápido de categoría (`.cat-chip`) son elementos `<button type="button">` vinculados a un manejador en `static/js/i18n.js` para alternar el campo oculto `category`. En entornos con JavaScript deshabilitado (como Tor Browser *Safest* o navegadores en modo texto), el formulario inicial se envía con la categoría general (`all`), pudiendo el usuario refinar la categoría en la página de resultados subsiguiente o mediante atajos (*bangs*, e.g., `!images`).
+* **Compatibilidad:** Compatible con **GNU LibreJS**, navegación en modo *Safest* de **Tor Browser**, navegadores en modo texto (`w3m`, `lynx`) y navegadores sin soporte para ECMAScript moderno.
 
 ### 2.2. Contraste y Modos de Visualización
 * **Relación de Contraste:** Todos los elementos de texto y componentes interactivos superan la relación de contraste mínima de **4.5:1** para texto normal y **3:1** para texto grande y elementos de interfaz de usuario.

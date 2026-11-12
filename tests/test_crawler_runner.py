@@ -143,3 +143,61 @@ async def test_crawler_runner_concurrent_multi_domain(tmp_path):
     assert storage.get_stats()["total_documents"] == 4
     assert storage.get_document_by_url("https://fsf.org/")["title"] == "Title for fsf.org"
     assert storage.get_document_by_url("https://gentoo.org/")["title"] == "Title for gentoo.org"
+
+
+@pytest.mark.asyncio
+async def test_crawler_runner_never_enqueues_onion_when_allow_onion_is_false(tmp_path):
+    """Verify CrawlerRunner strictly skips enqueuing .onion outgoing links when allow_onion is False."""
+    storage = StorageEngine(db_path=tmp_path / "runner_onion.db")
+    fetcher_mock = MagicMock()
+    fetcher_mock.allow_onion = False
+    fetcher_mock.user_agent = "SendaBot/0.1"
+
+    seed_html = """
+    <html>
+        <head><title>Seed with onion link</title></head>
+        <body>
+            <p>Testing onion enqueue protection</p>
+            <a href="http://expyuz5wqqfdgah56trldbdym27awapqoh6no3hpj5ncf6fdnra7qdyd.onion/hidden">Onion Link</a>
+            <a href="https://example.com/clearnet">Clearnet Link</a>
+        </body>
+    </html>
+    """
+
+    async def mock_fetch(url):
+        if "robots.txt" in url:
+            return FetchedDocument(
+                url=url,
+                status_code=200,
+                headers={"Content-Type": "text/plain"},
+                content=b"User-agent: *\nAllow: /\n",
+                text="User-agent: *\nAllow: /\n",
+                content_type="text/plain",
+                encoding="utf-8"
+            )
+        return FetchedDocument(
+            url=url,
+            status_code=200,
+            headers={"Content-Type": "text/html"},
+            content=seed_html.encode("utf-8"),
+            text=seed_html,
+            content_type="text/html",
+            encoding="utf-8"
+        )
+
+    fetcher_mock.fetch = AsyncMock(side_effect=mock_fetch)
+    runner = CrawlerRunner(storage=storage, fetcher=fetcher_mock)
+    runner.frontier.default_crawl_delay = 0.0
+
+    # Crawl seed with max_depth=1 (permitting 1 level of outgoing links to be enqueued)
+    await runner.crawl_seeds(["https://example.com/"], max_pages=1, max_depth=1, concurrency=1)
+
+    # Inspect frontier queue in storage
+    enqueued_items = storage.get_pending_frontier_urls(limit=10)
+    enqueued_urls = [item["url"] for item in enqueued_items]
+
+    # Clearnet link must be enqueued
+    assert "https://example.com/clearnet" in enqueued_urls
+    # .onion link must strictly NOT be enqueued
+    assert "http://expyuz5wqqfdgah56trldbdym27awapqoh6no3hpj5ncf6fdnra7qdyd.onion/hidden" not in enqueued_urls
+
