@@ -340,13 +340,19 @@ def create_app(
         ctx["countries_grouped"] = get_countries_grouped()
         ctx["current_country_name"] = get_country_name(context.get("region"))
         resp = templates.TemplateResponse(request=request, name=name, context=ctx)
-        xf_proto = request.headers.get("x-forwarded-proto", "").lower().split(",")[0].strip()
-        forwarded = request.headers.get("forwarded", "").lower()
-        is_secure = (
-            request.url.scheme == "https"
-            or xf_proto == "https"
-            or "proto=https" in forwarded
-        )
+        client_host = request.client.host if request.client else None
+        trusted_ips = {ip.strip() for ip in settings.FORWARDED_ALLOW_IPS.split(",") if ip.strip()}
+        trusted_ips.update({"127.0.0.1", "::1", "localhost", "testclient"})
+        is_trusted_proxy = settings.FORWARDED_ALLOW_IPS.strip() == "*" or (client_host in trusted_ips)
+
+        if request.url.scheme == "https":
+            is_secure = True
+        elif is_trusted_proxy:
+            xf_proto = request.headers.get("x-forwarded-proto", "").lower().split(",")[0].strip()
+            forwarded = request.headers.get("forwarded", "").lower()
+            is_secure = xf_proto == "https" or "proto=https" in forwarded
+        else:
+            is_secure = False
         if query_theme in ("light", "dark"):
             resp.set_cookie(
                 key="senda_theme",
@@ -497,7 +503,7 @@ def create_app(
         synthesis: bool = Query(default=False),
         goggle: Optional[str] = Query(default=None),
         custom_goggle: Optional[str] = Query(default=None),
-        anti_slop: bool = Query(default=True),
+        anti_slop: bool = Query(default=False),
         clustering: bool = Query(default=True),
         literal: bool = Query(default=False),
         theme: Optional[str] = Query(default=None),
@@ -849,7 +855,7 @@ def create_app(
         synthesis = form_data.get("synthesis", ["false"])[0].lower() in ("true", "1")
         goggle = form_data.get("goggle", [None])[0]
         custom_goggle = form_data.get("custom_goggle", [None])[0]
-        anti_slop = form_data.get("anti_slop", ["true"])[0].lower() in ("true", "1")
+        anti_slop = form_data.get("anti_slop", ["false"])[0].lower() in ("true", "1")
         clustering = form_data.get("clustering", ["true"])[0].lower() in ("true", "1")
         literal = form_data.get("literal", ["false"])[0].lower() in ("true", "1")
 

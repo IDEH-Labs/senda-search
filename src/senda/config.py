@@ -118,6 +118,10 @@ class SendaSettings(BaseSettings):
     # Web service
     SERVER_HOST: str = "127.0.0.1"
     SERVER_PORT: int = 8000
+    FORWARDED_ALLOW_IPS: str = Field(
+        default="127.0.0.1,::1",
+        description="Comma-separated list of IP addresses trusted to provide X-Forwarded-* proxy headers."
+    )
 
 
 

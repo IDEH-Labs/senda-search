@@ -37,12 +37,13 @@
 | **H5** | Comportamiento HTTPX `socks5://` vs `socks5h://` | **Confirmado** (httpcore pasa hostname ATYP=3) | Verificado empíricamente con servidor SOCKS de prueba; se exige esquema SOCKS para `.onion`. | **Verificado y documentado** |
 | **H6** | Exposición de DNS local previo a conexión por proxy | **Confirmado** (Decisión D1) | Conservada validación DNS local para destinos públicos no-.onion; prohibida para `.onion`. | **Mitigado (Decisión D1)** |
 | **H7** | Carga automática de imágenes externas (Fuga de IP) | **Confirmado** (En fichas, imágenes y videos) | Eliminados tags `<img src="...">` externos; sustituidos por placeholders SVG locales y enlaces directos. | **Corregido y validado** |
-| **H8** | Cookies funcionales no declaradas en `PRIVACY.md` | **Confirmado** | Registrado para Etapa 2. No modificado en Etapa 1. | **Pendiente (Etapa 2)** |
-| **H9** | CSP permisiva (`img-src * data:`) | **Confirmado** | Restringido `img-src 'self' data:;`. Resto de CSP reservado para Etapa 2. | **Corregido parcialmente en img-src** |
-| **H10** | Anti-slop vs política ética contra detectores IA | **Confirmado** | Registrado para Etapa 3. No modificado en Etapa 1. | **Pendiente (Etapa 3)** |
-| **H11** | Denominación de síntesis determinista como IA | **Confirmado** | Registrado para Etapa 3. No modificado en Etapa 1. | **Pendiente (Etapa 3)** |
-| **H12** | `docker-compose.yml` ausente y tag mutable en README | **Confirmado** | Registrado para Etapa 3. No modificado en Etapa 1. | **Pendiente (Etapa 3)** |
-| **H13** | Enlace roto a `docs/ACCESSIBILITY.md` | **Confirmado** | Registrado para Etapa 4. No modificado en Etapa 1. | **Pendiente (Etapa 4)** |
+| **H8** | Cookies funcionales no declaradas en `PRIVACY.md` | **Confirmado** | Documentadas formalmente en `PRIVACY.md` y `SECURITY.md` con alcance funcional para Zero-JS y flags estándar. | **Corregido y validado (Etapa 2)** |
+| **H9** | CSP permisiva (`img-src * data:`, `unsafe-inline`) | **Confirmado** | Migrado `script-src` a nonces criptográficos de un solo uso; incorporadas directivas `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`. `style-src 'unsafe-inline'` documentado como riesgo residual aceptado. | **Corregido y validado (Etapa 2)** |
+| **H10** | Anti-slop vs política ética contra detectores IA | **Confirmado** | Resuelto con Opción A: eliminada penalización de ranking, eliminada etiqueta `AIProvenance`, `anti_slop` desactivado por defecto y descripción como rasgos observables en `why_seen`. | **Corregido y validado (Etapa 3)** |
+| **H11** | Denominación de síntesis determinista como IA / atribución | **Confirmado** | Resuelto con Opción A: atribución limpia omitiendo "Dato no disponible", extracción y truncado por límites de oración/palabra, y disclaimer ético formal de citas extractivas. | **Corregido y validado (Etapa 3)** |
+| **H12** | `docker-compose.yml` ausente y tag mutable en README | **Confirmado** | Creado `Dockerfile` reproducible sin root (Python 3.12-slim), `docker-compose.yml` con SearXNG fijado (`2024.11.1-7b0be77`), y README corregido con URL canónica de Codeberg y conteo de pruebas actualizado. | **Corregido y validado (Etapa 3)** |
+| **H13** | Enlace roto a `docs/ACCESSIBILITY.md` | **Confirmado** | Registrado para Etapa 4. No modificado en Etapas 1, 2 ni 3. | **Pendiente (Etapa 4)** |
+| **H14** | Detección TLS de `Secure` tras proxy inverso y mitigación de spoofing | **Confirmado** | Endurecido: verificación de IP de proxy de confianza (`FORWARDED_ALLOW_IPS`), Uvicorn configurado con IPs de confianza, y rechazo verificado de cabeceras `X-Forwarded-Proto` falsificadas por clientes hostiles externos. | **Corregido y validado (Etapas 2 y 3)** |
 
 ---
 
@@ -103,11 +104,39 @@
 
 ## 5. Resultados de Pruebas Automatizadas
 
+### D. Políticas Editoriales, Anti-Slop, Síntesis y Cadena de Suministro (Etapa 3)
+1. **`src/senda/ranking/anti_slop.py` (H10 - Opción A):**
+   - Eliminada la penalización algorítmica de ranking (`demote_penalty=45.0` removido; los puntajes de los resultados se preservan intactos).
+   - Eliminada la reordenación forzada (`items.sort` eliminado).
+   - Eliminada la asignación de `AIProvenance` (en estricto cumplimiento de la Sección 4.3 de `POLITICA_ETICA.md`, que prohíbe el uso de detectores probabilísticos de IA).
+   - Reencuadre como rasgos de redacción observables en el registro de auditoría `why_seen` (`[Rasgo observable: Clichés o patrones frecuentes de redacción (...)]`).
+   - `anti_slop` desactivado por defecto (`default=False` en `app.py` y `aggregator.py`).
+2. **`src/senda/ai/grounded_synthesis.py` (H11 - Opción A + Corrección de Truncado):**
+   - Corregida la atribución de autoría: cuando no hay autor registrado, se atribuye limpiamente a la fuente (`Según {fuente}: «...»`), eliminando el texto burocrático redundante `(Dato no disponible)`.
+   - Implementada función de extracción `_clean_and_truncate_snippet`: extrae oraciones completas y, en textos extensos, trunca en límites exactos de palabras sin cortar vocablos a la mitad ni dejar puntuación dangling antes de los puntos suspensivos.
+   - Disclaimer ético actualizado declarando formalmente que se trata de síntesis extractiva determinista por citas directas sin uso de modelos generativos de IA.
+3. **`Dockerfile` y `docker-compose.yml` (H12):**
+   - Creado `Dockerfile` reproducible y seguro para Senda, basado en `python:3.12-slim-bookworm`, ejecutando como usuario de sistema sin privilegios `senda:senda` (UID 10001) y con `HEALTHCHECK` local.
+   - Creado `docker-compose.yml` para orquestación conjunta de Senda y SearXNG con versión inmutable fijada (`searxng/searxng:2024.11.1-7b0be77`), eliminando el tag mutable `:latest`.
+4. **`README.md` (H12):**
+   - Corregida la URL canónica del repositorio a Codeberg (`https://codeberg.org/IDEH-Labs/senda-search.git`).
+   - Actualizado el conteo verificado de pruebas a 245+ pruebas.
+   - Documentado el despliegue reproducible con Docker Compose.
+5. **Endurecimiento de Cabeceras de Proxy (H14):**
+   - Añadido `FORWARDED_ALLOW_IPS` en `config.py` (por defecto `127.0.0.1,::1`).
+   - Uvicorn configurado para utilizar las IPs de confianza especificadas.
+   - En `app.py`, se verifica que el host del cliente pertenezca a la lista de proxies de confianza antes de procesar cabeceras `X-Forwarded-Proto` o `Forwarded: proto=https`.
+   - Incorporada prueba hostil en `test_etapa2_security_remediation.py` demostrando que clientes externos no autorizados no pueden falsificar `X-Forwarded-Proto` para manipular la bandera `Secure`.
+
+---
+
+## 5. Resultados de Pruebas Automatizadas
+
 * **Pruebas preexistentes (Línea base):** 207 (207 superadas, 0 regresiones en pruebas HTTP).
 * **Pruebas de Etapa 1 (`tests/test_p0_security_remediation.py`):** 24 pruebas:
   * **21 pruebas de seguridad de red y anti-SSRF:** validación `.onion`, verificación de handshake SOCKS5 local (`ATYP=0x03`), proxy HTTP rechazado para `.onion`, manejo de proxy inaccesible (fail-closed sin fallback), revalidación en redirecciones (a otro `.onion`, a destino público, a loopback, a IP privada, a metadatos de nube y con esquemas no permitidos), bloqueo de rangos reservados/CGNAT, IPv4 mapeada en IPv6 y pinning anti-TOCTOU directo.
   * **3 pruebas de privacidad de recursos remotos:** ausencia de etiquetas `<img>` externas en resultados de imágenes y videos, presencia de placeholders SVG locales, y cabecera CSP estricta `img-src 'self' data:;`.
-* **Pruebas de Etapa 2 (`tests/test_etapa2_security_remediation.py`):** 9 pruebas:
+* **Pruebas de Etapa 2 (`tests/test_etapa2_security_remediation.py`):** 10 pruebas:
   * Directivas completas de CSP y anti-inyección.
   * Generación y unicidad de nonces criptográficos de 16 bytes.
   * Renderizado exacto del nonce en `<script nonce="...">`.
@@ -116,8 +145,12 @@
   * Atributos de cookies técnicas (`senda_theme`, `senda_lang`) en HTTP (`SameSite=Lax`, `Path=/`, `Max-Age=31536000`).
   * Atributo `Secure` forzado en cookies cuando la petición se realiza por conexión directa HTTPS.
   * Atributo `Secure` forzado en cookies cuando la petición llega tras un proxy inverso con cabeceras `X-Forwarded-Proto: https` o `Forwarded: proto=https`.
+  * Rechazo verificado de cabeceras `X-Forwarded-Proto` enviadas por clientes externos hostiles no autorizados.
   * Rechazo estricto de parámetros de cookie con valores o identificadores arbitrarios.
-* **Total de pruebas en la suite actual:** **240 superadas (100% de éxito en ejecución de pruebas automatizadas).**
+* **Pruebas de Etapa 3:**
+  * `tests/test_anti_slop.py` (4 pruebas): verificación de estabilidad absoluta del orden de ranking y puntajes con anti-slop, garantía de ausencia de asignación de `AIProvenance` sin señal declarada (Sección 4.3 de `POLITICA_ETICA.md`), y preservación de credenciales auténticas C2PA.
+  * `tests/test_grounded_synthesis.py` (7 pruebas): síntesis extractiva determinista, citas literales, formato limpio de autoría sin «Dato no disponible», y extracción y truncado por límites de oración y palabra.
+* **Total de pruebas en la suite actual:** **245 superadas (100% de éxito en ejecución de pruebas automatizadas).**
 * **Avisos de ejecución (Warnings):** 1 aviso residual de deprecación en biblioteca externa (`StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead`), originado en la importación de `starlette.testclient` en el entorno de pruebas, sin impacto en el código fuente de Senda.
 
 ---

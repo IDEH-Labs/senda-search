@@ -113,7 +113,7 @@ class ProviderAggregator:
         block_domains: Optional[List[str]] = None,
         goggle: Optional[str] = None,
         custom_goggle: Optional[str] = None,
-        anti_slop: bool = True,
+        anti_slop: bool = False,
         clustering: bool = True,
         lang: Optional[str] = None,
         **kwargs,

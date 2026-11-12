@@ -1,18 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
-"""Verifiable Grounded AI Synthesis for Senda Search Engine.
+"""Verifiable Grounded Extractive Synthesis for Senda Search Engine.
 
 Strictly adheres to non-negotiable ethical guidelines:
 1. Grounding: All assertions must explicitly cite retrieved primary items [1], [2].
-2. Zero Hallucination: If retrieved items are empty or lack sufficient evidence to
-   answer the query, Senda issues an explicit refusal to answer.
+2. Zero Hallucination: Purely deterministic extractive quotes. Senda never uses generative
+   AI models for synthesis and never invents claims.
 3. No Veracity Certifications: Senda never issues binary true/false judgments or certifies truth.
    Every claim is attributed strictly to the retrieved source.
 4. Privacy & Free Software: 100% server-side HTML rendering compatible with GNU LibreJS
    and Tor Browser 'Safest' mode.
 """
 
+import re
+import urllib.parse
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -26,7 +28,7 @@ class GroundedCitation(BaseModel):
     index: int = Field(description="1-based citation index e.g. [1]")
     title: str
     url: str
-    author: str = "Dato no disponible"
+    author: str = "No declarada"
     published_date: Optional[str] = None
     source: str = "Fuente desconocida"
     domain: str = ""
@@ -41,12 +43,34 @@ class GroundedSynthesisResult(BaseModel):
     is_refusal: bool = False
 
 
+def _clean_and_truncate_snippet(text: str, max_chars: int = 180) -> str:
+    """Extract a complete, coherent sentence or clause from snippet text without mid-word cuts."""
+    cleaned = re.sub(r"\s+", " ", text).strip()
+    if not cleaned:
+        return ""
+
+    # Try to find a sentence ending with punctuation (. ! ?)
+    sentence_match = re.search(r"^(.*?[.!?])(?:\s+|$)", cleaned)
+    if sentence_match:
+        sentence = sentence_match.group(1).strip()
+        if len(sentence) >= 30 and len(sentence) <= max_chars:
+            return sentence
+
+    # If too long or no punctuation, truncate at word boundary
+    if len(cleaned) > max_chars:
+        truncated = cleaned[:max_chars].rsplit(" ", 1)[0].rstrip(".,;:¡!¿?")
+        return truncated + "…"
+
+    return cleaned.rstrip(".,;:¡!¿?")
+
+
 class GroundedSynthesizer:
-    """Produces verified, grounded answer syntheses from retrieved search items."""
+    """Produces verified, grounded extractive syntheses from retrieved search items."""
 
     ETHICAL_DISCLAIMER = (
-        "Aviso de procedencia: Síntesis automatizada atribuida. Senda no certifica verdad "
-        "ni emite veredictos propios; consulte siempre los documentos originales."
+        "Aviso de procedencia: Síntesis extractiva determinista atribuida a fuentes primarias. "
+        "Senda no certifica verdad ni emite veredictos propios; no se utilizan modelos generativos "
+        "de IA en esta función. Consulte siempre los documentos originales."
     )
 
     def __init__(self, enabled: Optional[bool] = None):
@@ -91,7 +115,6 @@ class GroundedSynthesizer:
         selected = valid_items[:4]
         citations: List[GroundedCitation] = []
 
-        import urllib.parse
         for idx, it in enumerate(selected, start=1):
             domain = ""
             try:
@@ -99,7 +122,7 @@ class GroundedSynthesizer:
             except Exception:
                 domain = ""
 
-            author_str = ", ".join(it.authors) if it.authors else "Dato no disponible"
+            author_str = ", ".join(it.authors) if it.authors else "No declarada"
             citations.append(
                 GroundedCitation(
                     index=idx,
@@ -115,14 +138,15 @@ class GroundedSynthesizer:
         # Build grounded synthesis paragraphs attributing each key point
         summary_lines = []
         for c in citations:
-            # Find the corresponding snippet
             src_item = selected[c.index - 1]
-            snippet_text = (src_item.snippet or src_item.title or "").strip()
-            # Truncate cleanly to first sentence or max 140 chars
-            clean_snip = snippet_text.split(". ")[0].rstrip(".")
-            if len(clean_snip) > 160:
-                clean_snip = clean_snip[:157] + "…"
-            summary_lines.append(f"Según {c.source} ({c.author}): «{clean_snip}» [{c.index}].")
+            raw_text = (src_item.snippet or src_item.title or "").strip()
+            clean_snip = _clean_and_truncate_snippet(raw_text, max_chars=180)
+
+            # Clean attribution without awkward placeholders
+            if c.author and c.author not in ("No declarada", "Dato no disponible"):
+                summary_lines.append(f"Según {c.author} en {c.source}: «{clean_snip}» [{c.index}].")
+            else:
+                summary_lines.append(f"Según {c.source}: «{clean_snip}» [{c.index}].")
 
         body_text = " ".join(summary_lines)
 

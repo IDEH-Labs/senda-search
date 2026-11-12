@@ -202,6 +202,21 @@ def test_functional_cookies_secure_behind_reverse_proxy(client):
     assert "Secure" not in theme_cookie_http
 
 
+def test_functional_cookies_rejects_spoofed_proxy_header_from_untrusted_client(tmp_path):
+    """Hostile external client attempting to spoof X-Forwarded-Proto from untrusted IP must be rejected."""
+    storage = StorageEngine(db_path=tmp_path / "spoof_test.db")
+    app = create_app(storage=storage, enable_federated_providers=False)
+    # Untrusted external client IP
+    untrusted_client = TestClient(app, client=("198.51.100.42", 48123))
+
+    resp = untrusted_client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "https"})
+    assert resp.status_code == 200
+    cookies = resp.headers.get_list("set-cookie")
+    theme_cookie = next(c for c in cookies if c.startswith("senda_theme="))
+    # Spoofed header from untrusted client IP must NOT trigger Secure
+    assert "Secure" not in theme_cookie
+
+
 def test_functional_cookies_contain_no_tracking_identifiers(client):
     """Functional cookies must only store sanitized preference values, never arbitrary IDs or session tokens."""
     # Attempting to send invalid/arbitrary values via query params

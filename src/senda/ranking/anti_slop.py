@@ -2,10 +2,14 @@
 # SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
 """
-Senda Anti-Slop & Synthetic Farm Detection Engine
-Inspired by Kagi SlopStop and anti-SEO scraping defenses.
-Detects, flags, and demotes repetitive AI-generated spam and content-farm filler.
-Works 100% server-side with zero JavaScript required.
+Senda Content Style & SEO Cliché Inspection Engine.
+In strict compliance with POLITICA_ETICA.md (Section 4.3 - Prohibición de Detectores Automáticos de IA):
+- Senda does NOT use probabilistic/heuristic AI text detectors to classify or penalize content.
+- Senda does NOT alter ranking order or demote scores based on stylistic clichés.
+- Senda does NOT assign synthetic/AI provenance without a formally declared cryptographic
+  or metadata signal (C2PA / author metadata).
+- Observable traits (frequent clichés, keyword stuffing) are noted transparently in the
+  why_seen audit trail for user empowerment without paternalistic censorship.
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ from typing import List, Tuple
 from senda.providers.base import SearchResultItem
 
 
-# Known synthetic filler cliches common in automated LLM content-farms
+# Known repetitive filler clichés common in content-farms and automated templates
 SYNTHETIC_CLICHES = [
     # Spanish
     r"\ben\s+conclusi[oó]n\b",
@@ -92,10 +96,11 @@ def compute_slop_score(
 def apply_anti_slop_filter(
     items: List[SearchResultItem],
     threshold: float = 0.55,
-    demote_penalty: float = 45.0,
 ) -> List[SearchResultItem]:
     """
-    Inspect retrieved items, flag synthetic content mills, and demote them in ranking.
+    Inspect retrieved items to identify observable stylistic cliches.
+    Preserves ranking scores and ordering 100% intact, adhering strictly to
+    Section 4.3 of POLITICA_ETICA.md (zero ranking demotion, zero AIProvenance assignment).
     """
     if not items:
         return items
@@ -112,16 +117,11 @@ def apply_anti_slop_filter(
         )
 
         if score >= threshold:
-            item.score -= demote_penalty
             reason_str = "; ".join(reasons)
-            item.why_seen = f"[Anti-Slop: Sospecha de granja SEO ({reason_str})] {item.why_seen}".strip()
-            if not item.ai_provenance:
-                from senda.providers.base import AIProvenance
-                item.ai_provenance = AIProvenance(
-                    declared_signal="Heurística Anti-Slop: Alta probabilidad de generación sintética / granja SEO",
-                    status="degradado",
-                )
+            item.why_seen = f"[Rasgo observable: Clichés o patrones frecuentes de redacción ({reason_str})] {item.why_seen}".strip()
+            # In strict adherence to Section 4.3 of POLITICA_ETICA.md:
+            # Senda NEVER assigns AIProvenance unless there is an authentic declared signal
+            # (e.g. C2PA / author metadata). Heuristics never manufacture AI labels.
 
-    # Re-sort descending
-    items.sort(key=lambda x: x.score, reverse=True)
+    # Strict ranking preservation: no demotion, no re-sorting
     return items

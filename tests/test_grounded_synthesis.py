@@ -130,3 +130,39 @@ def test_api_synthesis_opt_in_renders_in_html(temp_storage):
     assert "grounded-answer-box" in html
     assert "Síntesis Asistida de Procedencia" in html
     assert "Senda no certifica verdad ni emite veredictos propios" in html
+
+
+def test_synthesis_attribution_without_author_omits_placeholder():
+    """Verify that items without author are cleanly attributed without awkward (Dato no disponible) strings."""
+    synth = GroundedSynthesizer(enabled=True)
+    items = [
+        SearchResultItem(
+            url="https://es.wikipedia.org/wiki/Software_libre",
+            title="Software libre - Wikipedia",
+            snippet="El software libre es aquel que respeta la libertad de los usuarios y la comunidad. Esto significa que tienen la libertad de ejecutar, copiar y distribuir.",
+            source="Wikipedia",
+            authors=[],  # No author
+        )
+    ]
+    res = synth.synthesize("software libre", items, force=True)
+    assert res is not None
+    # Must attribute cleanly to the source
+    assert "Según Wikipedia: «El software libre es aquel que respeta la libertad de los usuarios y la comunidad.» [1]." in res.summary
+    # Must NOT contain awkward "Dato no disponible" in the summary sentence
+    assert "(Dato no disponible)" not in res.summary
+
+
+def test_clean_and_truncate_snippet_handles_sentences_and_word_boundaries():
+    """Verify sentence extraction doesn't chop words mid-word or fail on abbreviations."""
+    from senda.ai.grounded_synthesis import _clean_and_truncate_snippet
+
+    # 1. Clean sentence with period
+    text = "La criptografía poscuántica protege contra ordenadores cuánticos futuros. Es un campo en desarrollo activo."
+    assert _clean_and_truncate_snippet(text, max_chars=100) == "La criptografía poscuántica protege contra ordenadores cuánticos futuros."
+
+    # 2. Long text without sentence break truncates cleanly at word boundary
+    long_text = "En este extenso párrafo técnico analizamos detalladamente las especificaciones del nuevo protocolo sin saltos de oración intermedios para probar la elisión léxica adecuada"
+    truncated = _clean_and_truncate_snippet(long_text, max_chars=80)
+    assert truncated.endswith("…")
+    assert not truncated.endswith(" …")
+    assert len(truncated) <= 80

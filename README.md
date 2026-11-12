@@ -52,12 +52,14 @@ senda-search/
 │       │       ├── js/i18n.js      # Internacionalización local, lentes y atajos
 │       │       └── img/            # Logotipos y favicons vectoriales SVG
 │       └── config.py          # Configuración de variables de entorno y defaults
-├── tests/                     # Suite de pruebas unitarias y de integración (150 pruebas)
+├── tests/                     # Suite de pruebas unitarias y de integración (245+ pruebas)
 │   ├── test_providers.py      # Pruebas de normalización, agregador, lentes y bangs
 │   ├── test_indexer.py        # Pruebas FTS5
 │   └── ...
-├── docker-compose.yml         # Despliegue conjunto de Senda y SearXNG
-├── PRIVACY.md                 # Declaración de lo que el sistema hace y NO hace
+├── Dockerfile                 # Contenedor mínimo sin privilegios de root (Python 3.12-slim)
+├── docker-compose.yml         # Despliegue conjunto y reproducible de Senda y SearXNG
+├── PRIVACY.md                 # Declaración auditada de privacidad y límites técnicos
+├── SECURITY.md                # Política de seguridad, SSRF pinning y modelo de amenazas
 ├── README.md                  # Manual y documentación principal
 └── pyproject.toml             # Especificación de paquete y dependencias auditables
 ```
@@ -69,8 +71,8 @@ senda-search/
 ### Opción 1: Entorno de Desarrollo Local
 
 ```bash
-# Clonar el repositorio
-git clone https://github.com/IDEH-Labs/senda-search.git
+# Clonar el repositorio oficial desde Codeberg
+git clone https://codeberg.org/IDEH-Labs/senda-search.git
 cd senda-search
 
 # Crear entorno virtual e instalar dependencias
@@ -85,19 +87,30 @@ pytest -v
 senda serve --host 127.0.0.1 --port 8000
 ```
 
-### Opción 2: Despliegue con SearXNG vía Docker
+### Opción 2: Despliegue Reproducible con Docker Compose
 
-Para habilitar resultados federados autoalojados utilizando SearXNG como proveedor complementario:
+Para levantar Senda junto con una instancia aislada de SearXNG con fijación determinista de imágenes:
 
 ```bash
-# 1. Ejecutar SearXNG en un contenedor Docker aislado
+# Iniciar servicios en segundo plano
+docker compose up -d
+
+# Verificar estado y logs
+docker compose ps
+docker compose logs -f senda
+```
+
+O si prefieres ejecutar SearXNG manualmente con una versión inmutable fijada:
+
+```bash
+# 1. Ejecutar SearXNG en un contenedor Docker con tag inmutable
 docker run -d \
   --name senda-searxng \
   -p 8888:8080 \
   -e "SEARXNG_BASE_URL=http://localhost:8888" \
   -e "SEARXNG_SECRET=$(openssl rand -hex 32)" \
   --restart unless-stopped \
-  searxng/searxng:latest
+  searxng/searxng:2024.11.1-7b0be77
 
 # 2. Configurar la URL de SearXNG en las variables de entorno de Senda
 export SENDA_SEARXNG_URL="http://127.0.0.1:8888"

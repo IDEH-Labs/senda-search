@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+services:
+  senda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: senda-search
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SENDA_SERVER_HOST=0.0.0.0
+      - SENDA_SERVER_PORT=8000
+      - SENDA_DATA_DIR=/var/lib/senda
+      - SENDA_FORWARDED_ALLOW_IPS=127.0.0.1,::1,172.16.0.0/12,10.0.0.0/8
+      - SENDA_SEARXNG_URL=http://searxng:8080
+      - SENDA_ENABLE_AI_SYNTHESIS=false
+    volumes:
+      - senda-data:/var/lib/senda
+    depends_on:
+      - searxng
+    networks:
+      - senda-net
+
+  searxng:
+    # Use pinned release tag instead of mutable :latest for supply chain reproducibility
+    image: docker.io/searxng/searxng:2024.11.1-7b0be77
+    container_name: senda-searxng
+    restart: unless-stopped
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8080/
+      - SEARXNG_SECRET=insecure-default-change-me-in-production-env
+    networks:
+      - senda-net
+
+volumes:
+  senda-data:
+    driver: local
+
+networks:
+  senda-net:
+    driver: bridge
