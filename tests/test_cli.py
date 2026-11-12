@@ -116,3 +116,43 @@ def test_cli_serve(monkeypatch, capsys):
     assert "Starting Senda Sovereign Search Web UI" in captured.out
 
 
+def test_cli_serve_custom_cli_forwarded_ips(monkeypatch, capsys):
+    """Verify senda serve CLI flag --forwarded-allow-ips propagates directly to uvicorn."""
+    custom_ips = "10.0.0.1,192.168.1.1,172.16.0.0/12"
+    monkeypatch.setattr(sys, "argv", ["senda", "serve", "--host", "0.0.0.0", "--port", "9000", "--forwarded-allow-ips", custom_ips])
+    with patch("uvicorn.run") as mock_run:
+        main()
+        assert mock_run.called
+        kwargs = mock_run.call_args.kwargs
+        assert kwargs["host"] == "0.0.0.0"
+        assert kwargs["port"] == 9000
+        assert kwargs["forwarded_allow_ips"] == custom_ips
+
+
+def test_cli_serve_env_and_defaults(monkeypatch, capsys):
+    """Verify senda serve uses settings defaults and reads FORWARDED_ALLOW_IPS from environment."""
+    monkeypatch.setattr(sys, "argv", ["senda", "serve"])
+    monkeypatch.setenv("FORWARDED_ALLOW_IPS", "127.0.0.1,::1,10.0.0.0/8")
+    with patch("uvicorn.run") as mock_run:
+        main()
+        assert mock_run.called
+        kwargs = mock_run.call_args.kwargs
+        from senda.config import settings
+        assert kwargs["host"] == settings.SERVER_HOST
+        assert kwargs["port"] == settings.SERVER_PORT
+        assert kwargs["forwarded_allow_ips"] == "127.0.0.1,::1,10.0.0.0/8"
+
+
+def test_cli_serve_type_error_fallback(monkeypatch, capsys):
+    """Verify senda serve gracefully falls back to uvicorn.Server if uvicorn.run raises TypeError."""
+    monkeypatch.setattr(sys, "argv", ["senda", "serve", "--host", "127.0.0.1", "--port", "8000"])
+    with patch("uvicorn.run", side_effect=TypeError("mocked legacy signature")), \
+         patch("uvicorn.server.Server.run") as mock_server_run:
+        main()
+        assert mock_server_run.called
+
+    captured = capsys.readouterr()
+    assert "Starting Senda Sovereign Search Web UI" in captured.out
+
+
+

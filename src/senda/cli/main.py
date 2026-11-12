@@ -204,7 +204,11 @@ def cmd_serve(args):
     host = args.host or settings.SERVER_HOST
     port = args.port or settings.SERVER_PORT
     print(f"Starting Senda Sovereign Search Web UI on http://{host}:{port}")
-    forwarded_ips = os.environ.get("FORWARDED_ALLOW_IPS", settings.FORWARDED_ALLOW_IPS)
+    forwarded_ips = (
+        getattr(args, "forwarded_allow_ips", None)
+        or os.environ.get("FORWARDED_ALLOW_IPS")
+        or settings.FORWARDED_ALLOW_IPS
+    )
     try:
         uvicorn.run("senda.api.app:app", host=host, port=port, log_level="info", proxy_headers=True, forwarded_allow_ips=forwarded_ips)
     except TypeError:
@@ -261,6 +265,7 @@ def main():
     p_serve = subparsers.add_parser("serve", help="Run the web search interface and API")
     p_serve.add_argument("--host", default=None, help=f"Host interface (default: {settings.SERVER_HOST})")
     p_serve.add_argument("--port", type=int, default=None, help=f"Port number (default: {settings.SERVER_PORT})")
+    p_serve.add_argument("--forwarded-allow-ips", default=None, help=f"Comma-separated list of IP addresses trusted for X-Forwarded-* headers (default: {settings.FORWARDED_ALLOW_IPS})")
 
     args = parser.parse_args()
 
