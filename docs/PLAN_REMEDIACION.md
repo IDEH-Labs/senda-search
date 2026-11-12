@@ -30,9 +30,9 @@
 
 | ID | Hallazgo | Estado Inicial | Corrección en Etapa 1 | Estado Actual |
 | :--- | :--- | :--- | :--- | :--- |
-| **H1** | Retorno de `127.0.0.1` en dominios `.onion` en `network_guard.py` | **Confirmado** (Vulnerabilidad crítica SSRF) | Erradicado. `.onion` se prohíbe sin proxy y nunca retorna loopback ni resuelve localmente. | **Corregido y validado** |
+| **H1** | Retorno de `127.0.0.1` en dominios `.onion` en `network_guard.py` | **Confirmado** (Vulnerabilidad crítica SSRF) | Corregido y validado en entorno local controlado. `.onion` se prohíbe sin proxy SOCKS y nunca retorna loopback ni resuelve localmente. | **Corregido y validado (entorno local)** |
 | **H2** | Encolado de enlaces salientes `.onion` sin proxy en `runner.py` | **Confirmado** (Vector de inducción SSRF) | Filtrado en `runner.py`: si no hay proxy Tor, los enlaces `.onion` se descartan. | **Corregido y validado** |
-| **H3** | Pérdida de socket pinning en `fetcher.py` con proxy | **Confirmado** (Riesgo TOCTOU con proxy) | Documentado técnicamente; proxy SOCKS delega resolución remota sin DNS local. | **Mitigado / Riesgo documentado** |
+| **H3** | Pérdida de socket pinning en `fetcher.py` con proxy | **Confirmado** (Riesgo TOCTOU con proxy) | Documentado técnicamente; para no-.onion se preserva validación DNS local asumiendo el riesgo residual; para .onion se delega en proxy. | **Riesgo aceptado y documentado (Decisión D1)** |
 | **H4** | Falta de dependencia `httpx[socks]` / `socksio` | **Confirmado** (`ImportError` al usar proxy) | Añadido `httpx[socks]>=0.27.0` en `pyproject.toml` y registrado en `SBOM.md`. | **Corregido y validado** |
 | **H5** | Comportamiento HTTPX `socks5://` vs `socks5h://` | **Confirmado** (httpcore pasa hostname ATYP=3) | Verificado empíricamente con servidor SOCKS de prueba; se exige esquema SOCKS para `.onion`. | **Verificado y documentado** |
 | **H6** | Exposición de DNS local previo a conexión por proxy | **Confirmado** (Decisión D1) | Conservada validación DNS local para destinos públicos no-.onion; prohibida para `.onion`. | **Mitigado (Decisión D1)** |
@@ -116,14 +116,18 @@ tests/test_ranking.py ........                                           [100%]
 ======================== 231 passed, 2 warnings in 63.88s =======================
 ```
 
-* **Pruebas preexistentes:** 207 (207 superadas, 0 regresiones).
-* **Pruebas nuevas específicas (`test_p0_security_remediation.py`):** 24 (24 superadas).
-* **Total de pruebas en la suite actual:** **231 superadas (100% de éxito).**
+* **Pruebas preexistentes (Línea base):** 207 (207 superadas, 0 regresiones).
+* **Pruebas nuevas añadidas (`tests/test_p0_security_remediation.py`):** 24 pruebas:
+  * **21 pruebas de seguridad de red y anti-SSRF:** validación `.onion`, verificación de handshake SOCKS5 local (`ATYP=0x03`), proxy HTTP rechazado para `.onion`, manejo de proxy inaccesible (fail-closed sin fallback), revalidación en redirecciones (a otro `.onion`, a destino público, a loopback, a IP privada, a metadatos de nube y con esquemas no permitidos), bloqueo de rangos reservados/CGNAT, IPv4 mapeada en IPv6 y pinning anti-TOCTOU directo.
+  * **3 pruebas de privacidad de recursos remotos:** ausencia de etiquetas `<img>` externas en resultados de imágenes y videos, presencia de placeholders SVG locales, y cabecera CSP estricta `img-src 'self' data:;`.
+* **Total de pruebas en la suite actual:** **231 superadas (100% de éxito en 63.88s).**
 
 ---
 
-## 6. Riesgos Residuales Técnicos
+## 6. Riesgos Residuales Técnicos y Limitaciones
 
-1. **Riesgo TOCTOU en proxy para destinos públicos (no-.onion):** Conforme a la Decisión D1, se mantuvo la pre-validación DNS/IP local en el servidor antes de entregar la petición al proxy. Existe una ventana teórica de TOCTOU si el registro DNS cambia entre la comprobación local y la conexión del proxy.
-2. **CSP `'unsafe-inline'`:** Se mantiene temporalmente en `style-src` y `script-src` para no romper la interfaz visual existente; su remoción está sujeta a la Etapa 2 mediante nonces criptográficos y refactorización CSS.
-3. **Cookies funcionales de preferencia:** Siguen operando para garantizar accesibilidad en entornos Zero-JS y Tor; su armonización en `PRIVACY.md` corresponde a la Etapa 2.
+1. **Riesgo TOCTOU y fuga DNS local en proxy para destinos públicos (no-.onion):** Conforme a la Decisión D1, se mantuvo la pre-validación DNS/IP local en el servidor antes de entregar la petición al proxy para evitar conexiones a redes privadas. Existe una ventana teórica de TOCTOU si el registro DNS cambia entre la comprobación local y la conexión del proxy, así como exposición de las consultas al resolvedor DNS local de la máquina anfitriona para dominios públicos.
+2. **Entorno de pruebas y alcance empírico:** Las validaciones de SOCKS y `.onion` se ejecutaron sobre un servidor SOCKS5 simulado local y mocks controlados; no constituyen una prueba en la red Tor viva ni certifican el comportamiento ante demonios `tor` mal configurados o latencias de red extremas.
+3. **CSP `'unsafe-inline'` y protección XSS:** Se mantiene temporalmente en `style-src` y `script-src` para no romper la interfaz visual existente. La protección del navegador frente a inyecciones XSS complejas sigue siendo débil mientras esta directiva no se reemplace por nonces criptográficos en la Etapa 2.
+4. **Cookies funcionales de preferencia:** Siguen operando para garantizar accesibilidad en entornos Zero-JS y Tor; su armonización en `PRIVACY.md` corresponde a la Etapa 2.
+5. **Especificidad del entorno:** El entorno local de ejecución utiliza una distribución rolling-release (Gentoo) con Python 3.14.6 experimental; estos resultados deben ser reproducidos en entornos estándar (Python 3.12 / 3.13) en etapas de CI/CD.
