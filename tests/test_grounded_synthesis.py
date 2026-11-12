@@ -6,7 +6,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from senda.ai.grounded_synthesis import GroundedSynthesizer, GroundedSynthesisResult
+from senda.synthesis.extractive import GroundedSynthesizer, GroundedSynthesisResult
 from senda.providers.base import SearchResultItem
 from senda.api.app import create_app
 from senda.indexer.storage import StorageEngine
@@ -40,7 +40,7 @@ def test_synthesis_refusal_when_no_items():
     res = synth.synthesize("quantum computing", [], force=True)
     assert res is not None
     assert res.is_refusal is True
-    assert "No se encontraron fuentes primarias suficientes" in res.summary
+    assert "No se encontraron documentos fuente suficientes" in res.summary
     assert len(res.citations) == 0
 
 
@@ -128,7 +128,7 @@ def test_api_synthesis_opt_in_renders_in_html(temp_storage):
     html = resp.text
 
     assert "grounded-answer-box" in html
-    assert "Síntesis Asistida de Procedencia" in html
+    assert "Síntesis Extractiva Atribuida" in html
     assert "Senda no certifica verdad ni emite veredictos propios" in html
 
 

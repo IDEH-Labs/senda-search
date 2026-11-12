@@ -226,3 +226,75 @@ def test_functional_cookies_contain_no_tracking_identifiers(client):
     # No cookies should be set for invalid theme or unsupported lang
     set_cookies = resp.headers.get_list("set-cookie")
     assert set_cookies == []
+
+
+def test_uvicorn_live_socket_proxy_headers_secure_cookie(tmp_path):
+    """Verify live Uvicorn TCP socket server honors X-Forwarded-Proto from localhost trusted proxy."""
+    import socket
+    import threading
+    import time
+    import httpx
+    import uvicorn
+
+    storage = StorageEngine(db_path=tmp_path / "live_uvicorn.db")
+    app = create_app(storage=storage, enable_federated_providers=False)
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+
+    config = uvicorn.Config(
+        app,
+        host="127.0.0.1",
+        port=port,
+        log_level="warning",
+        proxy_headers=True,
+        forwarded_allow_ips="127.0.0.1,::1",
+    )
+    server = uvicorn.Server(config=config)
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+
+    base_url = f"http://127.0.0.1:{port}"
+    for _ in range(40):
+        try:
+            with httpx.Client(timeout=1.0) as check_client:
+                r = check_client.get(f"{base_url}/")
+                if r.status_code == 200:
+                    break
+        except Exception:
+            time.sleep(0.1)
+
+    try:
+        with httpx.Client(base_url=base_url, timeout=5.0) as http_client:
+            # 1. Plain HTTP without proxy header: Secure flag must NOT be present
+            r1 = http_client.get("/?theme=dark&lang=es")
+            assert r1.status_code == 200
+            set_cookies_r1 = r1.headers.get_list("set-cookie")
+            theme_cookie_r1 = next(c for c in set_cookies_r1 if c.startswith("senda_theme="))
+            assert "Secure" not in theme_cookie_r1
+
+            # 2. Plain HTTP from localhost with X-Forwarded-Proto: https
+            r2 = http_client.get("/?theme=dark&lang=es", headers={"X-Forwarded-Proto": "https"})
+            assert r2.status_code == 200
+            set_cookies_r2 = r2.headers.get_list("set-cookie")
+            theme_cookie_r2 = next(c for c in set_cookies_r2 if c.startswith("senda_theme="))
+            assert "Secure" in theme_cookie_r2
+    finally:
+        server.should_exit = True
+        thread.join(timeout=3.0)
+
+
+def test_accessibility_doc_and_markdown_links_resolve():
+    """Verify that docs/ACCESSIBILITY.md exists and markdown links in README.md resolve cleanly (H13)."""
+    repo_root = Path(__file__).resolve().parent.parent
+    acc_doc = repo_root / "docs" / "ACCESSIBILITY.md"
+    assert acc_doc.exists(), "docs/ACCESSIBILITY.md does not exist"
+    content = acc_doc.read_text(encoding="utf-8")
+    assert "WCAG 2.1" in content
+    assert "Zero-JS" in content
+
+    readme = repo_root / "README.md"
+    assert readme.exists()
+    readme_text = readme.read_text(encoding="utf-8")
+    assert "docs/ACCESSIBILITY.md" in readme_text

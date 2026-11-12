@@ -90,8 +90,9 @@ class SendaSettings(BaseSettings):
     BLUESKY_ENABLED: bool = True
     BLUESKY_ENDPOINT: str = "https://api.bsky.app"
 
-    # Grounded AI Synthesis (Strictly disabled by default; never hallucinates; requires citations)
-    ENABLE_AI_SYNTHESIS: bool = False
+    # Grounded Extractive Synthesis (Strictly disabled by default; deterministic citations, zero generative hallucination)
+    ENABLE_EXTRACTIVE_SYNTHESIS: bool = False
+    ENABLE_AI_SYNTHESIS: bool = False  # Legacy backward-compatible alias
 
     # Regional & Language Defaults (Global por defecto; cero geolocalización invasiva)
     DEFAULT_REGION: str = "all"

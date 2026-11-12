@@ -526,9 +526,9 @@
     </aside>
     {% endif %}
 
-    <!-- Grounded AI Synthesis (Rendered only on explicit opt-in via ?synthesis=true) -->
+    <!-- Grounded Extractive Synthesis (Rendered only on explicit opt-in via ?synthesis=true) -->
     {% if grounded_synthesis %}
-    <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis de fuentes primarias">
+    <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis extractiva de documentos consultados">
         <div class="grounded-header">
             <span class="grounded-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -536,7 +536,7 @@
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                Síntesis Asistida de Procedencia
+                Síntesis Extractiva Atribuida
             </span>
             <span class="grounded-disclaimer">{{ grounded_synthesis.disclaimer }}</span>
         </div>
@@ -545,7 +545,7 @@
         </div>
         {% if grounded_synthesis.citations %}
         <div class="grounded-citations">
-            <span class="citations-title">Evidencia y fuentes primarias citadas:</span>
+            <span class="citations-title">Documentos fuente citados:</span>
             <ol class="citations-list">
                 {% for cit in grounded_synthesis.citations %}
                 <li id="cite-{{ cit.index }}" class="citation-item">

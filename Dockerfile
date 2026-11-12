@@ -2,14 +2,16 @@
 # SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
 # Reproducible, minimal, non-root container for Senda Search
-FROM python:3.12-slim-bookworm
+# Base image pinned to exact patch release for reproducible builds
+FROM python:3.12.9-slim-bookworm
 
 # Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     SENDA_DATA_DIR=/var/lib/senda \
     SENDA_SERVER_HOST=0.0.0.0 \
-    SENDA_SERVER_PORT=8000
+    SENDA_SERVER_PORT=8000 \
+    SENDA_FORWARDED_ALLOW_IPS=127.0.0.1,::1,172.16.0.0/12,10.0.0.0/8
 
 # Install build dependencies, sqlite3, and clean up apt cache in a single layer
 RUN apt-get update && \
@@ -27,12 +29,13 @@ RUN groupadd -r -g 10001 senda && \
 
 WORKDIR /app
 
-# Copy packaging specifications first for optimal layer caching
-COPY --chown=senda:senda pyproject.toml /app/
+# Copy packaging specifications and frozen lockfile for reproducible layer caching
+COPY --chown=senda:senda pyproject.toml requirements-lock.txt /app/
 
-# Install dependencies
+# Install exact pinned dependencies from lockfile
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -e "."
+    pip install --no-cache-dir -r requirements-lock.txt && \
+    pip install --no-cache-dir --no-deps -e "."
 
 # Copy application source code and configuration
 COPY --chown=senda:senda src/ /app/src/

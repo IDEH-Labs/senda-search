@@ -34,7 +34,7 @@ from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.providers.base import SearchResultItem
-from senda.ai.grounded_synthesis import GroundedSynthesizer
+from senda.synthesis.extractive import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
 from senda.calculator import evaluate_math_query
 from senda.providers.weather import WeatherProvider
