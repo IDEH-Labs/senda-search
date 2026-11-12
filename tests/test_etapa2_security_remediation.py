@@ -325,3 +325,21 @@ def test_proxy_cidr_range_trusted_and_untrusted(monkeypatch, tmp_path):
     theme_cookie_untrusted = next(c for c in cookies_untrusted if c.startswith("senda_theme="))
     assert "Secure" not in theme_cookie_untrusted
 
+
+def test_nginx_config_contract_no_double_csp_and_overwrites_proto():
+    """Verify Nginx configuration does not emit redundant Content-Security-Policy and overwrites X-Forwarded-Proto."""
+    repo_root = Path(__file__).resolve().parent.parent
+    nginx_conf = repo_root / "deploy" / "nginx" / "senda.conf"
+    assert nginx_conf.exists()
+    content = nginx_conf.read_text(encoding="utf-8")
+
+    # CSP must NOT be injected at Nginx level to prevent dual-CSP collision blocking inline nonced scripts
+    assert "add_header Content-Security-Policy" not in content
+
+    # HSTS must be present at Nginx level
+    assert "Strict-Transport-Security" in content
+
+    # X-Forwarded-Proto must be explicitly overwritten with $scheme
+    assert "proxy_set_header X-Forwarded-Proto $scheme;" in content
+
+
