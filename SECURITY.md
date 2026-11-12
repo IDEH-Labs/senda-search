@@ -19,7 +19,9 @@ Senda operates as both a web client (crawler/indexer) and a web server (search A
      - Carrier-Grade NAT (`100.64.0.0/10`)
      - Multicast (`224.0.0.0/4`, `ff00::/8`)
      - Broadcast and Reserved IP space
-   - Direct connection to the resolved, verified IP address with explicit TLS Server Name Indication (SNI) and HTTP `Host` headers to prevent DNS Rebinding.
+   - Direct connection to the resolved, verified IP address with explicit TLS Server Name Indication (SNI) and HTTP `Host` headers to prevent DNS Rebinding (`PinningNetworkBackend`).
+   - **Tor Special-Use Domain (`.onion`) Hardening:** Tor `.onion` destinations are strictly prohibited from direct resolution and direct TCP connections. They are blocked unconditionally unless an authorized SOCKS5/SOCKS5h proxy is configured. Direct DNS lookup is bypassed entirely for `.onion` to eliminate local DNS leakage, and destination addresses are never substituted with loopback IPs.
+   - **Proxy DNS Residual Risk:** When crawling through a proxy for non-`.onion` destinations, pre-flight DNS validation is retained (Decision D1), with the known residual risk of local DNS resolver exposure and potential TOCTOU between local pre-flight checks and proxy-side resolution.
 
 2. **Denial of Service (DoS) & Bomb Protection:**
    - Hard upper limit on payload size: maximum **2 MiB** per document.
@@ -45,9 +47,10 @@ Senda operates as both a web client (crawler/indexer) and a web server (search A
    - 100% parameterized SQLite queries. No dynamic string concatenation for FTS5 queries or schema modifications.
    - Strict sanitization and quoting of search terms for the FTS5 query parser.
 
-2. **Cross-Site Scripting (XSS) Prevention:**
+2. **Cross-Site Scripting (XSS) Prevention & Content Security Policy:**
    - HTML entity escaping for all search results, snippets, and user-supplied parameters.
-   - Strict Content Security Policy (`CSP`) blocking inline script execution (`'unsafe-inline'` disabled).
+   - Content Security Policy (`CSP`) restricting image origins strictly to `img-src 'self' data;` to prevent user IP leakage through third-party media.
+   - Note on script/style execution: inline scripts and styles currently utilize `'unsafe-inline'` for legacy templating compatibility, pending the comprehensive CSP and nonce migration scheduled for Etapa 2.
    - `X-Content-Type-Options: nosniff`.
    - `X-Frame-Options: DENY`.
 
