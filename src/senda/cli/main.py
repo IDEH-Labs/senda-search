@@ -209,11 +209,14 @@ def cmd_serve(args):
         or os.environ.get("FORWARDED_ALLOW_IPS")
         or settings.FORWARDED_ALLOW_IPS
     )
+    # Sovereign Privacy: Disable per-request query access logging to prevent storing queries in journald/disk
+    access_log = os.environ.get("SENDA_ACCESS_LOG", "false").lower() in ("true", "1", "yes")
     uvicorn.run(
         "senda.api.app:app",
         host=host,
         port=port,
         log_level="info",
+        access_log=access_log,
         proxy_headers=True,
         forwarded_allow_ips=forwarded_ips,
     )
