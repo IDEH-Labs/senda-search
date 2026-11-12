@@ -342,4 +342,17 @@ def test_nginx_config_contract_no_double_csp_and_overwrites_proto():
     # X-Forwarded-Proto must be explicitly overwritten with $scheme
     assert "proxy_set_header X-Forwarded-Proto $scheme;" in content
 
+    # Port 80 redirect must silence access logging to prevent real IP exposure
+    assert "access_log off;" in content
+
+    # Rate limiting violations must be at notice level so they are not written to warn-level error_log
+    assert "limit_req_log_level notice;" in content
+
+    # Sovereign privacy log format must use $uri without query parameters and drop referers
+    assert 'log_format sovereign_privacy \'0.0.0.0 - - [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "-"\' ;' in content or '$request_method $uri $server_protocol' in content
+
+    # Location blocks must consistently overwrite client IPs with 0.0.0.0
+    assert content.count('proxy_set_header X-Real-IP "0.0.0.0";') >= 3
+    assert content.count('proxy_set_header X-Forwarded-For "0.0.0.0";') >= 3
+
 

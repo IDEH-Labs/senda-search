@@ -40,6 +40,11 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
    Senda admite el envío de búsquedas a través de solicitudes HTTP `POST /search`, evitando que las palabras de búsqueda queden registradas en el historial local del navegador o en los logs de proxies intermediarios de la red.
 8. **Funcionalidad Completa sin JavaScript:**
    La consulta básica, los resultados paginados, los filtros y los atajos funcionan al 100% mediante HTML semántico y CSS estándar, garantizando accesibilidad y resistencia ante entornos con scripts deshabilitados por seguridad.
+9. **Arquitectura de Registros Transparentes (Server Logs Disclosure):**
+   - **Nginx `senda_access.log`:** Emplea el formato soberano `0.0.0.0 - - [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "-"`. La dirección IP se anonimiza forzosamente a `0.0.0.0`, la ruta se trunca a `$uri` (omitiendo parámetros de consulta `?q=...` para no almacenar términos de búsqueda en disco) y la cabecera `Referer` se sustituye por guion (`"-"`).
+   - **Nginx Redirección Puerto 80:** Se desactiva el registro de acceso (`access_log off;`) en el servidor de redirección hacia HTTPS para prevenir el almacenamiento involuntario de IPs en los registros globales del sistema.
+   - **Nginx `senda_error.log` y Limitación de Tasa:** El nivel de error está configurado en `warn;` y las alertas de `limit_req` se degradan a nivel `notice;`, garantizando que las denegaciones por exceso de tasa no registren la dirección IP del cliente en disco.
+   - **Servidor ASGI (Uvicorn) y Systemd (`journald`):** Senda desactiva el registro de acceso por petición (`access_log=False`) por defecto en la CLI de arranque, impidiendo que el journal del sistema operativo capture consultas de búsqueda en texto plano.
 
 ---
 
