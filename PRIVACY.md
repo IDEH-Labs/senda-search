@@ -26,7 +26,7 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
 4. **Gestión de Preferencias y Cookies Funcionales de Interfaz:**
    Para respetar la privacidad de las personas y garantizar la accesibilidad universal sin discriminación de entorno tecnológico:
    - **En navegadores con JavaScript:** Las preferencias seleccionadas (modo visual, idioma, región y filtros) se gestionan localmente en el cliente mediante `localStorage`.
-   - **En clientes sin JavaScript o en Tor Browser (modo *Safest*):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
+   - **En clientes con scripts inactivos o navegadores en modo estricto (como Tor Browser en nivel *Safest* para búsqueda básica):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
      * `senda_theme`: almacena exclusivamente el valor de tema (`"light"` o `"dark"`).
      * `senda_lang`: almacena exclusivamente el código de idioma (`"es"`, `"en"`, etc.).
      * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones directas HTTPS o detrás de proxy inverso (`X-Forwarded-Proto: https`, `Forwarded: proto=https`). El atributo `HttpOnly=False` se establece para permitir que clientes con JavaScript activo puedan sincronizar sus preferencias con `localStorage`; los clientes con JavaScript inactivo no dependen de esta lectura y transmiten sus opciones directamente mediante las cabeceras HTTP de cada petición.
