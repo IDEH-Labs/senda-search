@@ -16,7 +16,7 @@
         <li><strong>Cero registros de búsqueda (Zero Query Logs):</strong> Las consultas se procesan en la memoria volátil del servidor y se descartan inmediatamente tras entregar la respuesta. Ninguna búsqueda se almacena en disco ni en bases de datos.</li>
         <li><strong>Cero almacenamiento de direcciones IP:</strong> El servidor de Senda no asocia ni almacena la dirección IP de los usuarios con las búsquedas realizadas.</li>
         <li><strong>Cero cuentas y cero perfiles:</strong> No existe registro de usuarios, contraseñas, correos electrónicos ni identificadores persistentes. Cada petición es completamente anónima e independiente.</li>
-        <li><strong>Cero rastreadores y cero telemetría:</strong> Senda no incluye Google Analytics, Meta Pixel, ni scripts de telemetría de terceros. Cumple estrictamente con las directrices de <strong>GNU LibreJS</strong> y el nivel <strong>Safest</strong> de Tor Browser.</li>
+        <li><strong>Cero rastreadores y cero telemetría:</strong> Senda no incluye Google Analytics, Meta Pixel, ni scripts de telemetría de terceros. Diseñado con degradación funcional sin scripts y compatible con el nivel <strong>Safest</strong> de Tor Browser.</li>
         <li><strong>Cabeceras de protección estricta:</strong> Todas las respuestas HTTP fuerzan <code>Referrer-Policy: no-referrer</code> (para que los sitios a los que accedes no sepan de dónde vienes), <code>X-Frame-Options: DENY</code> y una estricta <code>Content-Security-Policy</code> sin recursos de CDNs externos.</li>
     </ul>
 
