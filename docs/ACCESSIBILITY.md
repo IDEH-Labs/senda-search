@@ -15,10 +15,10 @@ Senda está diseñado y auditado para cumplir y superar las pautas de las **Paut
 
 ## 2. Dimensiones Técnicas de Accesibilidad Implementadas
 
-### 2.1. Navegación sin JavaScript (Zero-JS) y Alcance Técnico
+### 2.1. Navegación sin JavaScript (Zero-JS con degradación funcional) y Alcance Técnico
 * **Resiliencia Operativa:** El flujo nuclear de búsqueda, paginación, filtros de categorías en la vista de resultados (`/search?q=...&category=...`), selección de idioma por URL y modo de lectura opera exclusivamente mediante HTML5 semántico estándar y peticiones HTTP GET/POST nativas sin requerir la ejecución de scripts.
 * **Limitación en Página de Inicio (`/`):** En la portada de inicio, los chips de cambio rápido de categoría (`.cat-chip`) son elementos `<button type="button">` vinculados a un manejador en `static/js/i18n.js` para alternar el campo oculto `category`. En entornos con JavaScript deshabilitado (como Tor Browser *Safest* o navegadores en modo texto), el formulario inicial se envía con la categoría general (`all`), pudiendo el usuario refinar la categoría en la página de resultados subsiguiente o mediante atajos (*bangs*, e.g., `!images`).
-* **Compatibilidad:** Compatible con **GNU LibreJS**, navegación en modo *Safest* de **Tor Browser**, navegadores en modo texto (`w3m`, `lynx`) y navegadores sin soporte para ECMAScript moderno.
+* **Compatibilidad:** Compatible con navegación en modo *Safest* de **Tor Browser**, navegadores en modo texto (`w3m`, `lynx`) y navegadores sin soporte para scripts.
 
 ### 2.2. Contraste y Modos de Visualización
 * **Relación de Contraste:** Todos los elementos de texto y componentes interactivos superan la relación de contraste mínima de **4.5:1** para texto normal y **3:1** para texto grande y elementos de interfaz de usuario.
@@ -49,7 +49,7 @@ Senda está diseñado y auditado para cumplir y superar las pautas de las **Paut
 
 | Dimensión Técnica | Criterio WCAG | Estado | Evidencia y Verificación en el Repositorio |
 | :--- | :--- | :--- | :--- |
-| **Operación Zero-JS** | 2.1.1 (A) | **Verificado** | Búsqueda, paginación, cambio de idioma y tema funcionan exclusivamente con formularios HTTP GET/POST nativos y HTML estándar sin requerir JavaScript. |
+| **Búsqueda sin JavaScript** | 2.1.1 (A) | **Parcialmente verificado** | Búsqueda principal, paginación y lectura funcionan con formularios HTTP GET nativos sin scripts. La selección inicial de categoría por chips en la portada y el guardado de preferencias en localStorage emplean mejora progresiva en JS. |
 | **Estructura Semántica** | 1.3.1 (A) | **Verificado** | Uso consistente de elementos semánticos de HTML5 (`<main>`, `<header>`, `<nav>`, `<section>`), jerarquía estricta de encabezados y controles de formulario con `<label for="...">` asociados. |
 | **Contraste de Paleta** | 1.4.3 / 1.4.11 (AA) | **Verificado** | Relación de contraste calculada matemáticamente en `static/css/main.css`: Modo Claro 17.5:1 (`#0f172a` sobre `#ffffff`), Modo Oscuro 16.8:1 (`#f1f5f9` sobre `#080c14`). |
 | **Indicadores de Foco** | 2.4.7 (AA) | **Verificado** | Reglas `:focus-visible` explícitas en CSS (`outline: 2px solid var(--accent)`) sin `outline: none` en elementos interactivos. |

@@ -61,7 +61,7 @@ Senda operates as both a web client (crawler/indexer) and a web server (search A
 3. **Referrer & Privacy Leakage Mitigation:**
    - `Referrer-Policy: no-referrer` on all responses and outgoing result links.
    - Direct outgoing links with `rel="noopener noreferrer"`. No click-tracking redirects.
-   - Functional cookies (`senda_theme`, `senda_lang`) carry `SameSite=Lax`, `Path=/`, `Max-Age=31536000`, and automatic `Secure` enforcement over direct HTTPS and behind reverse proxies (supporting `X-Forwarded-Proto: https` and RFC 7239 `Forwarded: proto=https`). `HttpOnly=False` is set strictly to allow optional client-side JavaScript synchronization when JS is enabled; Zero-JS environments do not rely on client-side cookie access and transmit preferences directly via HTTP request headers. Zero tracking cookies, zero session identifiers.
+   - Functional cookies (`senda_theme`, `senda_lang`) carry `SameSite=Lax`, `Path=/`, `Max-Age=31536000`, and automatic `Secure` enforcement over direct HTTPS and behind reverse proxies (supporting `X-Forwarded-Proto: https` and RFC 7239 `Forwarded: proto=https`). `HttpOnly=False` is set strictly to allow optional client-side JavaScript synchronization when JS is enabled; clients with JavaScript disabled do not rely on client-side cookie access and transmit preferences directly via HTTP request headers. Zero tracking cookies, zero session identifiers.
 
 ## 2. Reporting a Security Vulnerability
 

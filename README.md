@@ -15,7 +15,7 @@
 1. **Honestidad hacia el usuario:** Sin datos ocultos, sin explicaciones inventadas, sin sesgos disimulados.
 2. **Privacidad estricta:** Cero registro de consultas, cero almacenamiento de IP, cero cookies de seguimiento.
 3. **Utilidad de los resultados:** Fusión soberana y multi-proveedor con esquema normalizado.
-4. **Accesibilidad universal:** Cumplimiento estricto WCAG 2.2 nivel AA, soporte lector de pantalla, navegación 100% por teclado, funcional sin JavaScript.
+4. **Accesibilidad universal:** Cumplimiento WCAG 2.2 nivel AA, soporte para lectores de pantalla, navegación por teclado y degradación funcional para búsqueda sin JavaScript.
 5. **Velocidad y ligereza:** Presupuesto frontend <100 KB JS comprimido, LCP < 1,5 s en 4G.
 6. **Estética minimalista atemporal:** Jerarquía visual clara, densidad ajustable (cómoda/compacta), sin imitar marcas comerciales.
 

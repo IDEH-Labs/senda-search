@@ -26,10 +26,10 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
 4. **Gestión de Preferencias y Cookies Funcionales de Interfaz:**
    Para respetar la privacidad de las personas y garantizar la accesibilidad universal sin discriminación de entorno tecnológico:
    - **En navegadores con JavaScript:** Las preferencias seleccionadas (modo visual, idioma, región y filtros) se gestionan localmente en el cliente mediante `localStorage`.
-   - **En entornos sin JavaScript (Zero-JS, GNU LibreJS, Tor Browser en modo *Safest*):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
+   - **En clientes sin JavaScript o en Tor Browser (modo *Safest*):** El servidor emite dos cookies técnicas funcionales de preferencia de interfaz:
      * `senda_theme`: almacena exclusivamente el valor de tema (`"light"` o `"dark"`).
      * `senda_lang`: almacena exclusivamente el código de idioma (`"es"`, `"en"`, etc.).
-     * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones directas HTTPS o detrás de proxy inverso (`X-Forwarded-Proto: https`, `Forwarded: proto=https`). El atributo `HttpOnly=False` se establece para permitir que clientes con JavaScript activo puedan sincronizar sus preferencias con `localStorage`; los entornos en modo Zero-JS no dependen de esta lectura y transmiten sus opciones directamente mediante las cabeceras HTTP de cada petición.
+     * **Atributos técnicos:** `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año), con bandera `Secure` automática en conexiones directas HTTPS o detrás de proxy inverso (`X-Forwarded-Proto: https`, `Forwarded: proto=https`). El atributo `HttpOnly=False` se establece para permitir que clientes con JavaScript activo puedan sincronizar sus preferencias con `localStorage`; los clientes con JavaScript inactivo no dependen de esta lectura y transmiten sus opciones directamente mediante las cabeceras HTTP de cada petición.
      * **Finalidad exclusiva:** Mantener la coherencia visual y el idioma elegido al navegar o paginar resultados en clientes que no ejecutan scripts.
      * **Garantía estricta:** Estas cookies NO contienen identificadores de usuario, hashes de sesión, marcas temporales de rastreo ni datos personales. Jamás se emplean para correlacionar búsquedas ni se comparten con terceros.
 5. **Autocompletado Local:**
@@ -39,12 +39,15 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
 7. **Soporte de Búsqueda por POST:**
    Senda admite el envío de búsquedas a través de solicitudes HTTP `POST /search`, evitando que las palabras de búsqueda queden registradas en el historial local del navegador o en los logs de proxies intermediarios de la red.
 8. **Funcionalidad Completa sin JavaScript:**
-   La consulta básica, los resultados paginados, los filtros y los atajos funcionan al 100% mediante HTML semántico y CSS estándar, garantizando accesibilidad y resistencia ante entornos con scripts deshabilitados por seguridad.
+   La consulta básica, los resultados paginados, los filtros y los atajos operan mediante HTML semántico y CSS estándar, garantizando accesibilidad y resistencia ante entornos con scripts deshabilitados por seguridad.
+   
+   La portada utiliza JavaScript progresivo ligero para el cambio rápido de categorías mediante chips y atajos de teclado locales; en caso de no disponer de scripts, la búsqueda general procesa y envía la consulta directamente mediante formularios HTTP nativos.
 9. **Arquitectura de Registros Transparentes (Server Logs Disclosure):**
    - **Nginx `senda_access.log`:** Emplea el formato soberano `0.0.0.0 - - [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "-"`. La dirección IP se anonimiza forzosamente a `0.0.0.0`, la ruta se trunca a `$uri` (omitiendo parámetros de consulta `?q=...` para no almacenar términos de búsqueda en disco) y la cabecera `Referer` se sustituye por guion (`"-"`).
    - **Nginx Redirección Puerto 80:** Se desactiva el registro de acceso (`access_log off;`) en el servidor de redirección hacia HTTPS para prevenir el almacenamiento involuntario de IPs en los registros globales del sistema.
    - **Nginx `senda_error.log` y Limitación de Tasa:** El nivel de error está configurado en `warn;` y las alertas de `limit_req` se degradan a nivel `notice;`, garantizando que las denegaciones por exceso de tasa no registren la dirección IP del cliente en disco.
    - **Servidor ASGI (Uvicorn) y Systemd (`journald`):** Senda desactiva el registro de acceso por petición (`access_log=False`) por defecto en la CLI de arranque, impidiendo que el journal del sistema operativo capture consultas de búsqueda en texto plano.
+   - **Divulgación de Registro Histórico y Remediación:** Durante la fase de despliegue inicial previa a la implementación de mitigaciones de privacidad (entre el 9 de noviembre a las 04:20 UTC y el 12 de noviembre a las 14:00 UTC), la salida estándar del servidor de aplicaciones registró peticiones HTTP con términos de búsqueda en `journald` (con IP de cliente anonimizada a `0.0.0.0:0`), y los registros rotados de Nginx anteriores a la fecha conservaron cadenas completas de solicitud. El registro de peticiones en Uvicorn quedó completamente silenciado a partir del 12 de noviembre a las 14:00 UTC, el formato de Nginx fue restringido a `$uri` sin parámetros, y se estableció la política de purga definitiva de los registros históricos del servidor el 13 de noviembre de 2026.
 
 ---
 
@@ -53,7 +56,7 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
 - ❌ **NO registra consultas de búsqueda (*Zero Query Logging*):** Las consultas se procesan en la memoria volátil del proceso durante el ciclo de vida de la petición HTTP y nunca se escriben en disco, bases de datos o archivos de registro.
 - ❌ **NO almacena direcciones IP:** Las direcciones IP de conexión son descartadas o enmascaradas inmediatamente a nivel de servidor web y aplicación.
 - ❌ **NO crea perfiles de comportamiento:** Senda no rastrea sesiones repetidas, no crea identidades de usuario, ni correlaciona búsquedas a lo largo del tiempo.
-- ❌ **NO utiliza cookies de seguimiento, analítica ni de terceros:** Cero cookies de sesión de rastreo, cero cookies analíticas, cero píxeles de seguimiento. Únicamente se utilizan las dos cookies técnicas funcionales de interfaz descritas en el numeral 4 para navegación Zero-JS.
+- ❌ **NO utiliza cookies de seguimiento, analítica ni de terceros:** Cero cookies de sesión de rastreo, cero cookies analíticas, cero píxeles de seguimiento. Únicamente se utilizan las dos cookies técnicas funcionales de interfaz descritas en el numeral 4 para persistencia técnica en clientes sin JavaScript.
 - ❌ **NO incluye analítica de terceros ni balizas (*web beacons*):** Cero Google Analytics, cero píxeles de Meta, cero scripts de telemetría remota.
 - ❌ **NO realiza cargas automáticas de recursos o imágenes remotas:** Las páginas de resultados no cargan miniaturas ni elementos multimedia directamente desde servidores de terceros (evitando que los servidores de origen capturen la IP del usuario). Se emplean marcadores visuales locales y enlaces directos explícitos. La política de seguridad CSP restringe estrictamente el origen de imágenes a `img-src 'self' data:`.
 - ❌ **NO depende de CDNs externas:** Todos los estilos, tipografías SVG y scripts se sirven localmente desde el propio servidor de Senda, impidiendo que terceros rastreen las descargas de recursos.
@@ -103,7 +106,7 @@ Para garantizar que las consultas de búsqueda habituales no se filtren a nodos 
 1. **Desactivada por Defecto:** La síntesis asistida se encuentra inactiva en la configuración estándar del servidor (`ENABLE_AI_SYNTHESIS=False`).
 2. **Fundamentación Estricta (*Grounded*):** Si se activa explícitamente, Senda prohíbe categóricamente generar afirmaciones sin respaldo. Toda afirmación debe citar obligatoriamente `[1]`, `[2]` vinculando al documento primario recuperado en la consulta.
 3. **Rechazo Ético por Falta de Evidencia:** Si los resultados recuperados son insuficientes o no responden con certeza a la consulta, el sistema se rehúsa formalmente a responder en lugar de especular o inventar respuestas.
-4. **Compatibilidad Total LibreJS y Tor Browser:** Se procesa y renderiza al 100% en el servidor mediante HTML semántico nativo (`<aside>`), funcionando sin una sola línea de JavaScript privativo y sin telemetría.
+4. **Procesamiento del Lado del Servidor y Tor Browser:** La síntesis se genera y renderiza en el servidor mediante HTML semántico (`<aside>`), legible sin requerir JavaScript privativo ni telemetría.
 
 ---
 
