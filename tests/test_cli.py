@@ -166,6 +166,7 @@ def test_cli_list_niches(monkeypatch, capsys):
     assert "academic" in captured.out
     assert "iberoamerica_media" in captured.out
     assert "libre_software" in captured.out
+    assert "global_gov_data" in captured.out
 
 
 def test_cli_crawl_niche_mocked(monkeypatch, capsys):
@@ -178,6 +179,43 @@ def test_cli_crawl_niche_mocked(monkeypatch, capsys):
         assert "Iniciando rastreo de nicho" in captured.out
         assert "tech_docs" in captured.out
         assert "Se indexaron/actualizaron exitosamente 3 documentos" in captured.out
+
+
+def test_cli_crawl_global_gov_data_niche_mocked(monkeypatch, capsys):
+    """Verify senda crawl-niche global_gov_data triggers CrawlerRunner."""
+    from unittest.mock import AsyncMock
+    monkeypatch.setattr(sys, "argv", ["senda", "crawl-niche", "global_gov_data", "--max-pages", "10", "--max-depth", "1"])
+    with patch("senda.crawler.runner.CrawlerRunner.crawl_seeds", new=AsyncMock(return_value=12)):
+        main()
+        captured = capsys.readouterr()
+        assert "Iniciando rastreo de nicho" in captured.out
+        assert "global_gov_data" in captured.out
+        assert "Se indexaron/actualizaron exitosamente 12 documentos" in captured.out
+
+
+def test_global_gov_data_seed_coverage():
+    """Verify global_gov_data covers multilateral federators and diverse continents."""
+    from senda.crawler.seeds import get_niche_seeds, NICHE_DEFINITIONS
+    assert "global_gov_data" in NICHE_DEFINITIONS
+    seeds = get_niche_seeds("global_gov_data")
+    assert len(seeds) >= 70
+    countries = {s.country_code for s in seeds if s.country_code}
+    # Verify diverse continents are present
+    assert {"US", "CA", "MX", "CO", "BR", "AR", "CL"}.issubset(countries)
+    assert {"ES", "FR", "DE", "GB", "IT", "PT", "NL", "SE"}.issubset(countries)
+    assert {"JP", "IN", "KR", "SG", "ID", "AE", "SA"}.issubset(countries)
+    assert {"ZA", "NG", "KE", "MA", "GH", "RW"}.issubset(countries)
+    assert {"AU", "NZ"}.issubset(countries)
+    # Verify universal multilateral federators
+    multilateral = [s for s in seeds if s.category == "gobierno_multilateral"]
+    assert len(multilateral) >= 8
+    multi_domains = {s.domain for s in multilateral}
+    assert "data.un.org" in multi_domains
+    assert "data.worldbank.org" in multi_domains
+    assert "data.who.int" in multi_domains
+    assert "dataportal.opendataforafrica.org" in multi_domains
+    assert "data.europa.eu" in multi_domains
+
 
 
 

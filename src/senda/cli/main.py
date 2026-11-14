@@ -308,7 +308,7 @@ def main():
 
     # Command: crawl-niche
     p_cniche = subparsers.add_parser("crawl-niche", help="Crawl a curated high-value niche")
-    p_cniche.add_argument("niche", choices=["tech_docs", "academic", "iberoamerica_media", "libre_software", "all"], help="Strategic niche to crawl")
+    p_cniche.add_argument("niche", choices=list(get_available_niches().keys()) + ["all"], help="Strategic niche to crawl")
     p_cniche.add_argument("--max-pages", type=int, default=25, help="Max documents to index (default: 25)")
     p_cniche.add_argument("--max-depth", type=int, default=1, help="Max link hop depth (default: 1)")
     p_cniche.add_argument("--concurrency", type=int, default=3, help="Concurrent domain workers (default: 3)")
