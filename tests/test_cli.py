@@ -219,6 +219,61 @@ def test_global_gov_data_seed_coverage():
     assert "data.europa.eu" in multi_domains
 
 
+def test_expanded_strategic_niches_coverage():
+    """Verify all 10 strategic niches are properly registered with valid seeds."""
+    from senda.crawler.seeds import get_available_niches, get_niche_seeds
+
+    niches = get_available_niches()
+    expected_niches = {
+        "tech_docs", "academic", "iberoamerica_media", "libre_software", "global_gov_data",
+        "open_libraries", "space_astronomy", "ai_open_computing", "health_biomedicine", "education_oer"
+    }
+    assert expected_niches.issubset(set(niches.keys()))
+
+    # Verify Open Libraries niche
+    lib_seeds = get_niche_seeds("open_libraries")
+    assert len(lib_seeds) >= 8
+    lib_domains = {s.domain for s in lib_seeds}
+    assert "gutenberg.org" in lib_domains
+    assert "openlibrary.org" in lib_domains
+    assert "bdh.bne.es" in lib_domains
+    assert "europeana.eu" in lib_domains
+
+    # Verify Space & Astronomy niche
+    space_seeds = get_niche_seeds("space_astronomy")
+    assert len(space_seeds) >= 7
+    space_domains = {s.domain for s in space_seeds}
+    assert "data.nasa.gov" in space_domains
+    assert "esa.int" in space_domains
+    assert "eso.org" in space_domains
+    assert "webbtelescope.org" in space_domains
+
+    # Verify AI & Open Computing niche
+    ai_seeds = get_niche_seeds("ai_open_computing")
+    assert len(ai_seeds) >= 5
+    ai_domains = {s.domain for s in ai_seeds}
+    assert "arxiv.org" in ai_domains
+    assert "paperswithcode.com" in ai_domains
+    assert "huggingface.co" in ai_domains
+
+    # Verify Health & Biomedicine niche
+    health_seeds = get_niche_seeds("health_biomedicine")
+    assert len(health_seeds) >= 5
+    health_domains = {s.domain for s in health_seeds}
+    assert "ncbi.nlm.nih.gov" in health_domains
+    assert "medlineplus.gov" in health_domains
+    assert "cochranelibrary.com" in health_domains
+
+    # Verify Education & OER niche
+    edu_seeds = get_niche_seeds("education_oer")
+    assert len(edu_seeds) >= 5
+    edu_domains = {s.domain for s in edu_seeds}
+    assert "openstax.org" in edu_domains
+    assert "ocw.mit.edu" in edu_domains
+    assert "oercommons.org" in edu_domains
+
+
+
 
 
 

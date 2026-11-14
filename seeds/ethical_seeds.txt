@@ -274,3 +274,43 @@ https://tongastats.gov.to/
 https://tuvalustats.gov.tv/
 https://vnso.gov.vu/
 https://presidence.gov.bi/
+# Bibliotecas Abiertas y Patrimonio Bibliográfico
+https://www.gutenberg.org/
+https://openlibrary.org/
+https://www.europeana.eu/
+https://bdh.bne.es/
+https://www.cervantesvirtual.com/
+https://dp.la/
+https://gallica.bnf.fr/
+https://bibdigital.rjb.csic.es/
+https://www.bibliotecadigitaldebogota.gov.co/
+# Exploración Espacial y Astrofísica
+https://data.nasa.gov/
+https://science.nasa.gov/
+https://www.esa.int/Science_Exploration
+https://www.eso.org/public/
+https://webbtelescope.org/
+https://www.almaobservatory.org/
+https://arxiv.org/archive/astro-ph
+https://global.jaxa.jp/
+# Inteligencia Artificial y Computación Abierta
+https://arxiv.org/corr/cs.AI
+https://paperswithcode.com/
+https://huggingface.co/papers
+https://aclanthology.org/
+https://mlcommons.org/
+https://www.eleuther.ai/
+# Salud Pública y Biomedicina Abierta
+https://www.ncbi.nlm.nih.gov/pmc/
+https://medlineplus.gov/spanish/
+https://www.cochranelibrary.com/
+https://www.paho.org/es
+https://scielosp.org/
+https://www.who.int/publications
+# Educación y Recursos Educativos Abiertos (OER)
+https://openstax.org/
+https://ocw.mit.edu/
+https://www.oercommons.org/
+https://www.unesco.org/en/education
+https://libretexts.org/
+https://iedra.uned.es/
