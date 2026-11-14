@@ -22,6 +22,7 @@ from senda.config import settings
 from senda.providers.base import SearchProvider, SearchResultItem, AIProvenance
 
 
+# Supported languages configuration mapping
 NEWS_LANG_CONFIG: Dict[str, Dict[str, str]] = {
     "ar": {"hl": "ar", "gl": "SA", "ceid": "SA:ar"},
     "de": {"hl": "de", "gl": "DE", "ceid": "DE:de"},
@@ -70,6 +71,22 @@ VERIFIED_DIRECT_FEEDS: Dict[str, List[Dict[str, str]]] = {
     "pt": [
         {"name": "BBC Brasil", "url": "https://feeds.bbci.co.uk/portuguese/rss.xml", "domain": "bbc.com"},
         {"name": "DW Brasil", "url": "https://rss.dw.com/rdf/rss-br-all", "domain": "dw.com"},
+    ],
+    "ru": [
+        {"name": "DW Russian", "url": "https://rss.dw.com/rdf/rss-ru-all", "domain": "dw.com"},
+        {"name": "BBC Russian", "url": "https://feeds.bbci.co.uk/russian/rss.xml", "domain": "bbc.com"},
+    ],
+    "ar": [
+        {"name": "BBC Arabic", "url": "https://feeds.bbci.co.uk/arabic/rss.xml", "domain": "bbc.com"},
+        {"name": "DW Arabic", "url": "https://rss.dw.com/rdf/rss-ar-all", "domain": "dw.com"},
+        {"name": "France 24 Arabic", "url": "https://www.france24.com/ar/rss", "domain": "france24.com"},
+    ],
+    "zh": [
+        {"name": "BBC Chinese", "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml", "domain": "bbc.com"},
+        {"name": "DW Chinese", "url": "https://rss.dw.com/rdf/rss-chi-all", "domain": "dw.com"},
+    ],
+    "ja": [
+        {"name": "BBC Japanese", "url": "https://feeds.bbci.co.uk/japanese/rss.xml", "domain": "bbc.com"},
     ],
 }
 
@@ -212,17 +229,6 @@ class RealTimeNewsProvider(SearchProvider):
 
         # Resolve language configuration (defaulting to Spanish or provider default)
         target_lang = (lang or self.lang or "es").split("-")[0].lower()
-        lang_cfg = NEWS_LANG_CONFIG.get(target_lang, NEWS_LANG_CONFIG["es"])
-        hl = lang_cfg["hl"]
-        gl = lang_cfg["gl"]
-        ceid = lang_cfg["ceid"]
-
-        # Optional region/country override
-        gl_override = (region or self.region or "").upper().strip()
-        if len(gl_override) == 2 and gl_override not in ("AL", "ALL", "GLOBAL", ""):
-            gl = gl_override
-            ceid = f"{gl}:{hl}"
-
         headers = {
             "User-Agent": settings.USER_AGENT,
             "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml",
@@ -236,29 +242,16 @@ class RealTimeNewsProvider(SearchProvider):
                 direct_items = await self.search_direct_feeds(
                     query=clean_q,
                     lang=target_lang,
-                    max_feeds=15,
+                    max_feeds=20,
                     client=client,
                 )
                 items.extend(direct_items)
 
-                # 2. Only if direct feeds returned no results for a specific query, try GDELT open research
+                # 2. Only if direct feeds returned no results for a specific query, search open research news (GDELT)
                 if not items and clean_q:
                     try:
                         gdelt_items = await self.search_gdelt(clean_q, lang=target_lang, page_size=page_size, sort=sort, client=client)
                         items.extend(gdelt_items)
-                    except Exception:
-                        pass
-
-                # 3. Last-resort fallback for niche/long-tail search queries with zero direct matches
-                if not items and clean_q:
-                    try:
-                        query_with_time = _resolve_time_query(clean_q, time_filter)
-                        encoded_q = urllib.parse.quote_plus(query_with_time)
-                        feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={hl}&gl={gl}&ceid={ceid}"
-                        resp = await client.get(feed_url, headers=headers)
-                        if resp.status_code == 200:
-                            syn_items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
-                            items.extend(syn_items)
                     except Exception:
                         pass
         except Exception:
@@ -346,9 +339,12 @@ class RealTimeNewsProvider(SearchProvider):
                 snippet = clean_desc
 
             # Strict Ethical Policy & Verifiable Navigation:
-            # Preserve genuine article navigation so users reach the specific news reporting,
-            # while maintaining canonical attribution to the verified publisher domain.
+            # Preserve genuine direct article navigation so users reach the specific news reporting.
+            # Strictly filter out any Google News tracking redirect if ever encountered.
             article_url = link.strip() if link else ""
+            if "news.google.com" in article_url:
+                article_url = source_url or (f"https://{source_domain}" if source_domain else "")
+
             safe_url = article_url or source_url or (f"https://{source_domain}" if source_domain else "")
             canonical_url = source_url or (f"https://{source_domain}" if source_domain else "")
 
@@ -369,10 +365,10 @@ class RealTimeNewsProvider(SearchProvider):
                     content_type="noticia",
                     published_date=iso_date,
                     authors=[source_name],
-                    provider_origin="Prensa Abierta",
+                    provider_origin="Prensa Abierta Directa",
                     why_seen=(
                         f"Noticia en tiempo real del medio verificado «{source_name}» ({source_domain or 'prensa'}). "
-                        f"Consulta con aislamiento estricto de privacidad (no-referrer y noopener) para proteger tu navegación."
+                        f"Consulta directa y limpia sin intermediarios corporativos ni pasarelas de seguimiento."
                     ),
                     ai_provenance=AIProvenance(declared_signal=None, status="no determinado"),
                 )

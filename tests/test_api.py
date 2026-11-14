@@ -667,6 +667,7 @@ def test_news_results_strictly_strip_google_tracking_redirects(tmp_path):
         assert len(items) > 0, "Must return news items from fixture"
 
         for it in items:
+            assert "news.google.com" not in it["url"], f"Google News URL detected in item: {it['url']}"
             assert it["domain"] != "news.google.com", f"Invalid domain: {it['domain']}"
             assert it["canonical_url"] is not None
             assert "news.google.com" not in it["canonical_url"]
