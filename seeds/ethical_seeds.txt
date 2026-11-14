@@ -272,3 +272,4 @@ https://statistics.gov.sb/
 https://tongastats.gov.to/
 https://tuvalustats.gov.tv/
 https://vnso.gov.vu/
+https://presidence.gov.bi/

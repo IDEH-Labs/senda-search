@@ -165,6 +165,9 @@ NAVIGATIONAL_DIRECTORY: Dict[str, Tuple[str, str, str]] = {
     "moncloa": ("https://www.lamoncloa.gob.es/", "La Moncloa", "Portal oficial de la Presidencia del Gobierno de España."),
     "gob.mx": ("https://www.gob.mx/", "Gobierno de México", "Portal oficial del Gobierno de México."),
     "argentina.gob.ar": ("https://www.argentina.gob.ar/", "Argentina.gob.ar", "Portal oficial del Estado argentino."),
+    "burundi": ("https://presidence.gov.bi/", "Présidence de la République du Burundi", "Portal oficial de la Presidencia del Estado de Burundi."),
+    "presidence burundi": ("https://presidence.gov.bi/", "Présidence de la République du Burundi", "Portal oficial de la Presidencia del Estado de Burundi."),
+    "presidence.gov.bi": ("https://presidence.gov.bi/", "Présidence de la République du Burundi", "Portal oficial de la Presidencia de la República de Burundi."),
 }
 
 

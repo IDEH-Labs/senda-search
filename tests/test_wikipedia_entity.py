@@ -139,3 +139,38 @@ def test_api_renders_entity_card_in_html(temp_storage, einstein_fixture):
         assert data["entity_card"] is not None
         assert data["entity_card"]["title"] == "Albert Einstein"
         assert data["entity_card"]["wikibase_item"] == "Q937"
+
+
+@pytest.mark.asyncio
+async def test_burundi_official_website_override():
+    """Verify that sovereign entity Burundi (Q967) uses the verified official portal presidence.gov.bi."""
+    from senda.ranking.navigational import NavigationalEngine
+    provider = WikipediaEntityProvider()
+
+    summary_fixture = {
+        "title": "Burundi",
+        "extract": "Burundi es un Estado soberano en África Oriental.",
+        "description": "país de África Oriental",
+        "content_urls": {
+            "desktop": {"page": "https://es.wikipedia.org/wiki/Burundi"},
+            "mobile": {"page": "https://es.m.wikipedia.org/wiki/Burundi"}
+        },
+        "wikibase_item": "Q967"
+    }
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = summary_fixture
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = mock_resp
+        card = await provider.get_entity("Burundi", lang="es", fetch_official_website=True)
+
+    assert card is not None
+    assert card.official_website == "https://presidence.gov.bi/"
+
+    # Also test NavigationalEngine instant direct query
+    nav = NavigationalEngine.resolve("burundi")
+    assert nav is not None
+    assert nav.url == "https://presidence.gov.bi/"
+    assert "Burundi" in nav.title

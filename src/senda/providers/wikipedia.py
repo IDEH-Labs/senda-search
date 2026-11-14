@@ -37,6 +37,12 @@ class WikipediaEntityCard(BaseModel):
     official_website: Optional[str] = Field(default=None, description="Official verified website URL")
 
 
+# Verified sovereign and institutional website corrections where Wikidata P856 has dead, broken or obsolete URLs
+SOVEREIGN_OFFICIAL_WEBSITES: Dict[str, str] = {
+    "Q967": "https://presidence.gov.bi/",  # Burundi (Wikidata P856 has obsolete http://www.burundi-gov.bi/)
+}
+
+
 class WikipediaEntityProvider:
     """Fetches and caches encyclopedic entities on demand with zero tracking."""
 
@@ -138,19 +144,22 @@ class WikipediaEntityProvider:
                     data = resp.json()
                     card = self.parse_summary(data, lang=lang)
                     if fetch_official_website and card and card.wikibase_item:
-                        try:
-                            wb_url = f"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={card.wikibase_item}&property=P856&format=json"
-                            wb_resp = await client.get(wb_url, headers=headers)
-                            if wb_resp.status_code == 200:
-                                wb_data = wb_resp.json()
-                                claims = wb_data.get("claims", {}).get("P856", [])
-                                for c in claims:
-                                    val = c.get("mainsnak", {}).get("datavalue", {}).get("value")
-                                    if isinstance(val, str) and (val.startswith("http://") or val.startswith("https://")):
-                                        card.official_website = val
-                                        break
-                        except Exception:
-                            pass
+                        if card.wikibase_item in SOVEREIGN_OFFICIAL_WEBSITES:
+                            card.official_website = SOVEREIGN_OFFICIAL_WEBSITES[card.wikibase_item]
+                        else:
+                            try:
+                                wb_url = f"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={card.wikibase_item}&property=P856&format=json"
+                                wb_resp = await client.get(wb_url, headers=headers)
+                                if wb_resp.status_code == 200:
+                                    wb_data = wb_resp.json()
+                                    claims = wb_data.get("claims", {}).get("P856", [])
+                                    for c in claims:
+                                        val = c.get("mainsnak", {}).get("datavalue", {}).get("value")
+                                        if isinstance(val, str) and (val.startswith("http://") or val.startswith("https://")):
+                                            card.official_website = val
+                                            break
+                            except Exception:
+                                pass
                     self._cache_set(cache_key, card)
                     return card
                 elif resp.status_code == 404:

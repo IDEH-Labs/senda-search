@@ -2613,6 +2613,16 @@ NICHE_SEEDS: dict[str, List[SeedDefinition]] = {
             country_code="BF",
         ),
         SeedDefinition(
+            id="gov-bi-presidence",
+            url="https://presidence.gov.bi/",
+            domain="presidence.gov.bi",
+            organization="Présidence de la République du Burundi",
+            category="datos_publicos",
+            license_hint="Portal Oficial / Datos Abiertos",
+            why_included="Portal oficial de la Presidencia y Gobierno de la República de Burundi.",
+            country_code="BI",
+        ),
+        SeedDefinition(
             id="gov-bi-isteebu",
             url="https://isteebu.bi/",
             domain="isteebu.bi",
