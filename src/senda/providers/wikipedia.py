@@ -227,21 +227,24 @@ class WikipediaEntityProvider:
                     alt_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{alt_title}"
                     resp = await client.get(alt_url, headers=headers)
 
-                # Fallback to offline vocabulary suggestion for single-letter typos
+                # Fallback to offline vocabulary suggestion for single-letter typos and aliases
                 if resp.status_code == 404 and len(clean_q) >= 4:
                     try:
                         from senda.ranking.suggestions import SuggestionEngine, damerau_levenshtein_distance
                         vocab = SuggestionEngine.get_offline_vocabulary()
                         q_lower = clean_q.lower()
                         best_match = None
-                        best_d = 999
-                        max_d = 1 if len(q_lower) < 7 else 2
-                        for term, display in vocab.items():
-                            if abs(len(term) - len(q_lower)) <= max_d:
-                                d = damerau_levenshtein_distance(q_lower, term)
-                                if 0 < d <= max_d and d < best_d:
-                                    best_d = d
-                                    best_match = display
+                        if q_lower in vocab and vocab[q_lower].lower() != q_lower:
+                            best_match = vocab[q_lower]
+                        else:
+                            best_d = 999
+                            max_d = 1 if len(q_lower) < 7 else 2
+                            for term, display in vocab.items():
+                                if abs(len(term) - len(q_lower)) <= max_d:
+                                    d = damerau_levenshtein_distance(q_lower, term)
+                                    if d <= max_d and d < best_d and display.lower() != q_lower:
+                                        best_d = d
+                                        best_match = display
                         if best_match:
                             sugg_title = urllib.parse.quote(best_match.replace(" ", "_"))
                             sugg_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{sugg_title}"

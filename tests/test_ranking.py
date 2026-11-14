@@ -290,3 +290,21 @@ def test_navigational_typo_tolerance():
     assert "google.com" in nav_gogle.url
 
 
+@pytest.mark.asyncio
+async def test_phonetic_aliases_tricky_names():
+    """Verify that tricky foreign and celebrity names with phonetic spellings suggest correctly."""
+    from senda.ranking.suggestions import SuggestionEngine
+
+    engine = SuggestionEngine()
+    # 1. Phonetic Spanish spelling for Arnold Schwarzenegger
+    assert await engine.suggest("arnol suazeneige") == "Arnold Schwarzenegger"
+    assert await engine.suggest("suazeneige") == "Arnold Schwarzenegger"
+
+    # 2. Phonetic Spanish spelling for Friedrich Nietzsche
+    assert await engine.suggest("niche") == "Friedrich Nietzsche"
+
+    # 3. Phonetic Spanish spelling for William Shakespeare
+    assert await engine.suggest("sekspir") == "William Shakespeare"
+
+
+

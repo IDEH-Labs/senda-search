@@ -126,6 +126,95 @@ class SuggestionEngine:
             "library": "Library",
         }
 
+        # High-frequency historical, scientific, and cultural personalities with difficult or foreign spellings
+        tricky_figures: Dict[str, str] = {
+            # Arnold Schwarzenegger
+            "arnold schwarzenegger": "Arnold Schwarzenegger",
+            "arnol schwarzenegger": "Arnold Schwarzenegger",
+            "arnold schwarzeneger": "Arnold Schwarzenegger",
+            "schwarzenegger": "Arnold Schwarzenegger",
+            "schwarzeneger": "Arnold Schwarzenegger",
+            "suarzeneger": "Arnold Schwarzenegger",
+            "suaseneguer": "Arnold Schwarzenegger",
+            "arnol suazeneige": "Arnold Schwarzenegger",
+            "suazeneige": "Arnold Schwarzenegger",
+            "chuarzeneger": "Arnold Schwarzenegger",
+            "swarzeneger": "Arnold Schwarzenegger",
+            # William Shakespeare
+            "william shakespeare": "William Shakespeare",
+            "shakespeare": "William Shakespeare",
+            "sekspir": "William Shakespeare",
+            "chespir": "William Shakespeare",
+            "shakespere": "William Shakespeare",
+            # Friedrich Nietzsche
+            "friedrich nietzsche": "Friedrich Nietzsche",
+            "nietzsche": "Friedrich Nietzsche",
+            "niche": "Friedrich Nietzsche",
+            "nieche": "Friedrich Nietzsche",
+            "nietzche": "Friedrich Nietzsche",
+            # Fiódor Dostoievski
+            "fiodor dostoievski": "Fiódor Dostoievski",
+            "dostoievski": "Fiódor Dostoievski",
+            "dostoevski": "Fiódor Dostoievski",
+            "dostoyevski": "Fiódor Dostoievski",
+            "dostoevsky": "Fiódor Dostoievski",
+            # Piotr Ilich Chaikovski
+            "piotr ilich chaikovski": "Piotr Ilich Chaikovski",
+            "chaikovski": "Piotr Ilich Chaikovski",
+            "tchaikovsky": "Piotr Ilich Chaikovski",
+            "tchaikovski": "Piotr Ilich Chaikovski",
+            # Arthur Schopenhauer
+            "arthur schopenhauer": "Arthur Schopenhauer",
+            "schopenhauer": "Arthur Schopenhauer",
+            "chopenjauer": "Arthur Schopenhauer",
+            # Benedict Cumberbatch
+            "benedict cumberbatch": "Benedict Cumberbatch",
+            "cumberbatch": "Benedict Cumberbatch",
+            "camberbach": "Benedict Cumberbatch",
+            # Matthew McConaughey
+            "matthew mcconaughey": "Matthew McConaughey",
+            "mcconaughey": "Matthew McConaughey",
+            "maconajiu": "Matthew McConaughey",
+            "mcconajiu": "Matthew McConaughey",
+            # Keanu Reeves
+            "keanu reeves": "Keanu Reeves",
+            "kianu rivs": "Keanu Reeves",
+            "keanu rivs": "Keanu Reeves",
+            # Quentin Tarantino
+            "quentin tarantino": "Quentin Tarantino",
+            "tarantino": "Quentin Tarantino",
+            # Scarlett Johansson
+            "scarlett johansson": "Scarlett Johansson",
+            "scarlet johansson": "Scarlett Johansson",
+            "escarlet johanson": "Scarlett Johansson",
+            # Marilyn Monroe
+            "marilyn monroe": "Marilyn Monroe",
+            "merilin monro": "Marilyn Monroe",
+            # Leonardo DiCaprio
+            "leonardo dicaprio": "Leonardo DiCaprio",
+            "dicaprio": "Leonardo DiCaprio",
+            "decaprio": "Leonardo DiCaprio",
+            # Vincent van Gogh
+            "vincent van gogh": "Vincent van Gogh",
+            "van gogh": "Vincent van Gogh",
+            "van gog": "Vincent van Gogh",
+            # Ludwig van Beethoven
+            "ludwig van beethoven": "Ludwig van Beethoven",
+            "beethoven": "Ludwig van Beethoven",
+            "betoven": "Ludwig van Beethoven",
+            # Wolfgang Amadeus Mozart
+            "wolfgang amadeus mozart": "Wolfgang Amadeus Mozart",
+            "mozart": "Wolfgang Amadeus Mozart",
+            "mosart": "Wolfgang Amadeus Mozart",
+            # Sigmund Freud
+            "sigmund freud": "Sigmund Freud",
+            "freud": "Sigmund Freud",
+            # Zendaya
+            "zendaya": "Zendaya",
+            "sendaya": "Zendaya",
+        }
+        vocab.update(tricky_figures)
+
         # Populate with 100% of sovereign nations and their official aliases
         try:
             from senda.countries import SOVEREIGN_REGISTRY, normalize_country_text
@@ -180,6 +269,15 @@ class SuggestionEngine:
 
         # 1. Check authoritative offline dictionary first (zero network latency)
         vocab = self.get_offline_vocabulary()
+
+        # 1a. Exact alias match in vocabulary (phonetic aliases, sovereign aliases)
+        if q_norm in vocab:
+            canonical = vocab[q_norm]
+            if canonical.lower() != q_norm:
+                self._cache_set(cache_key, canonical)
+                return canonical
+
+        # 1b. Fuzzy typo match against vocabulary entries
         best_offline_term: Optional[str] = None
         best_offline_dist = 999
         max_d = 1 if len(q_norm) < 7 else 2
@@ -188,11 +286,10 @@ class SuggestionEngine:
             if abs(len(term) - len(q_norm)) > max_d:
                 continue
             dist = damerau_levenshtein_distance(q_norm, term)
-            if 0 < dist <= max_d and dist < best_offline_dist:
+            if dist <= max_d and dist < best_offline_dist and display_title.lower() != q_norm:
                 best_offline_dist = dist
                 best_offline_term = display_title
-                if dist == 1:
-                    # An exact 1-letter typo distance match is overwhelmingly likely
+                if dist <= 1:
                     break
 
         if best_offline_term:
