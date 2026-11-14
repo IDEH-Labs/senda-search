@@ -26,6 +26,7 @@ from senda.providers.wikipedia import WikipediaEntityCard, WikipediaEntityProvid
 from senda.providers.news import RealTimeNewsProvider
 from senda.providers.images import FreeCultureImageProvider
 from senda.providers.openverse import OpenverseProvider
+from senda.providers.museums import OpenAccessMuseumProvider
 from senda.providers.openlibrary import OpenLibraryProvider
 from senda.providers.lemmy import LemmyProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
@@ -54,6 +55,7 @@ __all__ = [
     "RealTimeNewsProvider",
     "FreeCultureImageProvider",
     "OpenverseProvider",
+    "OpenAccessMuseumProvider",
     "OpenLibraryProvider",
     "LemmyProvider",
     "ProviderAggregator",

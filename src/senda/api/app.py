@@ -35,6 +35,7 @@ from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.providers.openverse import OpenverseProvider
+from senda.providers.museums import OpenAccessMuseumProvider
 from senda.providers.openlibrary import OpenLibraryProvider
 from senda.providers.lemmy import LemmyProvider
 from senda.providers.base import SearchResultItem
@@ -67,8 +68,11 @@ class SearchItemModel(BaseModel):
     relevance_score: float
     doc_type: str = "web"
     media_url: Optional[str] = None
+    download_url: Optional[str] = None
+    dimensions: Optional[str] = None
     published_at: Optional[str] = None
     license: Optional[str] = None
+    license_url: Optional[str] = None
     source: str = "Senda"
     why_seen: str = ""
     is_sponsored: bool = False
@@ -219,6 +223,7 @@ def create_app(
     arxiv_prov = ArxivProvider() if enable_federated_providers else None
     pubmed_prov = PubMedProvider() if enable_federated_providers else None
     openverse_prov = OpenverseProvider() if enable_federated_providers else None
+    museum_prov = OpenAccessMuseumProvider() if enable_federated_providers else None
     openlibrary_prov = OpenLibraryProvider() if enable_federated_providers else None
     lemmy_prov = LemmyProvider() if enable_federated_providers else None
 
@@ -246,6 +251,7 @@ def create_app(
         arxiv_provider=arxiv_prov,
         pubmed_provider=pubmed_prov,
         openverse_provider=openverse_prov,
+        museum_provider=museum_prov,
         openlibrary_provider=openlibrary_prov,
         lemmy_provider=lemmy_prov,
     )
@@ -755,7 +761,11 @@ def create_app(
                     relevance_score=it.score,
                     doc_type=it.doc_type,
                     media_url=it.media_url,
+                    download_url=it.download_url,
+                    dimensions=it.dimensions,
                     published_at=it.date,
+                    license=it.license,
+                    license_url=it.license_url,
                     source=it.source,
                     why_seen=it.why_seen,
                     is_sponsored=it.is_sponsored,

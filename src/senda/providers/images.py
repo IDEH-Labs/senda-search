@@ -112,15 +112,22 @@ class FreeCultureImageProvider(SearchProvider):
             info = image_info_list[0]
             thumb_url = info.get("thumburl") or info.get("url")
             orig_url = info.get("descriptionshorturl") or info.get("descriptionurl") or thumb_url
+            download_url = info.get("url") or thumb_url
 
             if not thumb_url:
                 continue
+
+            # Extract dimensions
+            w = info.get("width")
+            h = info.get("height")
+            dimensions = f"{w} × {h}" if w and h else None
 
             # Extract metadata and license
             extmeta = info.get("extmetadata", {})
             license_short = extmeta.get("LicenseShortName", {}).get("value")
             license_name = extmeta.get("License", {}).get("value")
             lic = license_short or license_name or "Dominio Público / CC BY-SA"
+            lic_url = extmeta.get("LicenseUrl", {}).get("value")
 
             artist_raw = extmeta.get("Artist", {}).get("value", "")
             # Clean HTML from artist field
@@ -138,6 +145,10 @@ class FreeCultureImageProvider(SearchProvider):
                     score=90.0,
                     source="Wikimedia Commons (Cultura Libre)",
                     media_url=thumb_url,
+                    download_url=download_url,
+                    dimensions=dimensions,
+                    license=lic,
+                    license_url=lic_url,
                     doc_type="images",
                     date=date_str,
                     is_sponsored=False,

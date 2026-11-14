@@ -54,11 +54,15 @@ def test_openverse_parse_results(openverse_json_fixture):
     assert "BY 2.0" in item1.snippet
     assert "Galactic Photographer" in item1.authors
     assert item1.media_url == "https://api.openverse.org/v1/images/e4f8d22c-a0e2-411a-8c5e-7a1a45bb3864/thumb/"
+    assert item1.download_url == "https://live.staticflickr.com/65535/12345678_b.jpg"
+    assert item1.license == "BY 2.0"
     assert item1.canonical_url == "https://flickr.com/photos/user/12345678"
 
     # Second item: CC0 1.0 (The Met / Van Gogh)
     item2 = items[1]
     assert item2.title == "Classical Art Public Domain Portrait"
+    assert item2.download_url == "https://images.metmuseum.org/CRDImages/ep/original/DT1567.jpg"
+    assert item2.license == "CC0 1.0"
     assert "CC0 1.0" in item2.why_seen
     assert "Vincent van Gogh" in item2.authors
 

@@ -60,6 +60,10 @@ def test_free_culture_images_parse_commons(commons_images_fixture):
     assert len(items) > 0
     first = items[0]
     assert first.media_url is not None
+    assert first.download_url is not None
+    assert first.dimensions is not None
+    assert "×" in first.dimensions
+    assert first.license is not None
     assert first.doc_type == "images"
     assert first.source_type == "primaria_oficial"
     assert first.content_type == "imagen_libre"

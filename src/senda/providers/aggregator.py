@@ -24,6 +24,7 @@ from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
 from senda.providers.openverse import OpenverseProvider
+from senda.providers.museums import OpenAccessMuseumProvider
 from senda.providers.openlibrary import OpenLibraryProvider
 from senda.providers.lemmy import LemmyProvider
 from senda.ranking.clustering import apply_domain_clustering
@@ -69,6 +70,7 @@ class ProviderAggregator:
         arxiv_provider: Optional[ArxivProvider] = None,
         pubmed_provider: Optional[PubMedProvider] = None,
         openverse_provider: Optional[OpenverseProvider] = None,
+        museum_provider: Optional[OpenAccessMuseumProvider] = None,
         openlibrary_provider: Optional[OpenLibraryProvider] = None,
         lemmy_provider: Optional[LemmyProvider] = None,
     ):
@@ -88,6 +90,7 @@ class ProviderAggregator:
         self.arxiv = arxiv_provider
         self.pubmed = pubmed_provider
         self.openverse = openverse_provider
+        self.museums = museum_provider
         self.openlibrary = openlibrary_provider
         self.lemmy = lemmy_provider
 
@@ -148,6 +151,13 @@ class ProviderAggregator:
             if self.openverse and self.openverse.is_configured:
                 tasks.append(
                     self.openverse.search(
+                        query, category="images", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
+            if self.museums and self.museums.is_configured:
+                tasks.append(
+                    self.museums.search(
                         query, category="images", page=page, page_size=page_size,
                         time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )

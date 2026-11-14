@@ -64,6 +64,10 @@ class SearchResultItem(BaseModel):
     language: Optional[str] = Field(default=None, description="Content language code")
     doc_type: str = Field(default="web", description="Vertical category: web, images, news, videos, library")
     media_url: Optional[str] = Field(default=None, description="Direct thumbnail/media URL for media items")
+    download_url: Optional[str] = Field(default=None, description="Direct high-resolution download URL for media items")
+    dimensions: Optional[str] = Field(default=None, description="Media dimensions (e.g. 3840 × 2160)")
+    license: Optional[str] = Field(default=None, description="Verified open/free culture license (e.g. CC0, CC BY 4.0)")
+    license_url: Optional[str] = Field(default=None, description="URL of license deed")
     is_sponsored: bool = Field(default=False, description="Strict boolean flag. Ads are visually separated and never mixed with organic results.")
     score: float = Field(default=0.0, description="Ranking or BM25 relevance score")
     why_seen: str = Field(default="", description="Honest, transparent explanation of why this result was included and ranked.")
@@ -111,6 +115,17 @@ class SearchResultItem(BaseModel):
     @field_validator("media_url")
     @classmethod
     def validate_media_url(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return None
+        clean = v.strip()
+        lower = clean.lower()
+        if lower.startswith("http://") or lower.startswith("https://") or lower.startswith("data:image/"):
+            return clean
+        return None
+
+    @field_validator("download_url")
+    @classmethod
+    def validate_download_url(cls, v: Optional[str]) -> Optional[str]:
         if not v:
             return None
         clean = v.strip()

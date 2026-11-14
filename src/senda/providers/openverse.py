@@ -175,11 +175,17 @@ class OpenverseProvider(SearchProvider):
                 continue
 
             thumb_url = item.get("thumbnail") or item.get("url")
+            download_url = item.get("url") or thumb_url
+            w = item.get("width")
+            h = item.get("height")
+            dimensions = f"{w} × {h}" if w and h else None
+
             title = (item.get("title") or "Obra Libre (Openverse)").strip()
             creator = (item.get("creator") or "").strip()
             lic = (item.get("license") or "CC").upper()
             lic_ver = item.get("license_version") or ""
             full_lic = f"{lic} {lic_ver}".strip()
+            lic_url = item.get("license_url")
 
             author_name = creator if creator else "Autor en Openverse"
             attribution = item.get("attribution") or f"Obra de {author_name} bajo {full_lic}."
@@ -194,6 +200,10 @@ class OpenverseProvider(SearchProvider):
                     score=88.0,
                     source="Openverse (Cultura Libre)",
                     media_url=thumb_url,
+                    download_url=download_url,
+                    dimensions=dimensions,
+                    license=full_lic,
+                    license_url=lic_url,
                     doc_type="images",
                     date=None,
                     is_sponsored=False,
