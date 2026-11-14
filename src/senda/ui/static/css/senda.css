@@ -431,7 +431,19 @@ main.content-area {
   flex-direction: column;
 }
 
-/* Homepage Center View */
+/* Homepage Center View (Clean Wordmark Canvas like Google / Yahoo) */
+body.homepage-view header.app-header {
+  border-bottom: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  justify-content: flex-end;
+}
+
+body.homepage-view header.app-header .brand {
+  display: none;
+}
+
 body.homepage-view main.content-area {
   justify-content: center;
   align-items: center;
