@@ -12,6 +12,7 @@ from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 import html
 import re
+import time
 from typing import Dict, List, Optional, Any
 import unicodedata
 import urllib.parse
@@ -43,10 +44,14 @@ VERIFIED_DIRECT_FEEDS: Dict[str, List[Dict[str, str]]] = {
         {"name": "BBC Mundo", "url": "https://feeds.bbci.co.uk/mundo/rss.xml", "domain": "bbc.com"},
         {"name": "DW Español", "url": "https://rss.dw.com/rdf/rss-sp-all", "domain": "dw.com"},
         {"name": "France 24 Español", "url": "https://www.france24.com/es/rss", "domain": "france24.com"},
+        {"name": "El Heraldo", "url": "https://www.elheraldo.co/arc/outboundfeeds/rss/", "domain": "elheraldo.co"},
         {"name": "El Espectador", "url": "https://www.elespectador.com/arc/outboundfeeds/rss/", "domain": "elespectador.com"},
+        {"name": "El Tiempo", "url": "https://www.eltiempo.com/rss/colombia.xml", "domain": "eltiempo.com"},
+        {"name": "El Colombiano", "url": "https://www.elcolombiano.com/rss/portada.xml", "domain": "elcolombiano.com"},
         {"name": "El Diario", "url": "https://www.eldiario.es/rss/", "domain": "eldiario.es"},
         {"name": "Europa Press", "url": "https://www.europapress.es/rss/rss.aspx", "domain": "europapress.es"},
         {"name": "Clarín", "url": "https://www.clarin.com/rss/lo-ultimo/", "domain": "clarin.com"},
+        {"name": "La Nación", "url": "https://www.lanacion.com.ar/arc/outboundfeeds/rss/", "domain": "lanacion.com.ar"},
         {"name": "El Universal", "url": "https://www.eluniversal.com.mx/arc/outboundfeeds/rss/", "domain": "eluniversal.com.mx"},
     ],
     "en": [
@@ -104,7 +109,7 @@ def _strip_accents(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c)).lower()
 
 
-def _is_relevant_news(query: str, title: str, source: str) -> bool:
+def _is_relevant_news(query: str, title: str, source: str, snippet: str = "") -> bool:
     """Verify that the news item genuinely matches the search query.
 
     Prevents collaborative-filtering hallucinations and false positive synonym expansions.
@@ -122,8 +127,9 @@ def _is_relevant_news(query: str, title: str, source: str) -> bool:
 
     title_norm = _strip_accents(title)
     source_norm = _strip_accents(source)
+    snippet_norm = _strip_accents(snippet)
 
-    return any(token in title_norm or token in source_norm for token in tokens)
+    return any(token in title_norm or token in source_norm or token in snippet_norm for token in tokens)
 
 
 def _expand_news_query(query: str) -> str:
@@ -174,6 +180,8 @@ def _resolve_time_query(query: str, time_filter: Optional[str]) -> str:
 
 class RealTimeNewsProvider(SearchProvider):
     """Syndicated real-time news provider querying verified press feeds."""
+
+    _last_gdelt_fetch_time: float = 0.0
 
     def __init__(
         self,
@@ -242,7 +250,7 @@ class RealTimeNewsProvider(SearchProvider):
                 direct_items = await self.search_direct_feeds(
                     query=clean_q,
                     lang=target_lang,
-                    max_feeds=20,
+                    max_feeds=30,
                     client=client,
                 )
                 items.extend(direct_items)
@@ -286,6 +294,13 @@ class RealTimeNewsProvider(SearchProvider):
             raw_title = it.findtext("title", "").strip()
             link = it.findtext("link", "").strip()
             raw_desc = it.findtext("description", "")
+            if not raw_desc:
+                raw_desc = it.findtext("summary", "")
+            if not raw_desc:
+                for child in it:
+                    if child.tag.endswith("encoded") and child.text:
+                        raw_desc = child.text
+                        break
             pub_date_str = it.findtext("pubDate", "")
 
             source_elem = it.find("source")
@@ -315,8 +330,10 @@ class RealTimeNewsProvider(SearchProvider):
             if not source_name:
                 source_name = "Prensa Verificada"
 
+            clean_desc = _clean_text(raw_desc)
+
             # Relevance guard: eliminate false positives / unrelated feed items
-            if query and not _is_relevant_news(query, clean_title, source_name):
+            if query and not _is_relevant_news(query, clean_title, source_name, snippet=clean_desc):
                 continue
 
             # Parse publication date to ISO 8601
@@ -328,7 +345,6 @@ class RealTimeNewsProvider(SearchProvider):
                 except Exception:
                     iso_date = pub_date_str
 
-            clean_desc = _clean_text(raw_desc)
             clean_desc_cmp = clean_desc.lower().replace(source_name.lower(), "").strip()
             clean_title_cmp = clean_title.lower().strip()
 
@@ -417,6 +433,11 @@ class RealTimeNewsProvider(SearchProvider):
         }
 
         async def _do_fetch(c: httpx.AsyncClient) -> List[SearchResultItem]:
+            now = time.monotonic()
+            if now - RealTimeNewsProvider._last_gdelt_fetch_time < 5.0:
+                # Courtesy rate-limit: GDELT requires minimum 5-second interval
+                return []
+            RealTimeNewsProvider._last_gdelt_fetch_time = now
             try:
                 resp = await c.get(
                     "https://api.gdeltproject.org/api/v2/doc/doc",
@@ -489,7 +510,7 @@ class RealTimeNewsProvider(SearchProvider):
         self,
         query: str = "",
         lang: str = "es",
-        max_feeds: int = 15,
+        max_feeds: int = 30,
         client: Optional[httpx.AsyncClient] = None,
     ) -> List[SearchResultItem]:
         """Fetch and aggregate breaking news directly from curated editorial RSS feeds in parallel."""

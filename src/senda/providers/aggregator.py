@@ -166,6 +166,13 @@ class ProviderAggregator:
                         time_filter=time_filter, sort=sort, region=region, safe_search=safe_search, lang=lang
                     )
                 )
+            if self.brave and self.brave.is_configured:
+                tasks.append(
+                    self.brave.search(
+                        query, category="news", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
             if self.searxng and self.searxng.is_configured:
                 tasks.append(
                     self.searxng.search(

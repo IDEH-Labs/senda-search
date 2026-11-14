@@ -896,16 +896,23 @@
                     No se encontraron noticias recientes para «<strong>{{ query }}</strong>»{% if time_filter %} en el intervalo de fecha seleccionado{% endif %}.
                 </p>
                 {% if time_filter %}
-                <div style="margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 1.25rem;">
                     <a href="/search?q={{ query | urlencode }}&category=news&region={{ region }}&theme={{ theme }}{% if lang %}&lang={{ lang }}{% endif %}" class="suggestion-chip" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                         <span>📅 Buscar en «Cualquier fecha» ↗</span>
                     </a>
                 </div>
                 {% endif %}
+                <div style="margin: 1.25rem 0;">
+                    <a href="/search?q={{ query | urlencode }}&category=all&theme={{ theme }}{% if lang %}&lang={{ lang }}{% endif %}" class="suggestion-chip" style="font-size: 0.9rem; padding: 0.5rem 1.2rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <span>🌐 Buscar «{{ query }}» en la Web General ↗</span>
+                    </a>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 460px; margin: 0.75rem auto 1.5rem auto; line-height: 1.6;">
+                    Senda prioriza feeds RSS directos de medios editoriales verificados con navegación directa sin rastreadores ni pasarelas intermedias.
+                </p>
                 <ul class="no-results-tips" style="text-align: left; max-width: 420px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; margin: 0 auto; padding-left: 1.25rem;">
                     <li>Comprueba que no haya errores ortográficos.</li>
                     <li>Prueba con palabras clave más generales.</li>
-                    <li>Consulta resultados en la <a href="/search?q={{ query | urlencode }}&category=all&theme={{ theme }}{% if lang %}&lang={{ lang }}{% endif %}" style="color: var(--text-cyan); text-decoration: underline;">búsqueda web general</a>.</li>
                 </ul>
 
             {% elif category == 'images' %}
