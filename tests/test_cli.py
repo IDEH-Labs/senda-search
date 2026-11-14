@@ -194,18 +194,20 @@ def test_cli_crawl_global_gov_data_niche_mocked(monkeypatch, capsys):
 
 
 def test_global_gov_data_seed_coverage():
-    """Verify global_gov_data covers multilateral federators and diverse continents."""
+    """Verify global_gov_data covers multilateral federators and all 195 sovereign countries of the world."""
     from senda.crawler.seeds import get_niche_seeds, NICHE_DEFINITIONS
     assert "global_gov_data" in NICHE_DEFINITIONS
     seeds = get_niche_seeds("global_gov_data")
-    assert len(seeds) >= 70
+    assert len(seeds) >= 200
     countries = {s.country_code for s in seeds if s.country_code}
-    # Verify diverse continents are present
-    assert {"US", "CA", "MX", "CO", "BR", "AR", "CL"}.issubset(countries)
-    assert {"ES", "FR", "DE", "GB", "IT", "PT", "NL", "SE"}.issubset(countries)
-    assert {"JP", "IN", "KR", "SG", "ID", "AE", "SA"}.issubset(countries)
-    assert {"ZA", "NG", "KE", "MA", "GH", "RW"}.issubset(countries)
-    assert {"AU", "NZ"}.issubset(countries)
+    # Universal coverage: at least 195 sovereign states
+    assert len(countries) >= 195
+    # Verify diverse continents and nations are present
+    assert {"US", "CA", "MX", "CO", "BR", "AR", "CL", "CU", "VE", "HT", "UY", "PE"}.issubset(countries)
+    assert {"ES", "FR", "DE", "GB", "IT", "PT", "NL", "SE", "VA", "AD", "SM", "MC", "UA", "PL"}.issubset(countries)
+    assert {"JP", "IN", "KR", "SG", "ID", "AE", "SA", "CN", "PK", "BD", "PS", "IL", "AF", "VN"}.issubset(countries)
+    assert {"ZA", "NG", "KE", "MA", "GH", "RW", "DZ", "AO", "EG", "ET", "SO", "SS", "SN", "TZ"}.issubset(countries)
+    assert {"AU", "NZ", "FJ", "PG", "WS", "TO", "TV", "NR", "PW"}.issubset(countries)
     # Verify universal multilateral federators
     multilateral = [s for s in seeds if s.category == "gobierno_multilateral"]
     assert len(multilateral) >= 8
