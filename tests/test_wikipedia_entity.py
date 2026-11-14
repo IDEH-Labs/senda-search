@@ -246,3 +246,40 @@ async def test_sovereign_country_universal_coverage_across_continents():
         assert nav is not None, f"NavigationalEngine failed to resolve {title}"
         assert nav.url == expected_url, f"NavigationalEngine returned {nav.url} instead of {expected_url} for {title}"
 
+
+@pytest.mark.asyncio
+async def test_celebrity_figure_typo_fallback():
+    """Verify that person names with typos resolve via OpenSearch fallback."""
+    provider = WikipediaEntityProvider()
+
+    # When querying with typo 'gabriel garcia markez':
+    # 1st call to summary returns 404
+    # 2nd call to OpenSearch returns ['Gabriel garcia marquez']
+    # 3rd call to summary of 'Gabriel garcia marquez' returns 200
+    mock_404 = MagicMock(status_code=404)
+    mock_opensearch = MagicMock(
+        status_code=200,
+        json=MagicMock(return_value=["gabriel garcia markez", ["Gabriel García Márquez"]])
+    )
+    mock_summary = MagicMock(
+        status_code=200,
+        json=MagicMock(return_value={
+            "title": "Gabriel García Márquez",
+            "extract": "Gabriel José de la Concordia García Márquez fue un escritor y periodista colombiano.",
+            "description": "Escritor colombiano, premio Nobel de Literatura",
+            "wikibase_item": "Q5878",
+            "content_urls": {
+                "desktop": {"page": "https://es.wikipedia.org/wiki/Gabriel_Garc%C3%ADa_M%C3%A1rquez"}
+            }
+        })
+    )
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_get.side_effect = [mock_404, mock_404, mock_opensearch, mock_summary]
+        card = await provider.get_entity("gabriel garcia markez", lang="es")
+
+    assert card is not None
+    assert card.title == "Gabriel García Márquez"
+    assert "escritor" in card.extract.lower()
+
+

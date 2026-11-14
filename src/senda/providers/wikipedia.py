@@ -249,6 +249,31 @@ class WikipediaEntityProvider:
                     except Exception:
                         pass
 
+                # Fallback to Wikimedia OpenSearch API for historical figures, celebrities and people with typos
+                if resp.status_code == 404 and len(clean_q) >= 4:
+                    try:
+                        import unicodedata
+                        from senda.ranking.suggestions import damerau_levenshtein_distance
+                        os_url = (
+                            f"https://{lang}.wikipedia.org/w/api.php?"
+                            f"action=opensearch&search={urllib.parse.quote(clean_q)}&limit=1&namespace=0&format=json"
+                        )
+                        os_resp = await client.get(os_url, headers=headers)
+                        if os_resp.status_code == 200:
+                            os_data = os_resp.json()
+                            if len(os_data) >= 2 and os_data[1]:
+                                candidate = os_data[1][0]
+                                q_norm = "".join(c for c in unicodedata.normalize("NFKD", clean_q.lower()) if not unicodedata.combining(c))
+                                cand_norm = "".join(c for c in unicodedata.normalize("NFKD", candidate.lower()) if not unicodedata.combining(c))
+                                dist = damerau_levenshtein_distance(q_norm, cand_norm)
+                                max_dist = 2 if len(q_norm) < 10 else 3
+                                if dist <= max_dist:
+                                    sugg_title = urllib.parse.quote(candidate.replace(" ", "_"))
+                                    sugg_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{sugg_title}"
+                                    resp = await client.get(sugg_url, headers=headers)
+                    except Exception:
+                        pass
+
                 if resp.status_code == 200:
                     data = resp.json()
                     card = self.parse_summary(data, lang=lang)

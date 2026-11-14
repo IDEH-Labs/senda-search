@@ -798,6 +798,10 @@ def create_app(
             entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=target_wiki_lang, fetch_official_website=True)
             if not entity_card_obj and query_lang != target_wiki_lang:
                 entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=query_lang, fetch_official_website=True)
+            if not entity_card_obj and did_you_mean and did_you_mean.lower() != card_query.lower():
+                entity_card_obj = await app_wiki_entity.get_entity(did_you_mean, lang=target_wiki_lang, fetch_official_website=True)
+                if not entity_card_obj and query_lang != target_wiki_lang:
+                    entity_card_obj = await app_wiki_entity.get_entity(did_you_mean, lang=query_lang, fetch_official_website=True)
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
 
