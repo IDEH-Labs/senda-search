@@ -182,18 +182,27 @@ header.app-header {
 }
 
 .brand-text {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 15%, #2dd4bf 60%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: filter var(--transition-fast);
+}
+
+.brand:hover .brand-text {
+  filter: drop-shadow(0 2px 10px rgba(45, 212, 191, 0.35));
+}
+
+[data-theme="light"] .brand-text {
+  background: linear-gradient(135deg, #064e3b 0%, #0d9488 55%, #0284c7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-[data-theme="light"] .brand-text {
-  background: linear-gradient(135deg, #0f172a 30%, #475569 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+[data-theme="light"] .brand:hover .brand-text {
+  filter: drop-shadow(0 2px 8px rgba(13, 148, 136, 0.25));
 }
 
 .header-tools {
@@ -504,18 +513,21 @@ body.homepage-view main.content-area {
 }
 
 .home-brand-title {
-  font-size: 3rem;
+  font-size: 3.25rem;
   font-weight: 800;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 15%, #2dd4bf 55%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 22px rgba(0, 210, 160, 0.28));
+  transition: all var(--transition-normal);
 }
 
 [data-theme="light"] .home-brand-title {
-  background: linear-gradient(135deg, #0f172a 40%, #475569 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #0d9488 50%, #0284c7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(13, 148, 136, 0.18));
 }
 
 .home-search-form {
@@ -2030,6 +2042,20 @@ footer.app-footer {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+}
+
+.footer-brand {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #2dd4bf 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .footer-brand {
+  background: linear-gradient(135deg, #047857 0%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .footer-dot {
