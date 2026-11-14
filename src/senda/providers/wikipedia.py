@@ -17,6 +17,7 @@ import httpx
 from pydantic import BaseModel, Field
 
 from senda.config import settings
+from senda.countries import get_sovereign_country
 from senda.providers.base import SearchProvider, SearchResultItem, AIProvenance
 
 
@@ -37,10 +38,87 @@ class WikipediaEntityCard(BaseModel):
     official_website: Optional[str] = Field(default=None, description="Official verified website URL")
 
 
-# Verified sovereign and institutional website corrections where Wikidata P856 has dead, broken or obsolete URLs
+# Verified sovereign and institutional website overrides (fallback or direct overrides)
 SOVEREIGN_OFFICIAL_WEBSITES: Dict[str, str] = {
-    "Q967": "https://presidence.gov.bi/",  # Burundi (Wikidata P856 has obsolete http://www.burundi-gov.bi/)
+    "Q967": "https://presidence.gov.bi/",  # Burundi
 }
+
+_PARKED_OR_SPAM_DOMAINS = {
+    "sedoparking.com",
+    "parkingcrew.net",
+    "domainmarket.com",
+    "hugedomains.com",
+    "dan.com",
+    "godaddy.com",
+    "afternic.com",
+}
+
+_TRACKER_PARAMS = {
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "fbclid",
+    "gclid",
+    "ref",
+}
+
+
+def sanitize_official_website(raw_url: Optional[str]) -> Optional[str]:
+    """Ethically validate, upgrade to HTTPS, and sanitize official website URLs.
+
+    Guarantees no dead/parked domains, upgrades unencrypted HTTP to HTTPS,
+    and strips tracking query strings.
+    """
+    if not raw_url or not isinstance(raw_url, str):
+        return None
+
+    clean = raw_url.strip()
+    if not clean:
+        return None
+
+    # Upgrade http to https
+    if clean.startswith("http://"):
+        clean = "https://" + clean[7:]
+    elif not clean.startswith("https://"):
+        clean = "https://" + clean
+
+    try:
+        parsed = urllib.parse.urlparse(clean)
+        netloc = parsed.netloc.lower().strip()
+        if not netloc or "." not in netloc or " " in netloc:
+            return None
+
+        # Filter localhost / private addresses / raw IPs
+        if netloc in ("localhost", "0.0.0.0", "127.0.0.1"):
+            return None
+
+        # Filter known parked / spam brokers
+        for spam_dom in _PARKED_OR_SPAM_DOMAINS:
+            if netloc == spam_dom or netloc.endswith("." + spam_dom):
+                return None
+
+        # Strip tracking query params
+        path = parsed.path or "/"
+        clean_query = ""
+        if parsed.query:
+            query_parts = urllib.parse.parse_qsl(parsed.query, keep_blank_values=False)
+            filtered = [(k, v) for k, v in query_parts if k.lower() not in _TRACKER_PARAMS]
+            if filtered:
+                clean_query = urllib.parse.urlencode(filtered)
+
+        sanitized = urllib.parse.urlunparse((
+            "https",
+            netloc,
+            path,
+            "",
+            clean_query,
+            "",
+        ))
+        return sanitized
+    except Exception:
+        return None
 
 
 class WikipediaEntityProvider:
@@ -143,23 +221,36 @@ class WikipediaEntityProvider:
                 if resp.status_code == 200:
                     data = resp.json()
                     card = self.parse_summary(data, lang=lang)
-                    if fetch_official_website and card and card.wikibase_item:
-                        if card.wikibase_item in SOVEREIGN_OFFICIAL_WEBSITES:
+                    if fetch_official_website and card:
+                        # 1. Sovereign Country Registry (Universal coverage for 195 nations)
+                        sovereign = None
+                        if card.wikibase_item and card.wikibase_item in SOVEREIGN_OFFICIAL_WEBSITES:
                             card.official_website = SOVEREIGN_OFFICIAL_WEBSITES[card.wikibase_item]
                         else:
-                            try:
-                                wb_url = f"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={card.wikibase_item}&property=P856&format=json"
-                                wb_resp = await client.get(wb_url, headers=headers)
-                                if wb_resp.status_code == 200:
-                                    wb_data = wb_resp.json()
-                                    claims = wb_data.get("claims", {}).get("P856", [])
-                                    for c in claims:
-                                        val = c.get("mainsnak", {}).get("datavalue", {}).get("value")
-                                        if isinstance(val, str) and (val.startswith("http://") or val.startswith("https://")):
-                                            card.official_website = val
-                                            break
-                            except Exception:
-                                pass
+                            if card.wikibase_item:
+                                sovereign = get_sovereign_country(qid=card.wikibase_item)
+                            if not sovereign and card.title:
+                                sovereign = get_sovereign_country(query=card.title)
+
+                            if sovereign:
+                                card.official_website = sovereign.official_portal
+                            elif card.wikibase_item:
+                                # Non-country encyclopedic entity (e.g. universities, foundations, institutions)
+                                try:
+                                    wb_url = f"https://www.wikidata.org/w/api.php?action=wbgetclaims&entity={card.wikibase_item}&property=P856&format=json"
+                                    wb_resp = await client.get(wb_url, headers=headers)
+                                    if wb_resp.status_code == 200:
+                                        wb_data = wb_resp.json()
+                                        claims = wb_data.get("claims", {}).get("P856", [])
+                                        for c in claims:
+                                            val = c.get("mainsnak", {}).get("datavalue", {}).get("value")
+                                            if isinstance(val, str):
+                                                clean_site = sanitize_official_website(val)
+                                                if clean_site:
+                                                    card.official_website = clean_site
+                                                    break
+                                except Exception:
+                                    pass
                     self._cache_set(cache_key, card)
                     return card
                 elif resp.status_code == 404:

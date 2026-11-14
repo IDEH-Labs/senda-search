@@ -174,3 +174,75 @@ async def test_burundi_official_website_override():
     assert nav is not None
     assert nav.url == "https://presidence.gov.bi/"
     assert "Burundi" in nav.title
+
+
+def test_sanitize_official_website():
+    """Verify ethical sanitization, HTTPS upgrading, tracker stripping, and spam rejection."""
+    from senda.providers.wikipedia import sanitize_official_website
+
+    # Upgrades http to https
+    assert sanitize_official_website("http://example.org") == "https://example.org/"
+    assert sanitize_official_website("https://example.org/about") == "https://example.org/about"
+
+    # Strips tracker query parameters
+    dirty = "https://institution.org/portal?utm_source=wiki&utm_medium=referral&keep=1"
+    clean = sanitize_official_website(dirty)
+    assert clean == "https://institution.org/portal?keep=1"
+    assert "utm_source" not in clean
+
+    # Rejects spam brokers and parked domains
+    assert sanitize_official_website("http://sedoparking.com/land") is None
+    assert sanitize_official_website("https://sub.hugedomains.com/") is None
+    assert sanitize_official_website("http://parkingcrew.net") is None
+
+    # Rejects invalid formats and localhost
+    assert sanitize_official_website("not-a-url") is None
+    assert sanitize_official_website("http://localhost:8000") is None
+    assert sanitize_official_website("http://127.0.0.1/") is None
+    assert sanitize_official_website(None) is None
+
+
+@pytest.mark.asyncio
+async def test_sovereign_country_universal_coverage_across_continents():
+    """Verify that multiple sovereign states across all continents resolve their verified portals."""
+    from senda.ranking.navigational import NavigationalEngine
+    provider = WikipediaEntityProvider()
+
+    test_cases = [
+        ("Tanzania", "Q924", "https://www.ikulu.go.tz/"),
+        ("Vietnam", "Q881", "https://chinhphu.vn/"),
+        ("El Salvador", "Q792", "https://www.transparencia.gob.sv/"),
+        ("Sudáfrica", "Q258", "https://www.gov.za/"),
+        ("Trinidad y Tobago", "Q754", "https://www.ttconnect.gov.tt/"),
+        ("República Democrática del Congo", "Q974", "https://www.primature.gouv.cd/"),
+        ("Turquía", "Q43", "https://www.turkiye.gov.tr/"),
+    ]
+
+    for title, qid, expected_url in test_cases:
+        summary_fixture = {
+            "title": title,
+            "extract": f"Estado soberano {title}.",
+            "description": f"País {title}",
+            "content_urls": {
+                "desktop": {"page": f"https://es.wikipedia.org/wiki/{title}"},
+                "mobile": {"page": f"https://es.m.wikipedia.org/wiki/{title}"}
+            },
+            "wikibase_item": qid
+        }
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = summary_fixture
+
+        with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = mock_resp
+            card = await provider.get_entity(title, lang="es", fetch_official_website=True)
+
+        assert card is not None, f"Failed entity card for {title}"
+        assert card.official_website == expected_url, f"Expected {expected_url} for {title}, got {card.official_website}"
+
+        # Navigational resolution test
+        nav = NavigationalEngine.resolve(title)
+        assert nav is not None, f"NavigationalEngine failed to resolve {title}"
+        assert nav.url == expected_url, f"NavigationalEngine returned {nav.url} instead of {expected_url} for {title}"
+

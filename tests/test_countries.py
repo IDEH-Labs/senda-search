@@ -6,8 +6,10 @@
 from senda.countries import (
     COUNTRY_CATALOG,
     COUNTRY_BY_CODE,
+    SOVEREIGN_REGISTRY,
     get_country_name,
     get_countries_grouped,
+    get_sovereign_country,
 )
 
 
@@ -46,3 +48,64 @@ def test_get_countries_grouped():
     assert "África" in grouped
     assert "Oceanía" in grouped
     assert len(grouped["Europa"]) >= 30
+    assert len(grouped["África"]) >= 50
+
+
+def test_sovereign_country_universal_registry():
+    """Verify that SOVEREIGN_REGISTRY covers 100% of sovereign nations with verified HTTPS portals."""
+    assert len(SOVEREIGN_REGISTRY) >= 195
+
+    for code, country in SOVEREIGN_REGISTRY.items():
+        assert len(country.code) == 2
+        assert country.official_portal.startswith("https://"), f"{code} portal must be HTTPS: {country.official_portal}"
+        assert country.wikidata_qid.startswith("Q"), f"{code} missing valid Wikidata QID"
+        assert country.name_es, f"{code} missing Spanish name"
+        assert country.name_en, f"{code} missing English name"
+        assert country.portal_name, f"{code} missing portal name"
+
+
+def test_get_sovereign_country_lookups():
+    """Verify resolution across various continents, queries, Q-IDs, and institutional prefixes."""
+    # Africa: Burundi
+    bi = get_sovereign_country(query="burundi")
+    assert bi is not None
+    assert bi.official_portal == "https://presidence.gov.bi/"
+    assert bi.wikidata_qid == "Q967"
+    assert get_sovereign_country(qid="Q967") == bi
+
+    # Africa: Tanzania (Ikulu State House)
+    tz = get_sovereign_country(query="gobierno de tanzania")
+    assert tz is not None
+    assert tz.official_portal == "https://www.ikulu.go.tz/"
+    assert tz.wikidata_qid == "Q924"
+
+    # Africa: DR Congo (Primature)
+    cd = get_sovereign_country(query="republica democratica del congo")
+    assert cd is not None
+    assert cd.official_portal == "https://www.primature.gouv.cd/"
+
+    # Asia: Vietnam
+    vn = get_sovereign_country(query="vietnam")
+    assert vn is not None
+    assert vn.official_portal == "https://chinhphu.vn/"
+
+    # Latin America: El Salvador
+    sv = get_sovereign_country(query="gobierno de el salvador")
+    assert sv is not None
+    assert sv.official_portal == "https://www.transparencia.gob.sv/"
+
+    # Caribbean: Trinidad & Tobago
+    tt = get_sovereign_country(query="trinidad y tobago")
+    assert tt is not None
+    assert tt.official_portal == "https://www.ttconnect.gov.tt/"
+
+    # Africa: South Africa
+    za = get_sovereign_country(query="sudáfrica")
+    assert za is not None
+    assert za.official_portal == "https://www.gov.za/"
+
+    # Europe/Asia: Turkey
+    tr = get_sovereign_country(query="turquía")
+    assert tr is not None
+    assert tr.official_portal == "https://www.turkiye.gov.tr/"
+

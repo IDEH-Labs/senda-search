@@ -13,6 +13,7 @@ Zero tracking, 100% offline-resilient, privacy-first sovereign design.
 import re
 import urllib.parse
 from typing import Dict, Optional, Tuple
+from senda.countries import get_sovereign_country
 from senda.providers.base import SearchResultItem
 
 
@@ -247,7 +248,32 @@ class NavigationalEngine:
                 provider_origin="Senda Navegación",
             )
 
-        # 2. Check if query is explicitly a domain or URL (e.g., 'google.com', 'xvideos.com', 'archlinux.org')
+        # 2. Sovereign Country Registry lookup (100% of world sovereign states)
+        sovereign = get_sovereign_country(query=clean_q)
+        if sovereign:
+            domain = urllib.parse.urlparse(sovereign.official_portal).netloc
+            title = f"{sovereign.name_es} — Portal Oficial del Estado"
+            snippet = (
+                f"Portal oficial del Gobierno y Estado de {sovereign.name_es} ({domain}). "
+                f"Información pública y acceso soberano verificable sin intermediarios."
+            )
+            return SearchResultItem(
+                url=sovereign.official_portal,
+                domain=domain,
+                title=title,
+                snippet=snippet,
+                score=1000.0,
+                doc_type="web",
+                source="Portal Soberano de Estado",
+                why_seen=f"Reconocimiento de navegación soberana hacia el portal oficial de '{sovereign.name_es}'. Garantía ética de enlace institucional primario.",
+                is_sponsored=False,
+                canonical_url=sovereign.official_portal,
+                source_type="portal_oficial",
+                content_type="gobierno_nacional",
+                provider_origin="Senda Soberanía",
+            )
+
+        # 3. Check if query is explicitly a domain or URL (e.g., 'google.com', 'xvideos.com', 'archlinux.org')
         domain_info = cls.is_domain_query(clean_q)
         if domain_info:
             target_url, clean_host, site_title = domain_info
