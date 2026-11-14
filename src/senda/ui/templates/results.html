@@ -340,74 +340,124 @@
     </section>
     {% endif %}
 
-    <!-- Instant Sovereign Weather Card (Open-Meteo Open Data - Compact & Sleek) -->
-    {% if weather %}
+    <!-- Shared Sovereign Celestial & Weather SVG Gradients & Macro -->
+    {% if weather or world_time %}
     <style>
       .weather-compact { width: 100%; box-sizing: border-box; }
       .weather-compact-body { display: flex; justify-content: space-between; align-items: center; }
       .weather-primary-row { display: flex; align-items: center; gap: 0.75rem; }
       .weather-forecast-pane { display: flex; align-items: center; gap: 0.65rem; }
-      .forecast-mini-col { display: flex; flex-direction: column; align-items: center; }
+      .forecast-mini-col { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
       .forecast-mini-temps { display: flex; gap: 0.25rem; }
       @media (max-width: 640px) {
         .weather-compact-body { flex-direction: column; align-items: stretch; gap: 0.75rem; }
         .weather-forecast-pane { border-left: none; border-top: 1px solid var(--border-subtle); padding-left: 0; padding-top: 0.65rem; justify-content: space-around; }
       }
     </style>
+
+    <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="70%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </radialGradient>
+        <linearGradient id="lunarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="#cbd5e1"/>
+          <stop offset="100%" stop-color="#64748b"/>
+        </linearGradient>
+        <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#94a3b8"/>
+          <stop offset="100%" stop-color="#475569"/>
+        </linearGradient>
+        <linearGradient id="stormCloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#475569"/>
+          <stop offset="100%" stop-color="#1e293b"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    {% macro weather_icon(icon_type, size=38, moon_phase=none, label="") %}
+    <svg class="weather-vector-icon icon-{{ icon_type }}" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" role="img" aria-label="{{ label }}">
+      {% if icon_type == "sun" %}
+        <circle cx="12" cy="12" r="5" fill="url(#sunGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+        <line x1="12" y1="2" x2="12" y2="4" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="12" y1="20" x2="12" y2="22" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="2" y1="12" x2="4" y2="12" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="20" y1="12" x2="22" y2="12" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+      {% elif icon_type == "cloud_sun" %}
+        <circle cx="16" cy="8.5" r="4" fill="url(#sunGrad)" stroke="#f59e0b" stroke-width="1"/>
+        <line x1="16" y1="2" x2="16" y2="3.5" stroke="#f59e0b" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="21.5" y1="5" x2="20.3" y2="6.2" stroke="#f59e0b" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M16 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 16 19z" fill="url(#cloudGrad)"/>
+      {% elif icon_type == "cloud" %}
+        <path d="M17.5 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 19z" fill="url(#cloudGrad)"/>
+      {% elif icon_type == "rain" %}
+        <path d="M17.5 14H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 14z" fill="url(#cloudGrad)"/>
+        <line x1="8" y1="17" x2="7" y2="21" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+        <line x1="12" y1="17" x2="11" y2="21" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+        <line x1="16" y1="17" x2="15" y2="21" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+      {% elif icon_type == "snow" %}
+        <path d="M17.5 14H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 14z" fill="url(#cloudGrad)"/>
+        <circle cx="8" cy="18" r="1.3" fill="#93c5fd"/>
+        <circle cx="12" cy="19.5" r="1.3" fill="#93c5fd"/>
+        <circle cx="16" cy="18" r="1.3" fill="#93c5fd"/>
+      {% elif icon_type == "thunderstorm" %}
+        <path d="M17.5 13H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 13z" fill="url(#stormCloudGrad)"/>
+        <polygon points="12.5,12 9,17.5 12,17.5 10.5,23 15.5,16.5 12.5,16.5" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.5"/>
+      {% elif icon_type == "fog" %}
+        <line x1="4" y1="8" x2="20" y2="8" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6" y1="12" x2="18" y2="12" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+        <line x1="3" y1="16" x2="21" y2="16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+        <line x1="7" y1="20" x2="17" y2="20" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+      {% elif icon_type == "cloud_moon" %}
+        <path d="M17 10.5A6 6 0 0 0 10.5 4a6.2 6.2 0 0 0-.8.05A7 7 0 0 1 18 11.8c0 .24-.01.47-.04.7a5.5 5.5 0 0 0-.96-2z" fill="url(#lunarGrad)"/>
+        <path d="M17.5 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 19z" fill="url(#cloudGrad)" opacity="0.95"/>
+      {% else %}
+        {% set pcode = moon_phase.code if moon_phase else "waxing_crescent" %}
+        {% if pcode == "full_moon" %}
+          <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+        {% elif pcode == "new_moon" %}
+          <circle cx="12" cy="12" r="8.5" fill="rgba(100, 116, 139, 0.15)" stroke="url(#lunarGrad)" stroke-width="1.2" stroke-dasharray="2.5 1.5"/>
+        {% elif pcode == "first_quarter" %}
+          <circle cx="12" cy="12" r="8.5" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="0.8"/>
+          <path d="M12 3.5 A8.5 8.5 0 0 1 12 20.5 Z" fill="url(#lunarGrad)"/>
+        {% elif pcode == "last_quarter" %}
+          <circle cx="12" cy="12" r="8.5" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="0.8"/>
+          <path d="M12 3.5 A8.5 8.5 0 0 0 12 20.5 Z" fill="url(#lunarGrad)"/>
+        {% elif pcode == "waxing_gibbous" %}
+          <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)"/>
+          <path d="M12 3.5 A8.5 8.5 0 0 0 12 20.5 A4.5 8.5 0 0 1 12 3.5 Z" fill="#0f172a" opacity="0.65"/>
+        {% elif pcode == "waning_gibbous" %}
+          <g transform="scale(-1, 1) translate(-24, 0)">
+            <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)"/>
+            <path d="M12 3.5 A8.5 8.5 0 0 0 12 20.5 A4.5 8.5 0 0 1 12 3.5 Z" fill="#0f172a" opacity="0.65"/>
+          </g>
+        {% elif pcode == "waning_crescent" %}
+          <g transform="scale(-1, 1) translate(-24, 0)">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+          </g>
+        {% else %}
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+        {% endif %}
+      {% endif %}
+    </svg>
+    {% endmacro %}
+    {% endif %}
+
+    <!-- Instant Sovereign Weather Card (Open-Meteo Open Data - Compact & Sleek) -->
+    {% if weather %}
     <section class="weather-card weather-compact" role="region" aria-label="Información meteorológica en tiempo real">
         <div class="weather-compact-body">
             <!-- Left Pane: Main Weather Info & Inline Metrics -->
             <div class="weather-current-pane">
                 <div class="weather-primary-row">
-                    {% if weather.icon_type == 'moon' %}
-                    <svg class="weather-vector-icon icon-moon" width="38" height="38" viewBox="0 0 24 24" fill="none" aria-label="Luna en cielo despejado">
-                        <defs>
-                            <linearGradient id="lunarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ffffff"/>
-                                <stop offset="45%" stop-color="#cbd5e1"/>
-                                <stop offset="100%" stop-color="#64748b"/>
-                            </linearGradient>
-                        </defs>
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
-                    </svg>
-                    {% elif weather.icon_type == 'cloud_moon' %}
-                    <svg class="weather-vector-icon icon-cloud-moon" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-label="Luna entre nubes">
-                        <defs>
-                            <linearGradient id="lunarGradCloud" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ffffff"/>
-                                <stop offset="50%" stop-color="#cbd5e1"/>
-                                <stop offset="100%" stop-color="#64748b"/>
-                            </linearGradient>
-                            <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#94a3b8"/>
-                                <stop offset="100%" stop-color="#475569"/>
-                            </linearGradient>
-                        </defs>
-                        <path d="M17 10.5A6 6 0 0 0 10.5 4a6.2 6.2 0 0 0-.8.05A7 7 0 0 1 18 11.8c0 .24-.01.47-.04.7a5.5 5.5 0 0 0-.96-2z" fill="url(#lunarGradCloud)"/>
-                        <path d="M17.5 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 19z" fill="url(#cloudGrad)" opacity="0.9"/>
-                    </svg>
-                    {% elif weather.icon_type == 'sun' %}
-                    <svg class="weather-vector-icon icon-sun" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Sol">
-                        <defs>
-                            <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#fef08a"/>
-                                <stop offset="70%" stop-color="#f59e0b"/>
-                                <stop offset="100%" stop-color="#d97706"/>
-                            </radialGradient>
-                        </defs>
-                        <circle cx="12" cy="12" r="5" fill="url(#sunGrad)" stroke="#f59e0b" stroke-width="1.2"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3" stroke="#f59e0b"></line>
-                        <line x1="12" y1="21" x2="12" y2="23" stroke="#f59e0b"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f59e0b"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f59e0b"></line>
-                        <line x1="1" y1="12" x2="3" y2="12" stroke="#f59e0b"></line>
-                        <line x1="21" y1="12" x2="23" y2="12" stroke="#f59e0b"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f59e0b"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f59e0b"></line>
-                    </svg>
-                    {% else %}
-                    <span class="weather-compact-icon" aria-hidden="true">{{ weather.weather_icon }}</span>
-                    {% endif %}
+                    {{ weather_icon(weather.icon_type, size=38, moon_phase=weather.moon_phase, label=weather.weather_description) }}
                     <div class="weather-temp-wrap">
                         <span class="weather-compact-temp">{{ weather.temperature }}</span>
                         <span class="weather-compact-unit">°C</span>
@@ -420,6 +470,9 @@
                         <div class="weather-sub-line">
                             {% if weather.time_period %}
                             <span class="weather-time-period-tag">{{ weather.time_period }}</span>
+                            {% if not weather.is_day and weather.moon_phase %}
+                            <span class="weather-moon-phase-tag">({{ weather.moon_phase.name }} &bull; {{ weather.moon_phase.illumination_pct }}%)</span>
+                            {% endif %}
                             <span class="metric-sep">&bull;</span>
                             {% endif %}
                             {% if weather.admin1 and weather.admin1 != weather.city_name %}
@@ -450,7 +503,7 @@
                 {% for f in weather.daily_forecast %}
                 <div class="forecast-mini-col">
                     <span class="forecast-mini-day">{{ f.day_name }}</span>
-                    <span class="forecast-mini-icon" aria-hidden="true">{{ f.icon }}</span>
+                    {{ weather_icon(f.icon_type, size=24, label=f.description) }}
                     <div class="forecast-mini-temps">
                         <span class="forecast-mini-max">{{ f.temp_max }}°</span>
                         <span class="forecast-mini-min">{{ f.temp_min }}°</span>
@@ -504,6 +557,9 @@
                 <div class="worldtime-sub-line">
                     {% if world_time.time_period %}
                     <span class="worldtime-period-tag">{{ world_time.time_period }}</span>
+                    {% if not world_time.is_day and world_time.moon_phase %}
+                    <span class="worldtime-moon-phase-tag">({{ world_time.moon_phase.name }} &bull; {{ world_time.moon_phase.illumination_pct }}%)</span>
+                    {% endif %}
                     <span class="metric-sep">&bull;</span>
                     {% endif %}
                     <span class="worldtime-date">{{ world_time.date_formatted }}</span>
@@ -512,37 +568,7 @@
             </div>
 
             <div class="worldtime-display-col">
-                {% if world_time.icon_type == 'moon' %}
-                <svg class="worldtime-vector-icon icon-moon" width="36" height="36" viewBox="0 0 24 24" fill="none" aria-label="{{ world_time.time_period }}">
-                    <defs>
-                        <linearGradient id="worldtimeLunarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff"/>
-                            <stop offset="45%" stop-color="#cbd5e1"/>
-                            <stop offset="100%" stop-color="#64748b"/>
-                        </linearGradient>
-                    </defs>
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#worldtimeLunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
-                </svg>
-                {% else %}
-                <svg class="worldtime-vector-icon icon-sun" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="{{ world_time.time_period }}">
-                    <defs>
-                        <radialGradient id="worldtimeSunGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stop-color="#fef08a"/>
-                            <stop offset="70%" stop-color="#f59e0b"/>
-                            <stop offset="100%" stop-color="#d97706"/>
-                        </radialGradient>
-                    </defs>
-                    <circle cx="12" cy="12" r="5" fill="url(#worldtimeSunGrad)" stroke="#f59e0b" stroke-width="1.2"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3" stroke="#f59e0b"></line>
-                    <line x1="12" y1="21" x2="12" y2="23" stroke="#f59e0b"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f59e0b"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f59e0b"></line>
-                    <line x1="1" y1="12" x2="3" y2="12" stroke="#f59e0b"></line>
-                    <line x1="21" y1="12" x2="23" y2="12" stroke="#f59e0b"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f59e0b"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f59e0b"></line>
-                </svg>
-                {% endif %}
+                {{ weather_icon(world_time.icon_type, size=36, moon_phase=world_time.moon_phase, label=world_time.time_period) }}
                 <div class="worldtime-clock">
                     <span class="worldtime-clock-24">{{ world_time.time_24 }}</span>
                     <span class="worldtime-clock-12">{{ world_time.time_12 }}</span>

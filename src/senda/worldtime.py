@@ -15,6 +15,7 @@ import re
 from typing import Optional
 from zoneinfo import ZoneInfo
 from pydantic import BaseModel
+from senda.astronomy import calculate_moon_phase, MoonPhaseInfo
 
 
 class WorldTimeResult(BaseModel):
@@ -31,6 +32,7 @@ class WorldTimeResult(BaseModel):
     day_icon: str
     icon_type: str = "sun"
     time_period: str = "Día"
+    moon_phase: Optional[MoonPhaseInfo] = None
     utc_diff_text: str
     source: str = "Senda Sovereign Engine (Base de Datos IANA)"
 
@@ -329,6 +331,9 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
     else:
         utc_offset = "UTC"
 
+    # Calculate real astronomical lunar phase for local time
+    moon_phase = calculate_moon_phase(now_tz)
+
     # Discern the 4 periods of the day: Madrugada, Mañana, Tarde, Noche
     hour = now_tz.hour
     if 0 <= hour < 6:
@@ -373,5 +378,6 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
         day_icon=day_icon,
         icon_type=icon_type,
         time_period=time_period,
+        moon_phase=moon_phase,
         utc_diff_text=utc_diff_text,
     )

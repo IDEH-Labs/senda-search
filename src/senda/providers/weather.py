@@ -21,6 +21,7 @@ import urllib.parse
 from typing import Any, Dict, List, Optional
 import httpx
 from pydantic import BaseModel, Field
+from senda.astronomy import calculate_moon_phase, MoonPhaseInfo
 
 
 # World Meteorological Organization (WMO) Weather Interpretation Codes (WW)
@@ -65,6 +66,7 @@ class DailyForecastItem(BaseModel):
     temp_max: int
     temp_min: int
     icon: str
+    icon_type: str = "sun"
     description: str
 
 
@@ -84,6 +86,7 @@ class WeatherCard(BaseModel):
     icon_type: str = "sun"
     time_period: str = "Día"
     is_day: bool = True
+    moon_phase: Optional[MoonPhaseInfo] = None
     daily_forecast: List[DailyForecastItem] = Field(default_factory=list)
     source: str = "Open-Meteo & Modelos Meteorológicos Abiertos (DWD, NOAA, ECMWF)"
     license: str = "Datos Abiertos (CC BY 4.0)"
@@ -240,12 +243,21 @@ class WeatherProvider:
             # Calculate local hour from Open-Meteo local time (auto timezone)
             local_time_raw = curr.get("time", "")
             local_hour = 12
-            if local_time_raw and "T" in local_time_raw:
+            local_dt = None
+            if local_time_raw:
                 try:
-                    time_part = local_time_raw.split("T")[1]
-                    local_hour = int(time_part.split(":")[0])
+                    local_dt = datetime.fromisoformat(local_time_raw)
+                    local_hour = local_dt.hour
                 except Exception:
-                    pass
+                    if "T" in local_time_raw:
+                        try:
+                            time_part = local_time_raw.split("T")[1]
+                            local_hour = int(time_part.split(":")[0])
+                        except Exception:
+                            pass
+
+            # Discern real astronomical lunar phase for local datetime
+            moon_phase = calculate_moon_phase(local_dt)
 
             # Discern the 4 periods of the day: Madrugada, Mañana, Tarde, Noche
             if 0 <= local_hour < 6:
@@ -313,6 +325,24 @@ class WeatherProvider:
                 d_max = round(maxs[i]) if i < len(maxs) else 0
                 d_min = round(mins[i]) if i < len(mins) else 0
 
+                # Determine daily vector icon type (forecast is daytime)
+                if d_code == 0:
+                    d_icon_type = "sun"
+                elif d_code in (1, 2):
+                    d_icon_type = "cloud_sun"
+                elif d_code == 3:
+                    d_icon_type = "cloud"
+                elif d_code in (45, 48):
+                    d_icon_type = "fog"
+                elif d_code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82):
+                    d_icon_type = "rain"
+                elif d_code in (71, 73, 75, 77, 85, 86):
+                    d_icon_type = "snow"
+                elif d_code in (95, 96, 99):
+                    d_icon_type = "thunderstorm"
+                else:
+                    d_icon_type = "cloud"
+
                 daily_items.append(
                     DailyForecastItem(
                         date=d_str,
@@ -320,6 +350,7 @@ class WeatherProvider:
                         temp_max=d_max,
                         temp_min=d_min,
                         icon=d_ico,
+                        icon_type=d_icon_type,
                         description=d_desc,
                     )
                 )
@@ -341,6 +372,7 @@ class WeatherProvider:
                 icon_type=icon_type,
                 time_period=time_period,
                 is_day=is_day,
+                moon_phase=moon_phase if not is_day else None,
                 daily_forecast=daily_items,
                 updated_at=time_str,
             )

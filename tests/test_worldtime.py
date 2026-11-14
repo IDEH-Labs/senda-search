@@ -33,6 +33,8 @@ def test_world_time_cities():
     assert quito.timezone_name == "America/Guayaquil"
     assert quito.time_period in ("Madrugada", "Mañana", "Tarde", "Noche")
     assert quito.icon_type in ("sun", "moon")
+    assert quito.moon_phase is not None
+    assert quito.moon_phase.name
     if quito.icon_type == "moon":
         assert quito.time_period in ("Madrugada", "Noche")
     else:
