@@ -12,6 +12,7 @@ import uvicorn
 
 from senda.config import settings
 from senda.crawler.runner import CrawlerRunner
+from senda.crawler.seeds import get_available_niches, get_niche_seeds, get_niche_seed_urls
 from senda.indexer.storage import StorageEngine
 from senda.ranking.retriever import SearchRetriever
 
@@ -102,6 +103,52 @@ def cmd_crawl(args):
         print(f"\n[Crawl Complete] Successfully indexed {indexed} new/updated documents.\n")
     except KeyboardInterrupt:
         print("\n[Crawl Cancelled] Interrupted by user.")
+
+
+def cmd_list_niches(args):
+    """List registered strategic niches for sovereign indexing."""
+    niches = get_available_niches()
+    print("\n=== Nichos Estratégicos de Indexación Soberana de Senda ===")
+    for key, meta in niches.items():
+        seeds = get_niche_seeds(key)
+        print(f"\n* \033[1;36m{key}\033[0m: \033[1;37m{meta['title']}\033[0m ({len(seeds)} semillas)")
+        print(f"  {meta['description']}")
+        for s in seeds[:4]:
+            print(f"    - {s.organization}: \033[90m{s.url}\033[0m")
+        if len(seeds) > 4:
+            print(f"    - ... y {len(seeds) - 4} semillas adicionales.")
+    print("\nEjecute un rastreo enfocado con: senda crawl-niche <niche_name> --max-pages 25\n")
+
+
+def cmd_crawl_niche(args):
+    """Crawl a curated high-value niche."""
+    niche = args.niche.strip().lower()
+    seeds = get_niche_seed_urls(niche)
+    if not seeds:
+        print(f"Error: Nicho '{niche}' no encontrado. Ejecute 'senda list-niches' para ver los disponibles.")
+        return
+
+    runner = CrawlerRunner()
+
+    def progress(url: str, title: str, count: int):
+        print(f"[{count}/{args.max_pages}] Indexado: {title[:50]}... ({url})")
+
+    print(f"\n[Senda Niche Crawler] Iniciando rastreo de nicho: \033[1;36m{niche}\033[0m")
+    print(f"Semillas curadas: {len(seeds)} | Máx páginas: {args.max_pages} | Profundidad: {args.max_depth} | Concurrencia: {args.concurrency}")
+
+    try:
+        indexed = asyncio.run(
+            runner.crawl_seeds(
+                seed_urls=seeds,
+                max_pages=args.max_pages,
+                max_depth=args.max_depth,
+                concurrency=args.concurrency,
+                on_page_indexed=progress,
+            )
+        )
+        print(f"\n[Niche Crawl Complete] Se indexaron/actualizaron exitosamente {indexed} documentos en el nicho '{niche}'.\n")
+    except KeyboardInterrupt:
+        print("\n[Niche Crawl Cancelled] Interrumpido por el usuario.")
 
 
 def cmd_crawl_daemon(args):
@@ -256,6 +303,16 @@ def main():
     p_daemon.add_argument("--max-depth", type=int, default=2, help="Max link hop depth (default: 2)")
     p_daemon.add_argument("--once", action="store_true", help="Run a single crawl cycle and exit cleanly")
 
+    # Command: list-niches
+    subparsers.add_parser("list-niches", help="List registered strategic niches for sovereign indexing")
+
+    # Command: crawl-niche
+    p_cniche = subparsers.add_parser("crawl-niche", help="Crawl a curated high-value niche")
+    p_cniche.add_argument("niche", choices=["tech_docs", "academic", "iberoamerica_media", "libre_software", "all"], help="Strategic niche to crawl")
+    p_cniche.add_argument("--max-pages", type=int, default=25, help="Max documents to index (default: 25)")
+    p_cniche.add_argument("--max-depth", type=int, default=1, help="Max link hop depth (default: 1)")
+    p_cniche.add_argument("--concurrency", type=int, default=3, help="Concurrent domain workers (default: 3)")
+
     # Command: purge-domain
     p_purgd = subparsers.add_parser("purge-domain", help="Takedown/purge entire domain from index")
     p_purgd.add_argument("domain", help="Domain name to purge (e.g. example.com)")
@@ -277,6 +334,8 @@ def main():
         "search": cmd_search,
         "crawl": cmd_crawl,
         "crawl-daemon": cmd_crawl_daemon,
+        "list-niches": cmd_list_niches,
+        "crawl-niche": cmd_crawl_niche,
         "purge-domain": cmd_purge_domain,
         "purge-url": cmd_purge_url,
         "serve": cmd_serve,

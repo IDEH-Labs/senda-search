@@ -2,48 +2,65 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
 
-# IDEH Labs Sovereign Ecosystem
-https://ideh.top
+# =====================================================================
+# 1. DOCUMENTACIÓN TÉCNICA OFICIAL (Tech Docs)
+# =====================================================================
+https://docs.python.org/3/
+https://developer.mozilla.org/es/
+https://www.debian.org/doc/
+https://www.gnu.org/manual/
+https://doc.rust-lang.org/
+https://docs.kernel.org/
+https://wiki.archlinux.org/
+https://www.w3.org/
 
-# Free Software Foundation & GNU Project
-https://www.fsf.org
-https://www.gnu.org
+# =====================================================================
+# 2. CIENCIA ABIERTA Y REPOSITORIOS ACADÉMICOS (Academic & Open Science)
+# =====================================================================
+https://scielo.org/es/
+https://www.redalyc.org/
+https://arxiv.org/
+https://doaj.org/
+https://dialnet.unirioja.es/
+https://biblioteca-repositorio.clacso.edu.ar/
 
-# Linux Kernel & Community
-https://www.kernel.org
+# =====================================================================
+# 3. PERIODISMO INDEPENDIENTE DE IBEROAMÉRICA (Independent Civic Media)
+# =====================================================================
+https://www.elsaltodiario.com/
+https://ctxt.es/
+https://www.ciperchile.cl/
+https://cerosetenta.uniandes.edu.co/
+https://voragine.co/
+https://www.lasillavacia.com/
+https://elfaro.net/
+https://www.plazapublica.com.gt/
+https://apublica.org/
 
-# Sovereign Linux Distributions
-https://www.gentoo.org
-https://www.debian.org
+# =====================================================================
+# 4. SOFTWARE LIBRE Y CULTURA ABIERTA (Libre Software & Open Culture)
+# =====================================================================
+https://ideh.top/
+https://www.fsf.org/
+https://www.gnu.org/
+https://sfconservancy.org/
+https://opensource.org/
+https://creativecommons.org/
+https://archive.org/
+https://www.gutenberg.org/
+https://www.eff.org/
+https://libreplanet.org/
+https://kernel.org/
+https://www.debian.org/
 
-# Digital Freedom & Rights
-https://www.eff.org
-https://archive.org
-https://libreplanet.org
-
-# Free Knowledge & Sovereign Digital Library
+# =====================================================================
+# 5. ENCICLOPEDIAS Y CONOCIMIENTO ABIERTO
+# =====================================================================
 https://es.wikipedia.org/wiki/Wikipedia:Portada
-https://es.wikipedia.org/wiki/Colombia
 https://es.wikipedia.org/wiki/Software_libre
 https://es.wikipedia.org/wiki/GNU/Linux
 https://es.wikipedia.org/wiki/Ciencia
 https://es.wikipedia.org/wiki/Tecnolog%C3%ADa
-https://es.wikipedia.org/wiki/Internet
-https://es.wikipedia.org/wiki/Filosof%C3%ADa
 https://en.wikipedia.org/wiki/Main_Page
 https://en.wikipedia.org/wiki/Free_software
-https://en.wikipedia.org/wiki/Linux
 https://es.wikinews.org/wiki/Portada
-https://www.gutenberg.org
-https://www.gnu.org/manual
-https://www.w3.org
-
-# Free Cultural Media (Wikimedia Commons)
-https://commons.wikimedia.org
-
-# Ethical Tech News & Journalistic Feeds
-https://www.fsf.org/news
-https://www.eff.org/deeplinks
-https://lwn.net
-https://fsfe.org/news
-https://planet.debian.org

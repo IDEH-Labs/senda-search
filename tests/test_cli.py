@@ -156,4 +156,29 @@ def test_cli_serve_disables_access_log_by_default_and_honors_env(monkeypatch):
         assert mock_run.call_args.kwargs["access_log"] is True
 
 
+def test_cli_list_niches(monkeypatch, capsys):
+    """Verify senda list-niches prints registered high-value niches."""
+    monkeypatch.setattr(sys, "argv", ["senda", "list-niches"])
+    main()
+    captured = capsys.readouterr()
+    assert "Nichos Estratégicos de Indexación Soberana" in captured.out
+    assert "tech_docs" in captured.out
+    assert "academic" in captured.out
+    assert "iberoamerica_media" in captured.out
+    assert "libre_software" in captured.out
+
+
+def test_cli_crawl_niche_mocked(monkeypatch, capsys):
+    """Verify senda crawl-niche triggers CrawlerRunner with curated seeds."""
+    from unittest.mock import AsyncMock
+    monkeypatch.setattr(sys, "argv", ["senda", "crawl-niche", "tech_docs", "--max-pages", "5", "--max-depth", "1"])
+    with patch("senda.crawler.runner.CrawlerRunner.crawl_seeds", new=AsyncMock(return_value=3)):
+        main()
+        captured = capsys.readouterr()
+        assert "Iniciando rastreo de nicho" in captured.out
+        assert "tech_docs" in captured.out
+        assert "Se indexaron/actualizaron exitosamente 3 documentos" in captured.out
+
+
+
 

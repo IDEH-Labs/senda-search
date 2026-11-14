@@ -41,6 +41,7 @@ from senda.providers.base import SearchResultItem
 from senda.synthesis.extractive import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
 from senda.calculator import evaluate_math_query
+from senda.dictionary import DictionaryProvider
 from senda.providers.weather import WeatherProvider
 from senda.converters import convert_query
 from senda.worldtime import get_world_time
@@ -103,6 +104,7 @@ class SearchResponseModel(BaseModel):
     grounded_synthesis: Optional[dict] = None
     entity_card: Optional[dict] = None
     calculator: Optional[dict] = None
+    dictionary: Optional[dict] = None
     weather: Optional[dict] = None
     conversion: Optional[dict] = None
     world_time: Optional[dict] = None
@@ -223,6 +225,7 @@ def create_app(
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
     app_wiki_entity = WikipediaEntityProvider()
     app_weather = WeatherProvider()
+    app_dictionary = DictionaryProvider()
     app_reader = SovereignReader()
     app_suggestions = SuggestionEngine()
 
@@ -890,6 +893,13 @@ def create_app(
             if weather_card_obj:
                 weather_data = weather_card_obj.model_dump()
 
+        # Instant Sovereign Dictionary & Lexicographical Card (Wikcionario / Wiktionary)
+        dictionary_data = None
+        if current_page == 1 and clean_q and cat in ("all", "web"):
+            dict_card_obj = await app_dictionary.get_definition(clean_q, default_lang=user_lang or "es")
+            if dict_card_obj:
+                dictionary_data = dict_card_obj.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -904,6 +914,7 @@ def create_app(
             grounded_synthesis=grounded_data,
             entity_card=entity_data,
             calculator=calculator_data,
+            dictionary=dictionary_data,
             weather=weather_data,
             conversion=conversion_data,
             world_time=world_time_data,
@@ -934,6 +945,7 @@ def create_app(
                 "grounded_synthesis": grounded_data,
                 "entity_card": entity_data,
                 "calculator": calculator_data,
+                "dictionary": dictionary_data,
                 "weather": weather_data,
                 "conversion": conversion_data,
                 "world_time": world_time_data,

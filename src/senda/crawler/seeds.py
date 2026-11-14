@@ -1483,3 +1483,326 @@ def get_government_seeds() -> List[SeedDefinition]:
         s for s in CURATED_SEEDS
         if s.category in ("gobierno_nacional", "gobierno_multilateral", "datos_publicos")
     ]
+
+
+# ---------------------------------------------------------------------
+# HIGH-VALUE STRATEGIC NICHES FOR SOVEREIGN INDEXING
+# ---------------------------------------------------------------------
+
+NICHE_DEFINITIONS: dict[str, dict[str, str]] = {
+    "tech_docs": {
+        "title": "Documentación Técnica Oficial",
+        "description": "Manuales y documentación oficial de lenguajes, kernels y sistemas libres (Python, Debian, MDN, GNU, Rust, Linux, Arch).",
+    },
+    "academic": {
+        "title": "Ciencia Abierta y Revistas Académicas",
+        "description": "Repositorios científicos y hemerotecas abiertas revisadas por pares (SciELO, Redalyc, arXiv, DOAJ, Dialnet, CLACSO).",
+    },
+    "iberoamerica_media": {
+        "title": "Medios Independientes de Iberoamérica",
+        "description": "Portales de periodismo de investigación cívico y medios comunitarios independientes de habla hispana y portuguesa.",
+    },
+    "libre_software": {
+        "title": "Ecosistema de Software Libre y Cultura Abierta",
+        "description": "Fundaciones pilares de derechos digitales, licencias libres y preservación universal (FSF, GNU, Conservancy, CC, Archive.org).",
+    },
+}
+
+NICHE_SEEDS: dict[str, List[SeedDefinition]] = {
+    "tech_docs": [
+        SeedDefinition(
+            id="niche-tech-python",
+            url="https://docs.python.org/3/",
+            domain="docs.python.org",
+            organization="Python Software Foundation",
+            category="documentacion_tecnica",
+            license_hint="PSF License",
+            why_included="Documentación oficial de referencia del lenguaje Python.",
+        ),
+        SeedDefinition(
+            id="niche-tech-mdn",
+            url="https://developer.mozilla.org/es/",
+            domain="developer.mozilla.org",
+            organization="Mozilla Developer Network",
+            category="documentacion_tecnica",
+            license_hint="CC BY-SA 2.5+",
+            why_included="Estándares web abiertos oficiales (HTML, CSS, JavaScript, APIs).",
+        ),
+        SeedDefinition(
+            id="niche-tech-debian-doc",
+            url="https://www.debian.org/doc/",
+            domain="www.debian.org",
+            organization="Proyecto Debian",
+            category="documentacion_tecnica",
+            license_hint="GNU GPL / FDL",
+            why_included="Guías y manuales de administración del sistema universal Debian.",
+        ),
+        SeedDefinition(
+            id="niche-tech-gnu-manuals",
+            url="https://www.gnu.org/manual/",
+            domain="www.gnu.org",
+            organization="Free Software Foundation / GNU",
+            category="documentacion_tecnica",
+            license_hint="GNU FDL",
+            why_included="Manuales oficiales canónicos del software libre del sistema GNU.",
+        ),
+        SeedDefinition(
+            id="niche-tech-rust",
+            url="https://doc.rust-lang.org/",
+            domain="doc.rust-lang.org",
+            organization="Rust Foundation",
+            category="documentacion_tecnica",
+            license_hint="MIT / Apache 2.0",
+            why_included="Documentación oficial del lenguaje Rust y The Rust Book.",
+        ),
+        SeedDefinition(
+            id="niche-tech-linux-kernel",
+            url="https://docs.kernel.org/",
+            domain="docs.kernel.org",
+            organization="The Linux Kernel Organization",
+            category="documentacion_tecnica",
+            license_hint="GNU GPL-2.0",
+            why_included="Documentación técnica y arquitectura del núcleo Linux.",
+        ),
+        SeedDefinition(
+            id="niche-tech-archwiki",
+            url="https://wiki.archlinux.org/",
+            domain="wiki.archlinux.org",
+            organization="Arch Linux Community",
+            category="documentacion_tecnica",
+            license_hint="GNU FDL 1.3",
+            why_included="Una de las bases de conocimiento técnico y resolución de problemas GNU/Linux más completas del mundo.",
+        ),
+    ],
+    "academic": [
+        SeedDefinition(
+            id="niche-acad-scielo",
+            url="https://scielo.org/es/",
+            domain="scielo.org",
+            organization="SciELO (Scientific Electronic Library Online)",
+            category="ciencia_abierta",
+            license_hint="CC BY",
+            why_included="Red cooperativa de revistas científicas de acceso abierto en Iberoamérica.",
+        ),
+        SeedDefinition(
+            id="niche-acad-redalyc",
+            url="https://www.redalyc.org/",
+            domain="www.redalyc.org",
+            organization="Redalyc / UAEMéx",
+            category="ciencia_abierta",
+            license_hint="Acceso Abierto Diamante no comercial",
+            why_included="Ecosistema de revistas científicas sin cobro de APC de América Latina y España.",
+        ),
+        SeedDefinition(
+            id="niche-acad-arxiv",
+            url="https://arxiv.org/",
+            domain="arxiv.org",
+            organization="Cornell University / arXiv",
+            category="ciencia_abierta",
+            license_hint="Open Access Preprints",
+            why_included="Preprints abiertos en física, matemáticas, computación y biología cuantitativa.",
+        ),
+        SeedDefinition(
+            id="niche-acad-doaj",
+            url="https://doaj.org/",
+            domain="doaj.org",
+            organization="DOAJ (Directory of Open Access Journals)",
+            category="ciencia_abierta",
+            license_hint="Open Access Directory",
+            why_included="Directorio global curado de revistas de acceso abierto revisadas por pares.",
+        ),
+        SeedDefinition(
+            id="niche-acad-dialnet",
+            url="https://dialnet.unirioja.es/",
+            domain="dialnet.unirioja.es",
+            organization="Universidad de La Rioja / Dialnet",
+            category="ciencia_abierta",
+            license_hint="Acceso Abierto Científico",
+            why_included="Mayor repositorio bibliográfico de producción científica en español y portugués.",
+        ),
+        SeedDefinition(
+            id="niche-acad-clacso",
+            url="https://biblioteca-repositorio.clacso.edu.ar/",
+            domain="biblioteca-repositorio.clacso.edu.ar",
+            organization="Consejo Latinoamericano de Ciencias Sociales (CLACSO)",
+            category="ciencia_abierta",
+            license_hint="CC BY-NC-ND",
+            why_included="Biblioteca virtual de ciencias sociales y pensamiento crítico de América Latina.",
+        ),
+    ],
+    "iberoamerica_media": [
+        SeedDefinition(
+            id="niche-media-elsalto",
+            url="https://www.elsaltodiario.com/",
+            domain="www.elsaltodiario.com",
+            organization="El Salto Diario",
+            category="periodismo_independiente",
+            license_hint="CC BY-SA 3.0",
+            why_included="Periodismo de investigación cooperativo sin ánimo de lucro (España).",
+            country_code="ES",
+        ),
+        SeedDefinition(
+            id="niche-media-ctxt",
+            url="https://ctxt.es/",
+            domain="ctxt.es",
+            organization="Revista Contexto (CTXT)",
+            category="periodismo_independiente",
+            license_hint="CC BY-NC",
+            why_included="Periodismo independiente de análisis político y cultural en profundidad (España).",
+            country_code="ES",
+        ),
+        SeedDefinition(
+            id="niche-media-ciper",
+            url="https://www.ciperchile.cl/",
+            domain="www.ciperchile.cl",
+            organization="Centro de Investigación Periodística (CIPER)",
+            category="periodismo_independiente",
+            license_hint="Periodismo sin fines de lucro",
+            why_included="Referente internacional de periodismo investigativo anticorrupción y cívico (Chile).",
+            country_code="CL",
+        ),
+        SeedDefinition(
+            id="niche-media-cerosetenta",
+            url="https://cerosetenta.uniandes.edu.co/",
+            domain="cerosetenta.uniandes.edu.co",
+            organization="Revista Cerosetenta",
+            category="periodismo_independiente",
+            license_hint="CC BY-SA",
+            why_included="Revista de periodismo independiente sobre derechos humanos y sociedad (Colombia).",
+            country_code="CO",
+        ),
+        SeedDefinition(
+            id="niche-media-voragine",
+            url="https://voragine.co/",
+            domain="voragine.co",
+            organization="Vorágine Periodismo",
+            category="periodismo_independiente",
+            license_hint="Periodismo de investigación independiente",
+            why_included="Investigación de fondo sobre derechos humanos, medio ambiente y poder (Colombia).",
+            country_code="CO",
+        ),
+        SeedDefinition(
+            id="niche-media-lasilla",
+            url="https://www.lasillavacia.com/",
+            domain="www.lasillavacia.com",
+            organization="La Silla Vacía",
+            category="periodismo_independiente",
+            license_hint="Investigación y análisis cívico",
+            why_included="Periodismo cívico de verificación y cobertura del poder político (Colombia).",
+            country_code="CO",
+        ),
+        SeedDefinition(
+            id="niche-media-elfaro",
+            url="https://elfaro.net/",
+            domain="elfaro.net",
+            organization="El Faro",
+            category="periodismo_independiente",
+            license_hint="Periodismo independiente",
+            why_included="Primer periódico digital de América Latina, líder en investigación en Centroamérica (El Salvador).",
+            country_code="SV",
+        ),
+        SeedDefinition(
+            id="niche-media-plazapublica",
+            url="https://www.plazapublica.com.gt/",
+            domain="www.plazapublica.com.gt",
+            organization="Plaza Pública",
+            category="periodismo_independiente",
+            license_hint="CC BY-NC-SA",
+            why_included="Periodismo de investigación, análisis y debate en profundidad (Guatemala).",
+            country_code="GT",
+        ),
+        SeedDefinition(
+            id="niche-media-apublica",
+            url="https://apublica.org/",
+            domain="apublica.org",
+            organization="Agência Pública",
+            category="periodismo_independiente",
+            license_hint="CC BY-ND",
+            why_included="Primera agencia de periodismo de investigación sin fines de lucro en Brasil.",
+            country_code="BR",
+        ),
+    ],
+    "libre_software": [
+        SeedDefinition(
+            id="niche-libre-fsf",
+            url="https://www.fsf.org/",
+            domain="www.fsf.org",
+            organization="Free Software Foundation",
+            category="software_libre",
+            license_hint="FDL / CC BY-ND 4.0",
+            why_included="Filosofía fundacional y defensa legal del software libre.",
+            country_code="US",
+        ),
+        SeedDefinition(
+            id="niche-libre-gnu",
+            url="https://www.gnu.org/",
+            domain="www.gnu.org",
+            organization="Proyecto GNU",
+            category="software_libre",
+            license_hint="GNU FDL / CC BY-ND",
+            why_included="Filosofía, documentación y software del sistema operativo GNU.",
+            country_code="US",
+        ),
+        SeedDefinition(
+            id="niche-libre-conservancy",
+            url="https://sfconservancy.org/",
+            domain="sfconservancy.org",
+            organization="Software Freedom Conservancy",
+            category="software_libre",
+            license_hint="CC BY-SA",
+            why_included="Hogar legal y ético de proyectos libres clave como Git, Samba y BusyBox.",
+            country_code="US",
+        ),
+        SeedDefinition(
+            id="niche-libre-archive",
+            url="https://archive.org/",
+            domain="archive.org",
+            organization="Internet Archive",
+            category="preservacion",
+            license_hint="Dominio Público / Diversas licencias abiertas",
+            why_included="Biblioteca digital universal y preservación histórica de la web y obras culturales.",
+            country_code="US",
+        ),
+        SeedDefinition(
+            id="niche-libre-gutenberg",
+            url="https://www.gutenberg.org/",
+            domain="www.gutenberg.org",
+            organization="Project Gutenberg",
+            category="cultura_abierta",
+            license_hint="Dominio Público",
+            why_included="Mayor biblioteca digital de libros electrónicos libres de derechos de autor.",
+            country_code="US",
+        ),
+        SeedDefinition(
+            id="niche-libre-cc",
+            url="https://creativecommons.org/",
+            domain="creativecommons.org",
+            organization="Creative Commons",
+            category="cultura_abierta",
+            license_hint="CC BY 4.0",
+            why_included="Estándares jurídicos internacionales para obras culturales libres.",
+            country_code="US",
+        ),
+    ],
+}
+
+
+def get_available_niches() -> dict[str, dict[str, str]]:
+    """Return dictionary of registered high-value niche identifiers and metadata."""
+    return NICHE_DEFINITIONS
+
+
+def get_niche_seeds(niche: str) -> List[SeedDefinition]:
+    """Retrieve list of curated SeedDefinitions for a given niche identifier."""
+    clean = niche.strip().lower()
+    if clean == "all":
+        out = []
+        for n_seeds in NICHE_SEEDS.values():
+            out.extend(n_seeds)
+        return out
+    return NICHE_SEEDS.get(clean, [])
+
+
+def get_niche_seed_urls(niche: str) -> List[str]:
+    """Retrieve URL strings for a given niche identifier."""
+    return [s.url for s in get_niche_seeds(niche)]

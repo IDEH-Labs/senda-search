@@ -2661,6 +2661,182 @@ html.light .calculator-card {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
+/* Sovereign Instant Dictionary & Definition Card (Wikcionario / Wiktionary) */
+.dictionary-card {
+  margin: 1.25rem 0 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--text-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: calcSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dictionary-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dictionary-word-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dictionary-word {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.dictionary-pos {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-cyan);
+}
+
+.dictionary-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--text-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  display: inline-flex;
+  align-items: center;
+}
+
+.dictionary-etymology {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--border-subtle);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.etymology-label {
+  font-weight: 600;
+  color: var(--text-main);
+  margin-right: 0.35rem;
+}
+
+.dictionary-synonyms-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0;
+}
+
+.synonyms-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.synonyms-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.synonym-chip {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: var(--bg-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.synonym-chip:hover {
+  background: var(--bg-chip-hover);
+  border-color: var(--text-cyan);
+  color: var(--text-cyan);
+}
+
+.dictionary-senses {
+  margin: 0.25rem 0 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dictionary-sense-item {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.sense-content {
+  color: var(--text-main);
+}
+
+.sense-field {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.4rem;
+  margin-right: 0.4rem;
+  border-radius: var(--radius-sm);
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted);
+}
+
+.sense-example {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.dictionary-footer {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.dictionary-footer a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.dictionary-footer a:hover {
+  text-decoration: underline;
+}
+
+[data-theme="light"] .dictionary-card,
+html.light .dictionary-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
 /* Sovereign Instant Real-Time Weather Card (Compact & Sleek) */
 .weather-card {
   width: 100%;

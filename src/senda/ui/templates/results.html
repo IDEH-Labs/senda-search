@@ -626,6 +626,74 @@
     </aside>
     {% endif %}
 
+    <!-- Instant Sovereign Dictionary Card (Wikcionario / Wiktionary Open Data) -->
+    {% if dictionary %}
+    <section class="dictionary-card" role="region" aria-label="Definición lexicográfica soberana">
+        <div class="dictionary-top">
+            <div class="dictionary-word-group">
+                <h2 class="dictionary-word">{{ dictionary.word }}</h2>
+                <span class="dictionary-pos">{{ dictionary.part_of_speech }}</span>
+            </div>
+            <span class="dictionary-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: text-bottom;">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                Diccionario
+            </span>
+        </div>
+
+        {% if dictionary.etymology %}
+        <div class="dictionary-etymology">
+            <span class="etymology-label">Etimología:</span>
+            <span class="etymology-text">{{ dictionary.etymology }}</span>
+        </div>
+        {% endif %}
+
+        {% if dictionary.all_synonyms %}
+        <div class="dictionary-synonyms-bar">
+            <span class="synonyms-title">Sinónimos:</span>
+            <div class="synonyms-chips">
+                {% for syn in dictionary.all_synonyms[:8] %}
+                <a href="/search?q={{ syn | urlencode }}&category=all" class="synonym-chip">{{ syn }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if dictionary.all_antonyms %}
+        <div class="dictionary-synonyms-bar">
+            <span class="synonyms-title">Antónimos:</span>
+            <div class="synonyms-chips">
+                {% for ant in dictionary.all_antonyms[:8] %}
+                <a href="/search?q={{ ant | urlencode }}&category=all" class="synonym-chip">{{ ant }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <ol class="dictionary-senses">
+            {% for sense in dictionary.senses %}
+            <li class="dictionary-sense-item">
+                <div class="sense-content">
+                    {% if sense.field %}
+                    <span class="sense-field">{{ sense.field }}</span>
+                    {% endif %}
+                    <span class="sense-definition">{{ sense.definition }}</span>
+                    {% if sense.example %}
+                    <p class="sense-example">«{{ sense.example }}»</p>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+
+        <div class="dictionary-footer">
+            <span class="dictionary-license">Fuente abierta: <a href="{{ dictionary.source_url }}" target="_blank" rel="noopener noreferrer">{{ dictionary.source_name }}</a> ({{ dictionary.license }})</span>
+        </div>
+    </section>
+    {% endif %}
+
     <!-- Grounded Extractive Synthesis (Rendered only on explicit opt-in via ?synthesis=true) -->
     {% if grounded_synthesis %}
     <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis extractiva de documentos consultados">
