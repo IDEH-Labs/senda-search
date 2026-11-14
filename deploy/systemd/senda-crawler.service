@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
 [Unit]
 Description=Senda Sovereign Search Background Crawler
 After=network.target senda.service
@@ -11,3 +14,9 @@ Environment=PYTHONUNBUFFERED=1
 ExecStart=/opt/senda/venv/bin/senda crawl --seeds-file /etc/senda/ethical_seeds.txt --max-pages 500 --max-depth 2
 StandardOutput=journal
 StandardError=journal
+
+# Sandboxing & Systemd Hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/senda
+PrivateTmp=yes

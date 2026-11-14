@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 IDEH Labs <https://ideh.top>
+
+[Unit]
+Description=Senda SQLite Database Maintenance and WAL Checkpoint
+After=senda.service
+
+[Service]
+Type=oneshot
+User=senda
+Group=senda
+ExecStart=/usr/bin/sqlite3 /var/lib/senda/data/senda.db "PRAGMA wal_checkpoint(TRUNCATE); PRAGMA optimize;"

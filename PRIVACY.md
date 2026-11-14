@@ -86,8 +86,8 @@ La honestidad hacia el usuario exige transparentar los límites técnicos de cua
 
 Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de literatura científica o bibliotecas externas:
 
-1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** realiza solicitudes salientes a las APIs de OpenAlex u Open Library.
-2. **Activación Exclusiva por Intención Explícita:** La consulta saliente anonimizada hacia OpenAlex y Open Library únicamente se emite cuando el usuario selecciona expresamente la vertical **Biblioteca** (`category=library`) o activa el parámetro explícito de opt-in académico (`academic=true`), o mediante atajos dedicados (`!oa`, `!ol`).
+1. **Inactivo por Defecto en Búsqueda General sin Términos Relevantes:** Durante las consultas generales o web (`category=all`), Senda no efectúa solicitudes salientes arbitrarias a OpenAlex.
+2. **Activación Exclusiva por Intención Explícita:** La consulta saliente anonimizada hacia OpenAlex se emite cuando el usuario selecciona expresamente la vertical **Biblioteca** (`category=library`) o activa el parámetro de opt-in académico (`academic=true`).
 3. **Caché Local y Protección de Presupuesto:** Cada consulta consume presupuestos de red de servidores públicos. Senda implementa memoria intermedia en caché volátil local (TTL de 1 hora) y limitadores de tasa de peticiones por minuto con ventanas deslizantes. Esto evita consultas duplicadas, minimiza la huella de red y maneja defensivamente códigos HTTP 409 y 429.
 4. **Sin Rastreo ni Filtración de Identidad:** La petición saliente se origina exclusivamente desde el servidor proxy de Senda, utilizando una cabecera técnica de cortesía (`User-Agent` institucional). La IP del usuario, sus cookies, datos de navegación y huellas digitales son completamente omitidas.
 
@@ -98,12 +98,21 @@ Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de 
 Para garantizar que las consultas de búsqueda habituales no se filtren a nodos de redes sociales ni a directorios federados:
 
 1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** contacta instancias de Mastodon (ActivityPub), endpoints de Bluesky (ATProto) ni instancias federadas de Lemmy.
-2. **Activación Exclusiva por Vertical "Comunidad / Redes Abiertas" u Opt-in:** Las solicitudes hacia instancias federadas únicamente se despachan cuando el usuario pulsa explícitamente la pestaña **Comunidad / Redes Abiertas** (`category=community` o `category=social`) o invoca atajos tipográficos soberanos (`!masto`, `!bsky`, `!lemmy`).
+2. **Activación Exclusiva por Vertical "Comunidad / Redes Abiertas" u Opt-in:** Las solicitudes hacia instancias federadas únicamente se despachan cuando el usuario pulsa explícitamente la pestaña **Comunidad / Redes Abiertas** (`category=community` o `category=social`) o activa la opción correspondiente.
 3. **Anonimización Absoluta:** Las solicitudes se originan desde el backend proxy de Senda sin cookies, tokens de usuario ni cabeceras del cliente final. Solo se procesan contenidos declarados como públicos según el protocolo respectivo.
 
 ---
 
-## 7. Síntesis Asistida Grounded (Cero Alucinaciones y Desactivada por Defecto)
+## 7. Vertical de Imágenes y Divulgación de Tokens en Openverse
+
+1. **Wikimedia Commons:** Las consultas se canalizan directamente al endpoint de la API pública de Wikimedia Commons bajo User-Agent transparente institucional, sin cookies ni intermediarios.
+2. **Openverse y Reto Cloudflare:** La API pública de Openverse opera detrás de la red de entrega de Cloudflare. En entornos de centros de datos (como servidores en la nube), las peticiones no autenticadas pueden ser interceptadas por desafíos anti-bot automáticos (`cf-mitigated: challenge`).
+3. **Divulgación de Privacidad sobre Token Registrado:** Para habilitar consultas directas estables, el administrador puede proveer un token de acceso registrado (`SENDA_OPENVERSE_API_KEY`). **Compromiso y advertencia de privacidad:** La utilización de un token de API permite a la entidad proveedora (WordPress Foundation) asociar el conjunto de consultas salientes emitidas por la IP del proxy con la cuenta registrada de la aplicación. La IP del usuario final, sus huellas digitales y cookies jamás se transmiten.
+4. **Almacenamiento Seguro de Credenciales:** Dicho token reside exclusivamente en el archivo de entorno seguro del sistema (`/etc/senda/senda.env` con permisos estrictos `600`), sin registrarse jamás en repositorios de código ni en el historial de versiones.
+
+---
+
+## 8. Síntesis Asistida Grounded (Cero Alucinaciones y Desactivada por Defecto)
 
 1. **Desactivada por Defecto:** La síntesis asistida se encuentra inactiva en la configuración estándar del servidor (`ENABLE_AI_SYNTHESIS=False`).
 2. **Fundamentación Estricta (*Grounded*):** Si se activa explícitamente, Senda prohíbe categóricamente generar afirmaciones sin respaldo. Toda afirmación debe citar obligatoriamente `[1]`, `[2]` vinculando al documento primario recuperado en la consulta.

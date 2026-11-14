@@ -10,6 +10,7 @@ in adherence to Free Software Foundation (FSF) ethics and verifiable provenance.
 
 from collections import deque
 import logging
+import os
 import time
 from typing import Optional, List, Dict, Tuple, Any
 import urllib.parse
@@ -34,11 +35,21 @@ class OpenverseProvider(SearchProvider):
         enabled: Optional[bool] = None,
     ):
         self.endpoint = (endpoint or getattr(settings, "OPENVERSE_ENDPOINT", "https://api.openverse.org/v1")).rstrip("/")
-        self.api_key = (api_key if api_key is not None else getattr(settings, "OPENVERSE_API_KEY", "")).strip()
+        # Check explicit parameter, settings model (SENDA_OPENVERSE_API_KEY via pydantic-settings), or direct os.environ
+        resolved_key = (
+            api_key
+            if api_key is not None
+            else getattr(settings, "OPENVERSE_API_KEY", "")
+            or os.environ.get("SENDA_OPENVERSE_API_KEY", "")
+            or os.environ.get("OPENVERSE_API_KEY", "")
+        )
+        self.api_key = resolved_key.strip()
         self.timeout = timeout
         self.rate_limit_per_minute = rate_limit_per_minute or getattr(settings, "OPENVERSE_RATE_LIMIT_PER_MINUTE", 60)
         self.cache_ttl_seconds = cache_ttl_seconds or getattr(settings, "OPENVERSE_CACHE_TTL_SECONDS", 3600)
         self._enabled = getattr(settings, "OPENVERSE_ENABLED", True) if enabled is None else enabled
+        self.last_status: str = "ok"
+        self.last_error: Optional[str] = None
 
         self._cache: Dict[str, Tuple[float, List[SearchResultItem]]] = {}
         self._request_timestamps: deque = deque()
@@ -122,15 +133,27 @@ class OpenverseProvider(SearchProvider):
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 resp = await client.get(api_url, headers=headers)
-                if resp.status_code != 200:
-                    logger.debug("Openverse response status: %s", resp.status_code)
+                if resp.status_code == 403:
+                    self.last_status = "challenge_blocked"
+                    self.last_error = "Desafío anti-bot de Cloudflare detectado (HTTP 403)."
+                    logger.warning("OpenverseProvider: Desafío Cloudflare (HTTP 403) detectado. Fuente no disponible sin SENDA_OPENVERSE_API_KEY registrada.")
                     return []
+                elif resp.status_code != 200:
+                    self.last_status = f"http_{resp.status_code}"
+                    self.last_error = f"Error HTTP {resp.status_code} desde api.openverse.org."
+                    logger.warning("OpenverseProvider: Respuesta inesperada HTTP %s.", resp.status_code)
+                    return []
+
+                self.last_status = "ok"
+                self.last_error = None
                 data = resp.json()
                 items = self.parse_results(data)
                 self._save_to_cache(cache_key, items)
                 return items
         except Exception as exc:
-            logger.debug("Openverse fetch error: %s", exc)
+            self.last_status = "network_error"
+            self.last_error = str(exc)
+            logger.warning("OpenverseProvider: Error de conexión hacia api.openverse.org: %s", exc)
             return []
 
     def parse_results(self, data: Dict[str, Any]) -> List[SearchResultItem]:

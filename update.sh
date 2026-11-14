@@ -64,6 +64,7 @@ Type=simple
 User=senda
 Group=senda
 WorkingDirectory=/var/lib/senda
+EnvironmentFile=-/etc/senda/senda.env
 Environment="SENDA_DATABASE_PATH=/var/lib/senda/data/senda.db"
 Environment="SENDA_HOST=127.0.0.1"
 Environment="SENDA_PORT=8000"
