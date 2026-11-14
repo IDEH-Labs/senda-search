@@ -721,6 +721,62 @@ document.addEventListener("DOMContentLoaded", function() {
   initDropdownsAndFilters();
   initCommandBar();
   initOpenSearchInstallation();
+  initWorldTimeLiveClock();
 });
+
+/**
+ * Live Sovereign World Time Clock
+ * Accurately ticks seconds client-side using standard W3C Intl API.
+ * 100% offline, zero network telemetry.
+ */
+function initWorldTimeLiveClock() {
+  var clockEl = document.querySelector('.worldtime-clock[data-timezone]');
+  if (!clockEl) return;
+
+  var tz = clockEl.getAttribute('data-timezone');
+  if (!tz) return;
+
+  var hoursMinsEl = clockEl.querySelector('.worldtime-hours-mins');
+  var secondsEl = clockEl.querySelector('.worldtime-seconds');
+  var clock12El = clockEl.querySelector('.worldtime-clock-12');
+
+  function tick() {
+    try {
+      var now = new Date();
+      var t24 = now.toLocaleTimeString('en-GB', {
+        timeZone: tz,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      var parts = t24.split(':');
+      if (parts.length === 3) {
+        if (hoursMinsEl) hoursMinsEl.textContent = parts[0] + ':' + parts[1];
+        if (secondsEl) secondsEl.textContent = ':' + parts[2];
+      }
+
+      if (clock12El) {
+        var t12 = now.toLocaleTimeString('en-US', {
+          timeZone: tz,
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        clock12El.textContent = t12;
+      }
+    } catch (e) {
+      // Graceful fallback: maintain initial server-rendered time
+    }
+  }
+
+  tick();
+  var delay = 1000 - (new Date().getTime() % 1000);
+  setTimeout(function() {
+    tick();
+    setInterval(tick, 1000);
+  }, delay);
+}
 
 // @license-end

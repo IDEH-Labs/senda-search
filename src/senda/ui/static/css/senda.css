@@ -3185,6 +3185,17 @@ html.light .conversion-footer {
   line-height: 1.1;
   color: var(--text-main);
   font-family: var(--font-mono);
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+}
+
+.worldtime-seconds {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-left: 0.12rem;
 }
 
 .worldtime-clock-12 {

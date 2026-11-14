@@ -416,7 +416,7 @@
         <line x1="3" y1="16" x2="21" y2="16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
         <line x1="7" y1="20" x2="17" y2="20" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
       {% elif icon_type == "cloud_moon" %}
-        <path d="M17 10.5A6 6 0 0 0 10.5 4a6.2 6.2 0 0 0-.8.05A7 7 0 0 1 18 11.8c0 .24-.01.47-.04.7a5.5 5.5 0 0 0-.96-2z" fill="url(#lunarGrad)"/>
+        <path d="M3 12.79 A9 9 0 1 0 12.79 3 A7 7 0 0 1 3 12.79z" fill="url(#lunarGrad)"/>
         <path d="M17.5 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 19z" fill="url(#cloudGrad)" opacity="0.95"/>
       {% else %}
         {% set pcode = moon_phase.code if moon_phase else "waxing_crescent" %}
@@ -434,16 +434,13 @@
           <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)"/>
           <path d="M12 3.5 A8.5 8.5 0 0 0 12 20.5 A4.5 8.5 0 0 1 12 3.5 Z" fill="#0f172a" opacity="0.65"/>
         {% elif pcode == "waning_gibbous" %}
-          <g transform="scale(-1, 1) translate(-24, 0)">
-            <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)"/>
-            <path d="M12 3.5 A8.5 8.5 0 0 0 12 20.5 A4.5 8.5 0 0 1 12 3.5 Z" fill="#0f172a" opacity="0.65"/>
-          </g>
+          <circle cx="12" cy="12" r="8.5" fill="url(#lunarGrad)"/>
+          <path d="M12 3.5 A8.5 8.5 0 0 1 12 20.5 A4.5 8.5 0 0 0 12 3.5 Z" fill="#0f172a" opacity="0.65"/>
         {% elif pcode == "waning_crescent" %}
-          <g transform="scale(-1, 1) translate(-24, 0)">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
-          </g>
-        {% else %}
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+        {% else %}
+          <!-- Right-facing crescent (towards the right) -->
+          <path d="M3 12.79 A9 9 0 1 0 12.79 3 A7 7 0 0 1 3 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
         {% endif %}
       {% endif %}
     </svg>
@@ -569,8 +566,10 @@
 
             <div class="worldtime-display-col">
                 {{ weather_icon(world_time.icon_type, size=36, moon_phase=world_time.moon_phase, label=world_time.time_period) }}
-                <div class="worldtime-clock">
-                    <span class="worldtime-clock-24">{{ world_time.time_24 }}</span>
+                <div class="worldtime-clock" data-timezone="{{ world_time.timezone_name }}" data-time="{{ world_time.iso_timestamp }}">
+                    <div class="worldtime-clock-24">
+                        <span class="worldtime-hours-mins">{{ world_time.time_24 }}</span><span class="worldtime-seconds">:{{ world_time.seconds }}</span>
+                    </div>
                     <span class="worldtime-clock-12">{{ world_time.time_12 }}</span>
                 </div>
             </div>

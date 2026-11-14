@@ -24,6 +24,8 @@ class WorldTimeResult(BaseModel):
     display_name: str
     time_24: str
     time_12: str
+    seconds: str = "00"
+    iso_timestamp: str = ""
     date_formatted: str
     timezone_name: str
     timezone_abbr: str
@@ -314,7 +316,9 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
         return None
 
     time_24 = now_tz.strftime("%H:%M")
-    time_12 = now_tz.strftime("%I:%M %p").lstrip("0")
+    seconds = now_tz.strftime("%S")
+    time_12 = now_tz.strftime("%I:%M:%S %p").lstrip("0")
+    iso_timestamp = now_tz.isoformat()
     date_formatted = format_spanish_date(now_tz)
 
     tz_abbr = now_tz.strftime("%Z")
@@ -370,6 +374,8 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
         display_name=display_name,
         time_24=time_24,
         time_12=time_12,
+        seconds=seconds,
+        iso_timestamp=iso_timestamp,
         date_formatted=date_formatted,
         timezone_name=tz_identifier,
         timezone_abbr=tz_abbr,

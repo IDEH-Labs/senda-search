@@ -35,6 +35,8 @@ def test_world_time_cities():
     assert quito.icon_type in ("sun", "moon")
     assert quito.moon_phase is not None
     assert quito.moon_phase.name
+    assert quito.seconds
+    assert quito.iso_timestamp
     if quito.icon_type == "moon":
         assert quito.time_period in ("Madrugada", "Noche")
     else:
