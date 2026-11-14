@@ -206,8 +206,11 @@ class WikipediaEntityProvider:
         if cached is not None:
             return cached
 
-        # Prepare normalized title (spaces to underscores, capitalized words)
-        norm_title = urllib.parse.quote(clean_q.replace(" ", "_"))
+        # Prepare normalized title (spaces to underscores)
+        # If query matches a known sovereign state, prioritize its authoritative Spanish name
+        sovereign_match = get_sovereign_country(query=clean_q)
+        query_candidate = sovereign_match.name_es if sovereign_match else clean_q
+        norm_title = urllib.parse.quote(query_candidate.replace(" ", "_"))
         api_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{norm_title}"
 
         headers = {
@@ -218,6 +221,12 @@ class WikipediaEntityProvider:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 resp = await client.get(api_url, headers=headers)
+                # Fallback to Title-cased query if lower-cased multi-word yields 404
+                if resp.status_code == 404 and clean_q != clean_q.title():
+                    alt_title = urllib.parse.quote(clean_q.title().replace(" ", "_"))
+                    alt_url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{alt_title}"
+                    resp = await client.get(alt_url, headers=headers)
+
                 if resp.status_code == 200:
                     data = resp.json()
                     card = self.parse_summary(data, lang=lang)
