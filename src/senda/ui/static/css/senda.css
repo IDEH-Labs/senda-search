@@ -2713,6 +2713,52 @@ html.light .calculator-card {
   user-select: none;
 }
 
+.weather-vector-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.weather-vector-icon.icon-moon {
+  filter: drop-shadow(0 2px 10px rgba(255, 255, 255, 0.28));
+  transition: transform var(--transition-fast);
+}
+
+.weather-vector-icon.icon-cloud-moon {
+  filter: drop-shadow(0 2px 10px rgba(203, 213, 225, 0.22));
+}
+
+.weather-vector-icon.icon-sun {
+  filter: drop-shadow(0 2px 12px rgba(245, 158, 11, 0.35));
+}
+
+[data-theme="light"] .weather-vector-icon.icon-moon {
+  filter: drop-shadow(0 2px 6px rgba(30, 41, 59, 0.15));
+}
+
+[data-theme="light"] #lunarGrad stop:nth-child(1),
+[data-theme="light"] #lunarGradCloud stop:nth-child(1) {
+  stop-color: #1e293b !important;
+}
+
+[data-theme="light"] #lunarGrad stop:nth-child(2),
+[data-theme="light"] #lunarGradCloud stop:nth-child(2) {
+  stop-color: #334155 !important;
+}
+
+[data-theme="light"] #lunarGrad stop:nth-child(3),
+[data-theme="light"] #lunarGradCloud stop:nth-child(3) {
+  stop-color: #64748b !important;
+}
+
+.weather-time-period-tag {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
 .weather-temp-wrap {
   display: flex;
   align-items: flex-start;

@@ -26,13 +26,13 @@ from pydantic import BaseModel, Field
 # World Meteorological Organization (WMO) Weather Interpretation Codes (WW)
 WMO_CODES: Dict[int, tuple[str, str, str]] = {
     0: ("Cielo despejado", "☀️", "🌙"),
-    1: ("Mayormente despejado", "🌤️", "🌤️"),
-    2: ("Parcialmente nublado", "⛅", "⛅"),
+    1: ("Mayormente despejado", "🌤️", "☁️🌙"),
+    2: ("Parcialmente nublado", "⛅", "☁️🌙"),
     3: ("Nublado", "☁️", "☁️"),
     45: ("Niebla", "🌫️", "🌫️"),
     48: ("Niebla con escarcha", "🌫️", "🌫️"),
-    51: ("Llovizna ligera", "🌦️", "🌦️"),
-    53: ("Llovizna moderada", "🌦️", "🌦️"),
+    51: ("Llovizna ligera", "🌦️", "🌧️"),
+    53: ("Llovizna moderada", "🌦️", "🌧️"),
     55: ("Llovizna densa", "🌧️", "🌧️"),
     56: ("Llovizna helada leve", "🌧️❄️", "🌧️❄️"),
     57: ("Llovizna helada densa", "🌧️❄️", "🌧️❄️"),
@@ -45,7 +45,7 @@ WMO_CODES: Dict[int, tuple[str, str, str]] = {
     73: ("Nieve moderada", "🌨️", "🌨️"),
     75: ("Nieve intensa", "🌨️", "🌨️"),
     77: ("Granizo fino", "🌨️", "🌨️"),
-    80: ("Chubascos ligeros", "🌦️", "🌦️"),
+    80: ("Chubascos ligeros", "🌦️", "🌧️"),
     81: ("Chubascos moderados", "🌧️", "🌧️"),
     82: ("Chubascos violentos", "🌧️", "🌧️"),
     85: ("Chubascos de nieve leves", "🌨️", "🌨️"),
@@ -81,6 +81,8 @@ class WeatherCard(BaseModel):
     weather_code: int
     weather_description: str
     weather_icon: str
+    icon_type: str = "sun"
+    time_period: str = "Día"
     is_day: bool = True
     daily_forecast: List[DailyForecastItem] = Field(default_factory=list)
     source: str = "Open-Meteo & Modelos Meteorológicos Abiertos (DWD, NOAA, ECMWF)"
@@ -235,6 +237,62 @@ class WeatherProvider:
             desc, day_ico, night_ico = WMO_CODES.get(code, ("Condiciones variables", "⛅", "⛅"))
             icon = day_ico if is_day else night_ico
 
+            # Calculate local hour from Open-Meteo local time (auto timezone)
+            local_time_raw = curr.get("time", "")
+            local_hour = 12
+            if local_time_raw and "T" in local_time_raw:
+                try:
+                    time_part = local_time_raw.split("T")[1]
+                    local_hour = int(time_part.split(":")[0])
+                except Exception:
+                    pass
+
+            # Discern the 4 periods of the day: Madrugada, Mañana, Tarde, Noche
+            if 0 <= local_hour < 6:
+                time_period = "Madrugada"
+            elif 6 <= local_hour < 12:
+                time_period = "Mañana"
+            elif 12 <= local_hour < 19:
+                time_period = "Tarde"
+            else:
+                time_period = "Noche"
+
+            # Determine vector icon type for rendering
+            if is_day:
+                if code == 0:
+                    icon_type = "sun"
+                elif code in (1, 2):
+                    icon_type = "cloud_sun"
+                elif code == 3:
+                    icon_type = "cloud"
+                elif code in (45, 48):
+                    icon_type = "fog"
+                elif code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82):
+                    icon_type = "rain"
+                elif code in (71, 73, 75, 77, 85, 86):
+                    icon_type = "snow"
+                elif code in (95, 96, 99):
+                    icon_type = "thunderstorm"
+                else:
+                    icon_type = "cloud"
+            else:
+                if code == 0:
+                    icon_type = "moon"
+                elif code in (1, 2):
+                    icon_type = "cloud_moon"
+                elif code == 3:
+                    icon_type = "cloud"
+                elif code in (45, 48):
+                    icon_type = "fog"
+                elif code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82):
+                    icon_type = "rain"
+                elif code in (71, 73, 75, 77, 85, 86):
+                    icon_type = "snow"
+                elif code in (95, 96, 99):
+                    icon_type = "thunderstorm"
+                else:
+                    icon_type = "moon"
+
             # Build daily forecast (next 4 days)
             daily_items: List[DailyForecastItem] = []
             dates = daily.get("time", [])
@@ -280,6 +338,8 @@ class WeatherProvider:
                 weather_code=code,
                 weather_description=desc,
                 weather_icon=icon,
+                icon_type=icon_type,
+                time_period=time_period,
                 is_day=is_day,
                 daily_forecast=daily_items,
                 updated_at=time_str,

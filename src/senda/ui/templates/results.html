@@ -359,7 +359,55 @@
             <!-- Left Pane: Main Weather Info & Inline Metrics -->
             <div class="weather-current-pane">
                 <div class="weather-primary-row">
+                    {% if weather.icon_type == 'moon' %}
+                    <svg class="weather-vector-icon icon-moon" width="38" height="38" viewBox="0 0 24 24" fill="none" aria-label="Luna en cielo despejado">
+                        <defs>
+                            <linearGradient id="lunarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="45%" stop-color="#cbd5e1"/>
+                                <stop offset="100%" stop-color="#64748b"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#lunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+                    </svg>
+                    {% elif weather.icon_type == 'cloud_moon' %}
+                    <svg class="weather-vector-icon icon-cloud-moon" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-label="Luna entre nubes">
+                        <defs>
+                            <linearGradient id="lunarGradCloud" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="50%" stop-color="#cbd5e1"/>
+                                <stop offset="100%" stop-color="#64748b"/>
+                            </linearGradient>
+                            <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#94a3b8"/>
+                                <stop offset="100%" stop-color="#475569"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M17 10.5A6 6 0 0 0 10.5 4a6.2 6.2 0 0 0-.8.05A7 7 0 0 1 18 11.8c0 .24-.01.47-.04.7a5.5 5.5 0 0 0-.96-2z" fill="url(#lunarGradCloud)"/>
+                        <path d="M17.5 19H7a4.5 4.5 0 0 1-.9-8.91 5.5 5.5 0 0 1 10.8 1.91A4 4 0 0 1 17.5 19z" fill="url(#cloudGrad)" opacity="0.9"/>
+                    </svg>
+                    {% elif weather.icon_type == 'sun' %}
+                    <svg class="weather-vector-icon icon-sun" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Sol">
+                        <defs>
+                            <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#fef08a"/>
+                                <stop offset="70%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#d97706"/>
+                            </radialGradient>
+                        </defs>
+                        <circle cx="12" cy="12" r="5" fill="url(#sunGrad)" stroke="#f59e0b" stroke-width="1.2"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3" stroke="#f59e0b"></line>
+                        <line x1="12" y1="21" x2="12" y2="23" stroke="#f59e0b"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f59e0b"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f59e0b"></line>
+                        <line x1="1" y1="12" x2="3" y2="12" stroke="#f59e0b"></line>
+                        <line x1="21" y1="12" x2="23" y2="12" stroke="#f59e0b"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f59e0b"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f59e0b"></line>
+                    </svg>
+                    {% else %}
                     <span class="weather-compact-icon" aria-hidden="true">{{ weather.weather_icon }}</span>
+                    {% endif %}
                     <div class="weather-temp-wrap">
                         <span class="weather-compact-temp">{{ weather.temperature }}</span>
                         <span class="weather-compact-unit">°C</span>
@@ -370,6 +418,10 @@
                             <span class="weather-country-tag">{{ weather.country }}</span>
                         </div>
                         <div class="weather-sub-line">
+                            {% if weather.time_period %}
+                            <span class="weather-time-period-tag">{{ weather.time_period }}</span>
+                            <span class="metric-sep">&bull;</span>
+                            {% endif %}
                             {% if weather.admin1 and weather.admin1 != weather.city_name %}
                             <span class="weather-compact-admin">{{ weather.admin1 }}</span>
                             <span class="metric-sep">&bull;</span>
