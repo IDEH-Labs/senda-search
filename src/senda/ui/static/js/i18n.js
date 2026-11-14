@@ -331,6 +331,10 @@ function initDropdownsAndFilters() {
       if (d !== except) {
         d.removeAttribute('open');
         d.open = false;
+        if (d.classList.contains('why-seen-disclosure')) {
+          var c = d.closest('.result-card');
+          if (c) c.classList.remove('has-open-why-seen');
+        }
         resetMenuPosition(d);
       }
     });
@@ -378,6 +382,11 @@ function initDropdownsAndFilters() {
         adjustMenuBoundary(d);
         updateBackdrop();
 
+        if (d.classList.contains('why-seen-disclosure')) {
+          var card = d.closest('.result-card');
+          if (card) card.classList.add('has-open-why-seen');
+        }
+
         var searchInput = d.querySelector('.country-search-input');
         if (searchInput) {
           setTimeout(function() {
@@ -385,6 +394,10 @@ function initDropdownsAndFilters() {
           }, 50);
         }
       } else {
+        if (d.classList.contains('why-seen-disclosure')) {
+          var c = d.closest('.result-card');
+          if (c) c.classList.remove('has-open-why-seen');
+        }
         resetMenuPosition(d);
         updateBackdrop();
       }
