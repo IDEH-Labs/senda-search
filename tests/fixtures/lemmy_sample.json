@@ -1,0 +1,39 @@
+{
+  "posts": [
+    {
+      "post": {
+        "id": 123456,
+        "name": "Guía práctica para alojar tu propio nodo de software libre",
+        "url": "https://ideh.top/articulos/soberania-digital",
+        "body": "Comparto esta guía detallada sobre cómo montar servicios federados respetando la privacidad...",
+        "creator_id": 42,
+        "community_id": 99,
+        "removed": false,
+        "locked": false,
+        "published": "2026-11-10T18:00:00Z",
+        "deleted": false,
+        "nsfw": false,
+        "ap_id": "https://lemmy.world/post/123456"
+      },
+      "creator": {
+        "id": 42,
+        "name": "ciberactivista",
+        "actor_id": "https://lemmy.world/u/ciberactivista",
+        "local": true
+      },
+      "community": {
+        "id": 99,
+        "name": "privacidad",
+        "title": "Privacidad y Soberanía Tecnológica",
+        "actor_id": "https://lemmy.world/c/privacidad"
+      },
+      "counts": {
+        "post_id": 123456,
+        "comments": 18,
+        "score": 45,
+        "upvotes": 47,
+        "downvotes": 2
+      }
+    }
+  ]
+}

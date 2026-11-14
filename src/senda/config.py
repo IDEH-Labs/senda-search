@@ -29,7 +29,7 @@ class SendaSettings(BaseSettings):
 
     # User-Agent strictly declaring identity and contact per RFC 9309 guidelines
     USER_AGENT: str = Field(
-        default="SendaBot/0.1 (+https://ideh.top/senda-search; bot@ideh.top)",
+        default="SendaBot/0.1 (+https://senda.ideh.top; bot@ideh.top)",
         description="Transparent crawler identification header."
     )
 
@@ -89,6 +89,22 @@ class SendaSettings(BaseSettings):
     FEDIVERSE_INSTANCE: str = "mastodon.social"
     BLUESKY_ENABLED: bool = True
     BLUESKY_ENDPOINT: str = "https://api.bsky.app"
+
+    # Free Culture & Sovereign Knowledge Providers
+    OPENVERSE_ENABLED: bool = True
+    OPENVERSE_ENDPOINT: str = "https://api.openverse.org/v1"
+    OPENVERSE_RATE_LIMIT_PER_MINUTE: int = 60
+    OPENVERSE_CACHE_TTL_SECONDS: int = 3600
+
+    OPENLIBRARY_ENABLED: bool = True
+    OPENLIBRARY_ENDPOINT: str = "https://openlibrary.org"
+    OPENLIBRARY_RATE_LIMIT_PER_MINUTE: int = 30
+    OPENLIBRARY_CACHE_TTL_SECONDS: int = 3600
+
+    LEMMY_ENABLED: bool = True
+    LEMMY_INSTANCE: str = "lemmy.world"
+    LEMMY_RATE_LIMIT_PER_MINUTE: int = 30
+    LEMMY_CACHE_TTL_SECONDS: int = 1800
 
     # Grounded Extractive Synthesis (Strictly disabled by default; deterministic citations, zero generative hallucination)
     ENABLE_EXTRACTIVE_SYNTHESIS: bool = False

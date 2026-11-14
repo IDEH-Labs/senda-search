@@ -1,0 +1,36 @@
+{
+  "result_count": 142,
+  "page_count": 15,
+  "page_size": 10,
+  "page": 1,
+  "results": [
+    {
+      "id": "e4f8d22c-a0e2-411a-8c5e-7a1a45bb3864",
+      "title": "Astronomy Starry Night Sky",
+      "indexed_on": "2024-01-10T14:32:00Z",
+      "foreign_landing_url": "https://flickr.com/photos/user/12345678",
+      "url": "https://live.staticflickr.com/65535/12345678_b.jpg",
+      "creator": "Galactic Photographer",
+      "creator_url": "https://flickr.com/people/user",
+      "license": "by",
+      "license_version": "2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0/",
+      "attribution": "Astronomy Starry Night Sky by Galactic Photographer is licensed under CC BY 2.0",
+      "thumbnail": "https://api.openverse.org/v1/images/e4f8d22c-a0e2-411a-8c5e-7a1a45bb3864/thumb/"
+    },
+    {
+      "id": "99887766-5544-3322-1100-aabbccddeeff",
+      "title": "Classical Art Public Domain Portrait",
+      "indexed_on": "2024-02-15T09:12:00Z",
+      "foreign_landing_url": "https://www.metmuseum.org/art/collection/search/436535",
+      "url": "https://images.metmuseum.org/CRDImages/ep/original/DT1567.jpg",
+      "creator": "Vincent van Gogh",
+      "creator_url": "https://www.metmuseum.org",
+      "license": "cc0",
+      "license_version": "1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution": "Classical Art Public Domain Portrait is dedicated to the public domain under CC0 1.0",
+      "thumbnail": "https://images.metmuseum.org/CRDImages/ep/web-large/DT1567.jpg"
+    }
+  ]
+}

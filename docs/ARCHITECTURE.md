@@ -97,6 +97,14 @@ The network guard acts as the foundational perimeter against Server-Side Request
 - **Privacy Headers:** `Referrer-Policy: no-referrer`, strict `Content-Security-Policy`, `X-Content-Type-Options: nosniff`.
 - **i18n Translation:** Client-side dictionary switcher for English (`en`), Spanish (`es`), French (`fr`), and German (`de`), storing preferences in `localStorage` without tracking cookies.
 
+### 2.9. Federated Sovereign Providers & Verifiable Provenance (`senda.providers`)
+- **Multi-Source Aggregator (`ProviderAggregator`):** Parallel asynchronous query dispatcher over verified public catalogs and federated protocols.
+- **Strict Vertical Isolation:** Catalogs (OpenAlex, Open Library, Lemmy, Bluesky, Fediverse) are strictly isolated to their intended verticals (`library`, `community`) or explicit opt-in, protecting the user from query correlation in general web searches.
+- **Zero-Tracking Blind Proxy:** All outgoing API calls originate from Senda's backend with transparent institutional User-Agent, stripping client IP, cookies, and fingerprinting headers.
+- **In-Memory Rate Limiting & TTL Caching:** Sliding-window rate limiters prevent upstream request saturation, respecting community and open-source infrastructure.
+- **Verifiable Provenance Normalization:** Results are normalized to `SearchResultItem` containing audited licenses (CC0, CC BY, Public Domain), author declarations, and verifiable origin signals.
+
+
 ---
 
 ## 3. Data Flow Diagram

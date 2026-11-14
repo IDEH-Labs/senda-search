@@ -33,6 +33,9 @@ from senda.providers.crossref import CrossrefProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
+from senda.providers.openverse import OpenverseProvider
+from senda.providers.openlibrary import OpenLibraryProvider
+from senda.providers.lemmy import LemmyProvider
 from senda.providers.base import SearchResultItem
 from senda.synthesis.extractive import GroundedSynthesizer
 from senda.countries import get_country_name, get_countries_grouped
@@ -212,6 +215,9 @@ def create_app(
     doaj_prov = DoajProvider() if enable_federated_providers else None
     arxiv_prov = ArxivProvider() if enable_federated_providers else None
     pubmed_prov = PubMedProvider() if enable_federated_providers else None
+    openverse_prov = OpenverseProvider() if enable_federated_providers else None
+    openlibrary_prov = OpenLibraryProvider() if enable_federated_providers else None
+    lemmy_prov = LemmyProvider() if enable_federated_providers else None
 
     app_synthesizer = GroundedSynthesizer(enabled=settings.ENABLE_AI_SYNTHESIS)
     app_wiki_entity = WikipediaEntityProvider()
@@ -235,6 +241,9 @@ def create_app(
         doaj_provider=doaj_prov,
         arxiv_provider=arxiv_prov,
         pubmed_provider=pubmed_prov,
+        openverse_provider=openverse_prov,
+        openlibrary_provider=openlibrary_prov,
+        lemmy_provider=lemmy_prov,
     )
 
     # Privacy and Hardening Middleware
@@ -716,9 +725,25 @@ def create_app(
                         "estado": getattr(it.ai_provenance, "status", None) or getattr(it.ai_provenance, "estado", "no determinado"),
                     }
 
+            # Strict Ethical Anti-Tracking Policy:
+            # Under NO circumstances allow news.google.com tracking redirect URLs to leak to users
+            item_url = it.url
+            if not item_url or "news.google.com" in item_url:
+                canonical = getattr(it, "canonical_url", "")
+                if canonical and "news.google.com" not in canonical:
+                    item_url = canonical
+                elif domain_name and domain_name != "prensa":
+                    item_url = f"https://{domain_name}"
+                else:
+                    item_url = "https://senda.ideh.top"
+
+            canonical_clean = it.canonical_url or item_url
+            if canonical_clean and "news.google.com" in canonical_clean:
+                canonical_clean = item_url
+
             formatted_items.append(
                 SearchItemModel(
-                    url=it.url,
+                    url=item_url,
                     domain=domain_name,
                     title=it.title,
                     snippet=it.snippet,
@@ -729,7 +754,7 @@ def create_app(
                     source=it.source,
                     why_seen=it.why_seen,
                     is_sponsored=it.is_sponsored,
-                    canonical_url=it.canonical_url or it.url,
+                    canonical_url=canonical_clean,
                     source_type=it.source_type,
                     content_type=it.content_type,
                     published_date=it.published_date or it.date,

@@ -48,6 +48,8 @@ La privacidad en **Senda** no es una promesa comercial ni una declaración de in
    - **Nginx `senda_error.log` y Limitación de Tasa:** El nivel de error está configurado en `warn;` y las alertas de `limit_req` se degradan a nivel `notice;`, garantizando que las denegaciones por exceso de tasa no registren la dirección IP del cliente en disco.
    - **Servidor ASGI (Uvicorn) y Systemd (`journald`):** Senda desactiva el registro de acceso por petición (`access_log=False`) por defecto en la CLI de arranque, impidiendo que el journal del sistema operativo capture consultas de búsqueda en texto plano.
    - **Divulgación de Registro Histórico y Remediación:** Durante la fase de despliegue inicial previa a la implementación de mitigaciones de privacidad (entre el 9 de noviembre a las 04:20 UTC y el 12 de noviembre a las 14:00 UTC), la salida estándar del servidor de aplicaciones registró peticiones HTTP con términos de búsqueda en `journald` (con IP de cliente anonimizada a `0.0.0.0:0`), y los registros rotados de Nginx anteriores a la fecha conservaron cadenas completas de solicitud. Asimismo, el registro global por defecto de Nginx (`/var/log/nginx/access.log`) capturó direcciones IP de peticiones de borde y escáneres de red hasta el 13 de noviembre, fecha en que se desactivó dicho registro central (`access_log off;`) y se depuraron los archivos rotados residuales del disco local. El registro de peticiones en Uvicorn quedó desactivado a fecha de 13 de noviembre de 2026, el formato de Nginx fue restringido a `$uri` sin parámetros, y se eliminaron los registros históricos del disco local del servidor (la presencia en copias de seguridad remotas o instantáneas del proveedor de hosting previas a esta fecha no queda cubierta por este saneamiento local).
+10. **Des-rastreo y Enrutamiento Directo en Noticias (Anti-Click-Tracking):**
+   En la vertical de noticias, Senda garantiza que ningún enlace redireccione a través de pasarelas de seguimiento o sindicación corporativa (como `news.google.com`). Todos los resultados enlazan de forma directa al medio editorial emisor (vía feeds RSS directos de medios verificados, la base de datos abierta global GDELT o instancias soberanas de SearXNG), garantizando que el usuario acceda a la fuente sin exponer su navegación ni sus clics a intermediarios publicitarios.
 
 ---
 
@@ -80,23 +82,23 @@ La honestidad hacia el usuario exige transparentar los límites técnicos de cua
 
 ---
 
-## 5. Aislamiento Estricto y Opt-In de Ciencia Abierta (OpenAlex)
+## 5. Aislamiento Estricto y Opt-In de Ciencia Abierta y Biblioteca (OpenAlex y Open Library)
 
-Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de literatura científica externos:
+Para impedir la fuga o correlación de consultas cotidianas hacia catálogos de literatura científica o bibliotecas externas:
 
-1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** realiza solicitudes salientes a la API de OpenAlex.
-2. **Activación Exclusiva por Intención Explícita:** La consulta saliente anonimizada hacia OpenAlex únicamente se emite cuando el usuario selecciona expresamente la vertical **Biblioteca** (`category=library`) o activa el parámetro explícito de opt-in académico (`academic=true`).
-3. **Caché Local y Protección de Presupuesto:** Cada consulta de lista a OpenAlex consume 1 crédito de API. Senda implementa una memoria intermedia en caché volátil local (TTL de 1 hora) y limitador de tasa de peticiones por minuto. Esto evita consultas duplicadas, minimiza la huella de red y maneja defensivamente códigos HTTP 409 y 429.
+1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** realiza solicitudes salientes a las APIs de OpenAlex u Open Library.
+2. **Activación Exclusiva por Intención Explícita:** La consulta saliente anonimizada hacia OpenAlex y Open Library únicamente se emite cuando el usuario selecciona expresamente la vertical **Biblioteca** (`category=library`) o activa el parámetro explícito de opt-in académico (`academic=true`), o mediante atajos dedicados (`!oa`, `!ol`).
+3. **Caché Local y Protección de Presupuesto:** Cada consulta consume presupuestos de red de servidores públicos. Senda implementa memoria intermedia en caché volátil local (TTL de 1 hora) y limitadores de tasa de peticiones por minuto con ventanas deslizantes. Esto evita consultas duplicadas, minimiza la huella de red y maneja defensivamente códigos HTTP 409 y 429.
 4. **Sin Rastreo ni Filtración de Identidad:** La petición saliente se origina exclusivamente desde el servidor proxy de Senda, utilizando una cabecera técnica de cortesía (`User-Agent` institucional). La IP del usuario, sus cookies, datos de navegación y huellas digitales son completamente omitidas.
 
 ---
 
-## 6. Aislamiento Estricto y Opt-In de Redes Abiertas (Fediverso y Bluesky)
+## 6. Aislamiento Estricto y Opt-In de Redes Abiertas y Foros Federados (Fediverso, Bluesky y Lemmy)
 
 Para garantizar que las consultas de búsqueda habituales no se filtren a nodos de redes sociales ni a directorios federados:
 
-1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** contacta instancias de Mastodon (ActivityPub) ni endpoints de Bluesky (ATProto).
-2. **Activación Exclusiva por Vertical "Redes Abiertas" u Opt-in:** Las solicitudes hacia instancias federadas únicamente se despachan cuando el usuario pulsa explícitamente la pestaña **Redes Abiertas** (`category=social`) o invoca atajos tipográficos soberanos (`!masto`, `!bsky`).
+1. **Inactivo por Defecto en Búsqueda General:** Durante las consultas generales o web (`category=all`, `category=web`), Senda **NUNCA** contacta instancias de Mastodon (ActivityPub), endpoints de Bluesky (ATProto) ni instancias federadas de Lemmy.
+2. **Activación Exclusiva por Vertical "Comunidad / Redes Abiertas" u Opt-in:** Las solicitudes hacia instancias federadas únicamente se despachan cuando el usuario pulsa explícitamente la pestaña **Comunidad / Redes Abiertas** (`category=community` o `category=social`) o invoca atajos tipográficos soberanos (`!masto`, `!bsky`, `!lemmy`).
 3. **Anonimización Absoluta:** Las solicitudes se originan desde el backend proxy de Senda sin cookies, tokens de usuario ni cabeceras del cliente final. Solo se procesan contenidos declarados como públicos según el protocolo respectivo.
 
 ---

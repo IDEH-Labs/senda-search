@@ -1,0 +1,32 @@
+{
+  "numFound": 42,
+  "start": 0,
+  "numFoundExact": true,
+  "docs": [
+    {
+      "key": "/works/OL102749W",
+      "title": "Don Quijote de la Mancha",
+      "author_name": [
+        "Miguel de Cervantes Saavedra"
+      ],
+      "first_publish_year": 1605,
+      "edition_count": 128,
+      "cover_i": 8234567,
+      "has_fulltext": true,
+      "ia": [
+        "donquijotedelama01cerv"
+      ]
+    },
+    {
+      "key": "/works/OL847985W",
+      "title": "Cien años de soledad",
+      "author_name": [
+        "Gabriel García Márquez"
+      ],
+      "first_publish_year": 1967,
+      "edition_count": 89,
+      "cover_i": 9876543,
+      "has_fulltext": false
+    }
+  ]
+}

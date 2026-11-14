@@ -23,6 +23,9 @@ from senda.providers.crossref import CrossrefProvider
 from senda.providers.doaj import DoajProvider
 from senda.providers.arxiv import ArxivProvider
 from senda.providers.pubmed import PubMedProvider
+from senda.providers.openverse import OpenverseProvider
+from senda.providers.openlibrary import OpenLibraryProvider
+from senda.providers.lemmy import LemmyProvider
 from senda.ranking.clustering import apply_domain_clustering
 from senda.ranking.goggles import get_preset_goggle, apply_goggle_rules, parse_goggle_dsl
 from senda.ranking.anti_slop import apply_anti_slop_filter
@@ -65,6 +68,9 @@ class ProviderAggregator:
         doaj_provider: Optional[DoajProvider] = None,
         arxiv_provider: Optional[ArxivProvider] = None,
         pubmed_provider: Optional[PubMedProvider] = None,
+        openverse_provider: Optional[OpenverseProvider] = None,
+        openlibrary_provider: Optional[OpenLibraryProvider] = None,
+        lemmy_provider: Optional[LemmyProvider] = None,
     ):
         self.internal = internal_provider or InternalStorageProvider()
         self.searxng = searxng_provider or SearXNGProvider()
@@ -81,6 +87,9 @@ class ProviderAggregator:
         self.doaj = doaj_provider
         self.arxiv = arxiv_provider
         self.pubmed = pubmed_provider
+        self.openverse = openverse_provider
+        self.openlibrary = openlibrary_provider
+        self.lemmy = lemmy_provider
 
     @staticmethod
     def detect_bang(query: str) -> Optional[Tuple[str, str]]:
@@ -136,6 +145,13 @@ class ProviderAggregator:
                         time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
+            if self.openverse and self.openverse.is_configured:
+                tasks.append(
+                    self.openverse.search(
+                        query, category="images", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
             tasks.append(
                 self.internal.search(
                     query, category="images", page=page, page_size=page_size,
@@ -148,6 +164,13 @@ class ProviderAggregator:
                     self.news.search(
                         query, category="news", page=page, page_size=page_size,
                         time_filter=time_filter, sort=sort, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
+            if self.searxng and self.searxng.is_configured:
+                tasks.append(
+                    self.searxng.search(
+                        query, category="news", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
             tasks.append(
@@ -199,6 +222,13 @@ class ProviderAggregator:
                         time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
+            if self.openlibrary and self.openlibrary.is_configured:
+                tasks.append(
+                    self.openlibrary.search(
+                        query, category="library", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
         elif cat in ("community", "social", "smallweb") or opt_in_social:
             # Unified Community & Fora (Personal blogs, IndieWeb, Fediverse, Bluesky)
             tasks.append(
@@ -218,6 +248,13 @@ class ProviderAggregator:
                 tasks.append(
                     self.bluesky.search(
                         query, category="social", page=page, page_size=page_size,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
+            if self.lemmy and self.lemmy.is_configured:
+                tasks.append(
+                    self.lemmy.search(
+                        query, category="community", page=page, page_size=page_size,
                         time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )
@@ -261,6 +298,13 @@ class ProviderAggregator:
                 tasks.append(
                     self.doaj.search(
                         query, category=category, page=page, page_size=3,
+                        time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
+                    )
+                )
+            if self.openlibrary and self.openlibrary.is_configured:
+                tasks.append(
+                    self.openlibrary.search(
+                        query, category=category, page=page, page_size=2,
                         time_filter=time_filter, region=region, safe_search=safe_search, lang=lang
                     )
                 )

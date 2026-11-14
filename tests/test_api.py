@@ -499,6 +499,7 @@ def test_multilingual_backend_resolution_and_rendering(client):
     assert "SafeSearch: Off" in html_en
 
     # 3. German language via cookie senda_lang=de
+    client.cookies.clear()
     client.cookies.set("senda_lang", "de")
     resp_de = client.get("/search?q=freiheit&category=all&time_filter=1d")
     assert resp_de.status_code == 200
@@ -632,6 +633,48 @@ def test_news_results_resolve_real_publisher_domains_and_never_news_google_com(c
         for it in items:
             assert it["domain"] != "news.google.com", f"Domain was incorrectly set to news.google.com for item: {it}"
             assert it["domain"] != "", "Domain must not be empty"
+            assert "news.google.com" not in it["url"], f"URL must not contain news.google.com: {it}"
+
+
+def test_news_results_strictly_strip_google_tracking_redirects(tmp_path):
+    """Verify ethical anti-tracking policy: news URLs must point directly to the publisher, never news.google.com."""
+    from unittest.mock import patch, MagicMock, AsyncMock
+    from pathlib import Path
+
+    fixture_path = Path(__file__).parent / "fixtures" / "realtime_news_sample.xml"
+    with open(fixture_path, "r", encoding="utf-8") as f:
+        xml_content = f.read()
+
+    storage = StorageEngine(db_path=tmp_path / "news_api_test.db")
+    news_app = create_app(storage=storage, enable_federated_providers=True)
+    test_client = TestClient(news_app)
+
+    with patch("senda.providers.news.httpx.AsyncClient") as mock_client:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = xml_content
+
+        instance = AsyncMock()
+        instance.get.return_value = mock_resp
+        instance.__aenter__.return_value = instance
+        instance.__aexit__.return_value = False
+        mock_client.return_value = instance
+
+        resp = test_client.get("/search?q=shakira&category=news&format=json")
+        assert resp.status_code == 200
+        data = resp.json()
+        items = data.get("items", [])
+        assert len(items) > 0, "Must return news items from fixture"
+
+        for it in items:
+            assert "news.google.com" not in it["url"], f"Tracking redirect detected in item url: {it['url']}"
+            assert it["domain"] != "news.google.com", f"Invalid domain: {it['domain']}"
+            assert it["canonical_url"] is not None
+            assert "news.google.com" not in it["canonical_url"]
+            # Target must be a verified media outlet (e.g., eltiempo.com, as.com, publimetro.co, lafm.com.co)
+            assert any(pub in it["url"] for pub in ("eltiempo.com", "as.com", "publimetro.co", "lafm.com.co", "marca.com", "infobae.com")), (
+                f"URL must point directly to genuine publisher outlet: {it['url']}"
+            )
 
 
 

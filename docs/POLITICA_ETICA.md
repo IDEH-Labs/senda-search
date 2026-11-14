@@ -36,6 +36,7 @@ En caso de conflicto técnico o de diseño, las decisiones de ingeniería en Sen
 - **Cero almacenamiento de direcciones IP:** Las IPs de origen se descartan en memoria volátil de forma instantánea.
 - **Sin perfiles ni analítica de terceros:** No se instalan cookies de rastreo, ni balizas, ni telemetría comercial, ni identificadores de sesión cruzada.
 - **Transparencia en peticiones salientes:** Cualquier proveedor externo o catálogo que reciba peticiones anonimizadas se documenta explícitamente en [PRIVACY.md](file:///home/Familia/Proyectos/senda-search/PRIVACY.md) y en la página informativa */how-it-works*. Ningún proveedor externo se activa por defecto en la búsqueda general sin una justificación pública y documentada.
+- **Cero Redirecciones de Rastreo en Noticias:** Senda prohíbe taxativamente entregar URLs intermedias de seguimiento corporativo (tales como `news.google.com/rss/articles/...`). Todo resultado de prensa enlaza directamente al dominio y artículo canónico del medio emisor o a repositorios abiertos (vía feeds RSS directos, GDELT o SearXNG), previniendo cualquier fuga de telemetría hacia intermediarios publicitarios.
 
 ### Principio 3: Bloqueo Solo por Daño Objetivo Comprobable; Etiquetado para lo Demás
 Senda distingue de forma tajante entre **amenazas técnicas objetivas a la seguridad/integridad humana** y **discrepancias editoriales, ideológicas o cualitativas**:

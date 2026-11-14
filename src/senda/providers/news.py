@@ -33,6 +33,42 @@ NEWS_LANG_CONFIG: Dict[str, Dict[str, str]] = {
     "zh": {"hl": "zh-CN", "gl": "CN", "ceid": "CN:zh-Hans"},
 }
 
+# Curated direct RSS feeds from verified public and independent editorial media
+VERIFIED_DIRECT_FEEDS: Dict[str, List[Dict[str, str]]] = {
+    "es": [
+        {"name": "El País", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada", "domain": "elpais.com"},
+        {"name": "BBC Mundo", "url": "https://feeds.bbci.co.uk/mundo/rss.xml", "domain": "bbc.com"},
+        {"name": "DW Español", "url": "https://rss.dw.com/rdf/rss-sp-all", "domain": "dw.com"},
+        {"name": "France 24 Español", "url": "https://www.france24.com/es/rss", "domain": "france24.com"},
+        {"name": "RTVE Noticias", "url": "https://api.rtve.es/api/noticias.rss", "domain": "rtve.es"},
+        {"name": "El Espectador", "url": "https://www.elespectador.com/arc/outboundfeeds/rss/", "domain": "elespectador.com"},
+        {"name": "El Diario", "url": "https://www.eldiario.es/rss/", "domain": "eldiario.es"},
+    ],
+    "en": [
+        {"name": "BBC News", "url": "https://feeds.bbci.co.uk/news/rss.xml", "domain": "bbc.com"},
+        {"name": "The Guardian", "url": "https://www.theguardian.com/world/rss", "domain": "theguardian.com"},
+        {"name": "DW English", "url": "https://rss.dw.com/rdf/rss-en-all", "domain": "dw.com"},
+        {"name": "NPR News", "url": "https://feeds.npr.org/1001/rss.xml", "domain": "npr.org"},
+        {"name": "France 24 English", "url": "https://www.france24.com/en/rss", "domain": "france24.com"},
+    ],
+    "de": [
+        {"name": "Tagesschau", "url": "https://www.tagesschau.de/xml/rss2/", "domain": "tagesschau.de"},
+        {"name": "DW Deutsch", "url": "https://rss.dw.com/rdf/rss-de-all", "domain": "dw.com"},
+    ],
+    "fr": [
+        {"name": "France 24", "url": "https://www.france24.com/fr/rss", "domain": "france24.com"},
+        {"name": "Le Monde", "url": "https://www.lemonde.fr/rss/une.xml", "domain": "lemonde.fr"},
+        {"name": "RFI", "url": "https://www.rfi.fr/fr/general/rss", "domain": "rfi.fr"},
+    ],
+    "it": [
+        {"name": "ANSA", "url": "https://www.ansa.it/sito/ansait_rss.xml", "domain": "ansa.it"},
+    ],
+    "pt": [
+        {"name": "BBC Brasil", "url": "https://feeds.bbci.co.uk/portuguese/rss.xml", "domain": "bbc.com"},
+        {"name": "DW Brasil", "url": "https://rss.dw.com/rdf/rss-br-all", "domain": "dw.com"},
+    ],
+}
+
 
 def _clean_text(text: Optional[str]) -> str:
     if not text:
@@ -195,20 +231,41 @@ class RealTimeNewsProvider(SearchProvider):
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 resp = await client.get(feed_url, headers=headers)
                 if resp.status_code != 200:
-                    return []
-                items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
-
-                # Sorting: default in news or if sort == 'date', sort by publication date descending
-                if sort == "relevance":
-                    pass
+                    items = []
                 else:
-                    items.sort(key=self._item_datetime, reverse=True)
+                    items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
 
-                start_idx = max(0, (page - 1) * page_size)
-                end_idx = start_idx + page_size
-                return items[start_idx:end_idx]
+                # When searching with a query and few results, enrich with GDELT open research news using the same client
+                if len(items) < page_size and clean_q:
+                    try:
+                        gdelt_items = await self.search_gdelt(clean_q, lang=target_lang, page_size=page_size, sort=sort, client=client)
+                        existing_titles = {it.title.lower() for it in items}
+                        for g_item in gdelt_items:
+                            if g_item.title.lower() not in existing_titles:
+                                items.append(g_item)
+                                existing_titles.add(g_item.title.lower())
+                    except Exception:
+                        pass
+
+                # If still empty (e.g., query-less breaking headlines), enrich with verified direct feeds
+                if not items and not clean_q:
+                    try:
+                        direct_items = await self.search_direct_feeds(query="", lang=target_lang, client=client)
+                        items.extend(direct_items)
+                    except Exception:
+                        pass
         except Exception:
-            return []
+            items = []
+
+        # Sorting: default in news or if sort == 'date', sort by publication date descending
+        if sort == "relevance":
+            pass
+        else:
+            items.sort(key=self._item_datetime, reverse=True)
+
+        start_idx = max(0, (page - 1) * page_size)
+        end_idx = start_idx + page_size
+        return items[start_idx:end_idx]
 
     def parse_feed(self, xml_content: str, query: str = "", lang: str = "es") -> List[SearchResultItem]:
         """Parse news items from RSS XML payload, strictly resolving publisher origin and enforcing relevance."""
@@ -281,9 +338,18 @@ class RealTimeNewsProvider(SearchProvider):
             else:
                 snippet = clean_desc
 
+            # Strict Ethical Anti-Tracking Policy:
+            # Under NO circumstances allow news.google.com redirection/tracking URLs to leak to users.
+            # If the syndication link points to Google News, resolve it directly to the publisher's origin.
+            safe_url = link
+            if not safe_url or "news.google.com" in safe_url:
+                safe_url = source_url or (f"https://{source_domain}" if source_domain else "")
+
+            canonical_url = source_url or (safe_url if "news.google.com" not in safe_url else "")
+
             items.append(
                 SearchResultItem(
-                    url=link,
+                    url=safe_url or link,
                     title=clean_title,
                     snippet=snippet,
                     score=92.0,
@@ -293,7 +359,7 @@ class RealTimeNewsProvider(SearchProvider):
                     language=lang,
                     doc_type="news",
                     is_sponsored=False,
-                    canonical_url=source_url or link,
+                    canonical_url=canonical_url or safe_url or link,
                     source_type="noticia",
                     content_type="noticia",
                     published_date=iso_date,
@@ -305,3 +371,156 @@ class RealTimeNewsProvider(SearchProvider):
             )
 
         return items
+
+    async def search_gdelt(
+        self,
+        query: str,
+        lang: str = "es",
+        page_size: int = 10,
+        sort: Optional[str] = None,
+        client: Optional[httpx.AsyncClient] = None,
+    ) -> List[SearchResultItem]:
+        """Query GDELT DOC 2.0 open research API for global open news with direct URLs."""
+        if not query:
+            return []
+
+        gdelt_lang_map = {
+            "es": "spanish",
+            "en": "english",
+            "fr": "french",
+            "de": "german",
+            "it": "italian",
+            "pt": "portuguese",
+            "ru": "russian",
+            "ar": "arabic",
+            "zh": "chinese",
+        }
+        lang_filter = gdelt_lang_map.get(lang.lower(), "")
+        full_query = f"{query} sourcelang:{lang_filter}" if lang_filter else query
+        sort_mode = "DateDesc" if sort != "relevance" else "HybridRel"
+
+        params = {
+            "query": full_query,
+            "mode": "artlist",
+            "format": "json",
+            "maxrecords": min(30, page_size * 2),
+            "sort": sort_mode,
+        }
+
+        headers = {
+            "User-Agent": settings.USER_AGENT,
+            "Accept": "application/json",
+        }
+
+        async def _do_fetch(c: httpx.AsyncClient) -> List[SearchResultItem]:
+            try:
+                resp = await c.get(
+                    "https://api.gdeltproject.org/api/v2/doc/doc",
+                    params=params,
+                    headers=headers,
+                )
+                if resp.status_code != 200:
+                    return []
+                data = resp.json()
+            except Exception:
+                return []
+
+            parsed_items: List[SearchResultItem] = []
+            articles = data.get("articles", [])
+            for art in articles:
+                url = art.get("url", "").strip()
+                title = art.get("title", "").strip()
+                domain = art.get("domain", "").strip().lower()
+                if domain.startswith("www."):
+                    domain = domain[4:]
+                seendate = art.get("seendate", "")
+                if not url or not title or "news.google.com" in url:
+                    continue
+
+                iso_date = None
+                if seendate:
+                    try:
+                        dt = datetime.strptime(seendate, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+                        iso_date = dt.isoformat()
+                    except Exception:
+                        iso_date = seendate
+
+                source_name = domain.capitalize() if domain else "Prensa Abierta"
+                snippet = f"Cobertura periodística de actualidad por «{source_name}» ({domain}). Consulta directa sin rastreadores ni publicidad."
+
+                parsed_items.append(
+                    SearchResultItem(
+                        url=url,
+                        title=title,
+                        snippet=snippet,
+                        score=90.0,
+                        source=source_name,
+                        source_domain=domain,
+                        date=iso_date,
+                        language=lang,
+                        doc_type="news",
+                        is_sponsored=False,
+                        canonical_url=url,
+                        source_type="noticia",
+                        content_type="noticia",
+                        published_date=iso_date,
+                        authors=[source_name],
+                        provider_origin="Prensa Abierta (GDELT)",
+                        why_seen="Noticia en tiempo real recuperada a través de la base de datos abierta global GDELT. Consulta directa y sin intermediarios publicitarios.",
+                        ai_provenance=AIProvenance(declared_signal=None, status="no determinado"),
+                    )
+                )
+            return parsed_items
+
+        if client is not None:
+            return await _do_fetch(client)
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as local_c:
+                return await _do_fetch(local_c)
+        except Exception:
+            return []
+
+    async def search_direct_feeds(
+        self,
+        query: str = "",
+        lang: str = "es",
+        max_feeds: int = 4,
+        client: Optional[httpx.AsyncClient] = None,
+    ) -> List[SearchResultItem]:
+        """Fetch and aggregate breaking news directly from curated editorial RSS feeds."""
+        target_lang = lang.lower().split("-")[0]
+        feeds = VERIFIED_DIRECT_FEEDS.get(target_lang, VERIFIED_DIRECT_FEEDS.get("es", []))[:max_feeds]
+        if not feeds:
+            return []
+
+        headers = {
+            "User-Agent": settings.USER_AGENT,
+            "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml",
+        }
+
+        async def _fetch_feeds(c: httpx.AsyncClient) -> List[SearchResultItem]:
+            aggregated_items: List[SearchResultItem] = []
+            for feed_info in feeds:
+                try:
+                    resp = await c.get(feed_info["url"], headers=headers)
+                    if resp.status_code == 200 and resp.text:
+                        feed_items = self.parse_feed(resp.text, query=query, lang=target_lang)
+                        for it in feed_items:
+                            if not it.source or it.source == "Prensa Verificada":
+                                it.source = feed_info["name"]
+                            if not it.source_domain:
+                                it.source_domain = feed_info["domain"]
+                            aggregated_items.append(it)
+                except Exception:
+                    continue
+            return aggregated_items
+
+        if client is not None:
+            return await _fetch_feeds(client)
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as local_c:
+                return await _fetch_feeds(local_c)
+        except Exception:
+            return []

@@ -25,6 +25,9 @@ from senda.providers.bluesky import BlueskyProvider
 from senda.providers.wikipedia import WikipediaEntityCard, WikipediaEntityProvider, WikipediaSearchProvider
 from senda.providers.news import RealTimeNewsProvider
 from senda.providers.images import FreeCultureImageProvider
+from senda.providers.openverse import OpenverseProvider
+from senda.providers.openlibrary import OpenLibraryProvider
+from senda.providers.lemmy import LemmyProvider
 from senda.providers.aggregator import ProviderAggregator, BANG_SHORTCUTS
 
 __all__ = [
@@ -50,6 +53,9 @@ __all__ = [
     "WikipediaSearchProvider",
     "RealTimeNewsProvider",
     "FreeCultureImageProvider",
+    "OpenverseProvider",
+    "OpenLibraryProvider",
+    "LemmyProvider",
     "ProviderAggregator",
     "BANG_SHORTCUTS",
 ]
