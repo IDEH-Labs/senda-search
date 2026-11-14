@@ -241,20 +241,16 @@ class RealTimeNewsProvider(SearchProvider):
                 )
                 items.extend(direct_items)
 
-                # 2. When searching a specific keyword with few direct feed matches, enrich with GDELT open research news
-                if len(items) < page_size and clean_q:
+                # 2. Only if direct feeds returned no results for a specific query, try GDELT open research
+                if not items and clean_q:
                     try:
                         gdelt_items = await self.search_gdelt(clean_q, lang=target_lang, page_size=page_size, sort=sort, client=client)
-                        existing_titles = {it.title.lower() for it in items}
-                        for g_item in gdelt_items:
-                            if g_item.title.lower() not in existing_titles:
-                                items.append(g_item)
-                                existing_titles.add(g_item.title.lower())
+                        items.extend(gdelt_items)
                     except Exception:
                         pass
 
-                # 3. Fallback for niche/long-tail search queries with few results in verified feeds
-                if len(items) < page_size and clean_q:
+                # 3. Last-resort fallback for niche/long-tail search queries with zero direct matches
+                if not items and clean_q:
                     try:
                         query_with_time = _resolve_time_query(clean_q, time_filter)
                         encoded_q = urllib.parse.quote_plus(query_with_time)
@@ -262,11 +258,7 @@ class RealTimeNewsProvider(SearchProvider):
                         resp = await client.get(feed_url, headers=headers)
                         if resp.status_code == 200:
                             syn_items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
-                            existing_titles = {it.title.lower() for it in items}
-                            for s_item in syn_items:
-                                if s_item.title.lower() not in existing_titles:
-                                    items.append(s_item)
-                                    existing_titles.add(s_item.title.lower())
+                            items.extend(syn_items)
                     except Exception:
                         pass
         except Exception:
