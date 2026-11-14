@@ -93,6 +93,7 @@ class SendaSettings(BaseSettings):
     # Free Culture & Sovereign Knowledge Providers
     OPENVERSE_ENABLED: bool = True
     OPENVERSE_ENDPOINT: str = "https://api.openverse.org/v1"
+    OPENVERSE_API_KEY: str = ""
     OPENVERSE_RATE_LIMIT_PER_MINUTE: int = 60
     OPENVERSE_CACHE_TTL_SECONDS: int = 3600
 

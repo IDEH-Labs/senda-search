@@ -27,12 +27,14 @@ class OpenverseProvider(SearchProvider):
     def __init__(
         self,
         endpoint: Optional[str] = None,
+        api_key: Optional[str] = None,
         timeout: float = 6.0,
         rate_limit_per_minute: int = 60,
         cache_ttl_seconds: int = 3600,
         enabled: Optional[bool] = None,
     ):
         self.endpoint = (endpoint or getattr(settings, "OPENVERSE_ENDPOINT", "https://api.openverse.org/v1")).rstrip("/")
+        self.api_key = (api_key if api_key is not None else getattr(settings, "OPENVERSE_API_KEY", "")).strip()
         self.timeout = timeout
         self.rate_limit_per_minute = rate_limit_per_minute or getattr(settings, "OPENVERSE_RATE_LIMIT_PER_MINUTE", 60)
         self.cache_ttl_seconds = cache_ttl_seconds or getattr(settings, "OPENVERSE_CACHE_TTL_SECONDS", 3600)
@@ -114,6 +116,8 @@ class OpenverseProvider(SearchProvider):
             "User-Agent": settings.USER_AGENT,
             "Accept": "application/json",
         }
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
