@@ -342,19 +342,6 @@
 
     <!-- Shared Sovereign Celestial & Weather SVG Gradients & Macro -->
     {% if weather or world_time %}
-    <style>
-      .weather-compact { width: 100%; box-sizing: border-box; }
-      .weather-compact-body { display: flex; justify-content: space-between; align-items: center; }
-      .weather-primary-row { display: flex; align-items: center; gap: 0.75rem; }
-      .weather-forecast-pane { display: flex; align-items: center; gap: 0.65rem; }
-      .forecast-mini-col { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
-      .forecast-mini-temps { display: flex; gap: 0.25rem; }
-      @media (max-width: 640px) {
-        .weather-compact-body { flex-direction: column; align-items: stretch; gap: 0.75rem; }
-        .weather-forecast-pane { border-left: none; border-top: 1px solid var(--border-subtle); padding-left: 0; padding-top: 0.65rem; justify-content: space-around; }
-      }
-    </style>
-
     <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true" focusable="false">
       <defs>
         <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">

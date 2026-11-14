@@ -105,6 +105,7 @@ html, body {
   color: var(--text-main);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 body {
@@ -2704,6 +2705,7 @@ html.light .calculator-card {
 .weather-primary-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
@@ -2863,7 +2865,8 @@ html.light .calculator-card {
 .weather-sub-line {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
   font-size: 0.82rem;
   color: var(--text-muted);
 }
@@ -2955,14 +2958,42 @@ html.light .calculator-card {
   .weather-compact-body {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+  }
+  .weather-current-pane {
+    width: 100%;
+    min-width: 0;
   }
   .weather-forecast-pane {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    gap: 0.25rem;
     border-left: none;
     border-top: 1px solid var(--border-subtle);
     padding-left: 0;
-    padding-top: 0.65rem;
-    justify-content: space-around;
+    padding-top: 0.75rem;
+    margin-top: 0.15rem;
+  }
+  .forecast-mini-col {
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .forecast-mini-day {
+    font-size: 0.7rem;
+  }
+  .forecast-mini-temps {
+    justify-content: center;
+    font-size: 0.68rem;
+    gap: 0.2rem;
+  }
+  .weather-compact-footer {
+    padding: 0.45rem 1rem;
+    font-size: 0.68rem;
+    flex-wrap: wrap;
   }
 }
 
@@ -3124,7 +3155,8 @@ html.light .conversion-footer {
 .worldtime-sub-line {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
   font-size: 0.88rem;
   color: var(--text-muted);
 }
@@ -3236,6 +3268,69 @@ html.light .worldtime-tz-badge {
 [data-theme="light"] .worldtime-footer,
 html.light .worldtime-footer {
   background: #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .worldtime-card {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0.25rem 0 1rem 0;
+  }
+  .worldtime-main-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+  }
+  .worldtime-location-col {
+    width: 100%;
+    min-width: 0;
+  }
+  .worldtime-city-header {
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .worldtime-city-name {
+    font-size: 1.15rem;
+  }
+  .worldtime-sub-line {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    gap: 0.2rem 0.4rem;
+  }
+  .worldtime-display-col {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 0.75rem;
+    margin-top: 0.15rem;
+    text-align: right;
+  }
+  .worldtime-display-col .weather-vector-icon,
+  .worldtime-vector-icon {
+    margin-top: 0;
+    width: 38px;
+    height: 38px;
+  }
+  .worldtime-clock-24 {
+    font-size: 1.85rem;
+    justify-content: flex-end;
+  }
+  .worldtime-seconds {
+    font-size: 1.1rem;
+  }
+  .worldtime-clock-12 {
+    font-size: 0.8rem;
+  }
+  .worldtime-footer {
+    padding: 0.45rem 1rem;
+    font-size: 0.7rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
 }
 
 /* ==========================================================================
