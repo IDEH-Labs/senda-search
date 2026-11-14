@@ -4,8 +4,8 @@
 """
 Senda Sovereign Unit & Currency Converter
 Deterministic, zero-telemetry conversion engine for physical units and open exchange rates.
-Works 100% server-side with zero JavaScript required.
-Compatible with Tor Browser (Safest mode) and GNU LibreJS.
+Works server-side without requiring JavaScript.
+Compatible with Tor Browser (Safest mode).
 """
 
 from __future__ import annotations

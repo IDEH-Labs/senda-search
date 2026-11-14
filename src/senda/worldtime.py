@@ -4,8 +4,8 @@
 """
 Senda Sovereign World Time Engine
 Deterministic, zero-telemetry world clock based on standard IANA Time Zones.
-Works 100% server-side with zero JavaScript required.
-Compatible with Tor Browser (Safest mode) and GNU LibreJS.
+Works server-side without requiring JavaScript.
+Compatible with Tor Browser (Safest mode).
 """
 
 from __future__ import annotations

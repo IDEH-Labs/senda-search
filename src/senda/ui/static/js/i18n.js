@@ -4,15 +4,15 @@
 
 /**
  * Senda Sovereign Client Core
- * Multi-Language (es-CO, en), Theme Manager, Density Toggle, Why-Seen Dialog.
- * Zero telemetry, zero tracking, zero cookies. 100% Client-Side.
- * GNU LibreJS Compliant: Declared Free Software under GNU GPL-3.0-or-later.
+ * Multi-Language, Theme Manager, Density Toggle, Why-Seen Dialog.
+ * Zero telemetry, zero tracking, zero third-party cookies. Free Software under GNU GPL-3.0-or-later.
  */
 
 const SENDA_TRANSLATIONS = {
   es: {
     nav_about: "Acerca de",
     nav_privacy: "Privacidad",
+    nav_javascript: "JavaScript y licencias",
     search_placeholder: "Buscar en la web libre...",
     tab_web: "Web",
     tab_images: "Imágenes",
@@ -28,6 +28,7 @@ const SENDA_TRANSLATIONS = {
   en: {
     nav_about: "About",
     nav_privacy: "Privacy",
+    nav_javascript: "JavaScript & Licenses",
     search_placeholder: "Search the libre web...",
     tab_web: "Web",
     tab_images: "Images",
@@ -43,6 +44,7 @@ const SENDA_TRANSLATIONS = {
   fr: {
     nav_about: "À propos",
     nav_privacy: "Confidentialité",
+    nav_javascript: "JavaScript et licences",
     search_placeholder: "Rechercher sur le web libre...",
     tab_web: "Web",
     tab_images: "Images",
@@ -58,6 +60,7 @@ const SENDA_TRANSLATIONS = {
   de: {
     nav_about: "Über uns",
     nav_privacy: "Datenschutz",
+    nav_javascript: "JavaScript & Lizenzen",
     search_placeholder: "Im freien Web suchen...",
     tab_web: "Web",
     tab_images: "Bilder",
@@ -73,6 +76,7 @@ const SENDA_TRANSLATIONS = {
   pt: {
     nav_about: "Sobre",
     nav_privacy: "Privacidade",
+    nav_javascript: "JavaScript e licenças",
     search_placeholder: "Pesquisar na web livre...",
     tab_web: "Web",
     tab_images: "Imagens",
@@ -88,6 +92,7 @@ const SENDA_TRANSLATIONS = {
   it: {
     nav_about: "Info",
     nav_privacy: "Privacy",
+    nav_javascript: "JavaScript e licenze",
     search_placeholder: "Cerca nel web libero...",
     tab_web: "Web",
     tab_images: "Immagini",
@@ -103,6 +108,7 @@ const SENDA_TRANSLATIONS = {
   ja: {
     nav_about: "概要",
     nav_privacy: "プライバシー",
+    nav_javascript: "JavaScript とライセンス",
     search_placeholder: "自由なウェブを検索...",
     tab_web: "ウェブ",
     tab_images: "画像",
@@ -118,6 +124,7 @@ const SENDA_TRANSLATIONS = {
   zh: {
     nav_about: "关于",
     nav_privacy: "隐私政策",
+    nav_javascript: "JavaScript 与许可证",
     search_placeholder: "在自由网络中搜索...",
     tab_web: "网页",
     tab_images: "图片",
@@ -133,6 +140,7 @@ const SENDA_TRANSLATIONS = {
   ru: {
     nav_about: "О проекте",
     nav_privacy: "Конфиденциальность",
+    nav_javascript: "JavaScript и лицензии",
     search_placeholder: "Поиск в свободной сети...",
     tab_web: "Веб",
     tab_images: "Изображения",
@@ -148,6 +156,7 @@ const SENDA_TRANSLATIONS = {
   ar: {
     nav_about: "حول",
     nav_privacy: "الخصوصية",
+    nav_javascript: "جافاسكريبت والتراخيص",
     search_placeholder: "ابحث في الويب الحر...",
     tab_web: "ويب",
     tab_images: "صور",
@@ -181,7 +190,7 @@ function applyTranslations(lang) {
 }
 
 /**
- * Tor & Privacy Sandbox Storage Guards (GNU LibreJS Compliant)
+ * Tor & Privacy Sandbox Storage Guards
  */
 function safeGetStorage(key) {
   try {
@@ -199,7 +208,7 @@ function safeSetStorage(key, val) {
 
 /**
  * Theme Manager: Toggle light/dark themes with dual-layer fallback.
- * Works seamlessly in Tor Browser (Standard, Safer, Safest) and with LibreJS.
+ * Works with or without JavaScript enabled.
  */
 function initThemeManager() {
   var toggleBtn = document.getElementById('themeToggle');
@@ -277,14 +286,14 @@ function initThemeManager() {
 }
 
 /**
- * Sovereign Dropdown & Accessible Filter Manager (GNU LibreJS Compliant)
+ * Sovereign Dropdown & Accessible Filter Manager
  * - Closes dropdowns on Escape key press (with focus restore to summary)
  * - Closes dropdowns on Outside Click
  * - Automatically closes other open dropdowns when one opens (mutual exclusion)
  * - Autofocuses country filter input when Region dropdown opens
  * - Client-side instant filter for countries and ISO codes
  * - Zero JS fallback: standard HTML <details> native behavior is preserved
- * - GNU LibreJS Compliant: 100% Free Software under GNU GPL-3.0-or-later.
+ * - Free Software under GNU GPL-3.0-or-later.
  */
 window.selectCategory = function(cat, btn) {
   var input = document.getElementById('search-category');

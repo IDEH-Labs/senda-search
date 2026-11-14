@@ -12,8 +12,8 @@ Strictly adheres to non-negotiable ethical guidelines:
    Every claim is attributed strictly to the retrieved source.
 4. Methodological Precision: Sources retrieved from the web are secondary/tertiary documents,
    never falsely labeled as "fuentes primarias" unless formally verified as such.
-5. Privacy & Free Software: 100% server-side HTML rendering compatible with GNU LibreJS
-   and Tor Browser 'Safest' mode.
+5. Privacy & Free Software: Server-side HTML rendering without requiring JavaScript,
+   functional in Tor Browser 'Safest' mode.
 """
 
 import re

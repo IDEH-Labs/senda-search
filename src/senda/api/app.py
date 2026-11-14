@@ -459,7 +459,7 @@ def create_app(
         theme: Optional[str] = Query(default=None),
         lang: Optional[str] = Query(default=None),
     ):
-        """GNU LibreJS Web Labels page declaring Free JavaScript licenses."""
+        """JavaScript and Free Software licenses page (Web Labels table format)."""
         return render_with_theme("javascript.html", request, {}, theme, lang)
 
     @app.get("/reader")

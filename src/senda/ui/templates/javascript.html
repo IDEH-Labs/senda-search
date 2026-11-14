@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}JavaScript Web Labels - Senda (GNU LibreJS){% endblock %}
+{% block title %}JavaScript y Licencias de Software - Senda{% endblock %}
 
 {% block content %}
 <div class="static-content-container" style="max-width: 860px; margin: 2rem auto; padding: 0 1.5rem;">
     <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem;">
         <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
-            Licencias de JavaScript (GNU LibreJS Web Labels)
+            JavaScript y Licencias de Software
         </h1>
+        <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+            Senda utiliza JavaScript únicamente para mejoras progresivas y opcionales de interfaz: selección de categoría en la portada y persistencia local de preferencias como el tema visual. La búsqueda básica, paginación y filtros funcionan con formularios HTTP convencionales sin requerir JavaScript.
+        </p>
         <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem;">
-            <strong>Senda</strong> cumple estrictamente con los criterios de <em>Software Libre para JavaScript</em> establecidos por la 
-            <a href="https://www.fsf.org" target="_blank" rel="noopener noreferrer" style="color: var(--text-accent);">Free Software Foundation (FSF)</a>. 
-            El buscador no requiere JavaScript para su funcionamiento esencial: la búsqueda, paginación, filtros y redirecciones operan al 100% mediante HTML semántico y procesamiento en el servidor.
+            Todos los scripts distribuidos por Senda son Software Libre bajo licencia <strong>GNU GPL-3.0-or-later</strong> y su código fuente sin ofuscar está disponible en <a href="/static/js/i18n.js" style="color: var(--text-link);">/static/js/</a>. La siguiente tabla sigue el formato de etiquetas web (Web Labels) para GNU LibreJS. No se ha realizado una verificación formal automatizada con dicha extensión.
         </p>
 
         <div style="overflow-x: auto;">
@@ -35,13 +36,24 @@
                             <a href="/static/js/i18n.js" style="color: var(--text-cyan); text-decoration: none; font-family: var(--font-mono);">/static/js/i18n.js</a>
                         </td>
                     </tr>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted);">
+                        <td style="padding: 0.85rem 1rem;">
+                            <span style="font-family: var(--font-mono);">Script en línea (Arranque de tema)</span>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer" style="color: var(--text-link);">GNU-GPL-3.0-or-later</a>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            <a href="https://codeberg.org/IDEH-Labs/senda-search/src/branch/main/src/senda/ui/templates/base.html" target="_blank" rel="noopener noreferrer" style="color: var(--text-cyan); text-decoration: none; font-family: var(--font-mono);">base.html (&lt;head&gt;)</a>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <div style="margin-top: 2rem; padding: 1rem; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+        <div style="margin-top: 2rem; padding: 1rem; border-radius: var(--radius-md); background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);">
             <p style="margin: 0; font-size: 0.9rem; color: var(--text-main); line-height: 1.5;">
-                ✓ <strong>Garantía de libertad digital:</strong> Los scripts de Senda son libres de ofuscación, libres de telemetría de terceros, no registran pulsaciones de teclas ni realizan rastreo de comportamiento. Si utiliza el complemento <strong>GNU LibreJS</strong>, este identificará automáticamente estos scripts como software libre y los ejecutará sin advertencias de bloqueo.
+                ℹ️ <strong>Transparencia de código:</strong> Los scripts de Senda son legibles, no están ofuscados, no contienen analítica ni telemetría de terceros y no registran pulsaciones de teclas ni actividad del usuario.
             </p>
         </div>
     </div>

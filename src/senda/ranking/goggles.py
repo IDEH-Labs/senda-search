@@ -5,8 +5,8 @@
 Senda Sovereign Goggles & Domain Ranking Engine
 Inspired by Brave Goggles and Kagi Domain Lenses.
 Empowers users to customize or apply community-defined ranking rulesets.
-Works 100% server-side with zero JavaScript required.
-Compatible with Tor Browser (Safest mode) and GNU LibreJS.
+Works server-side without requiring JavaScript.
+Compatible with Tor Browser (Safest mode).
 """
 
 from __future__ import annotations

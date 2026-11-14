@@ -5,8 +5,8 @@
 Senda Sovereign Reader Mode
 Zero-telemetry, distraction-free, ad-free article extraction engine.
 Enforces strict anti-SSRF protections, HTML sanitization, and DNS pinning.
-Works 100% server-side with zero JavaScript required.
-Compatible with Tor Browser (Safest mode) and GNU LibreJS.
+Works server-side without requiring JavaScript.
+Compatible with Tor Browser (Safest mode).
 """
 
 from __future__ import annotations

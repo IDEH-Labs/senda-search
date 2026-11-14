@@ -200,7 +200,7 @@ def test_api_brand_assets_and_manifest(client):
 
 
 def test_theme_toggle_zero_js_and_cookie(client):
-    """Verify theme switching works via query parameter and functional cookie (Tor/LibreJS compatible)."""
+    """Verify theme switching works via query parameter and functional cookie (Works with or without JavaScript)."""
     # 1. Default should be dark
     r_default = client.get("/")
     assert r_default.status_code == 200
