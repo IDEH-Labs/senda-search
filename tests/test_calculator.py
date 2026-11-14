@@ -53,9 +53,23 @@ def test_percentages():
     assert evaluate_math_query("15% de 200").formatted_result == "30"
     assert evaluate_math_query("25 % de 80").formatted_result == "20"
     assert evaluate_math_query("50% of 100").formatted_result == "50"
+    # International thousands separators & decimal commas
+    assert evaluate_math_query("2.5% de 22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("2,5% de 22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("2.5% of 22,000,000").formatted_result == "550,000"
+    assert evaluate_math_query("2.5% de $22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("2.5% de 22.000.000 COP").formatted_result == "550,000"
+    assert evaluate_math_query("2.5 por ciento de 22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("2.5 porciento de 22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("2.5 percent of 22,000,000").formatted_result == "550,000"
+    # What percentage is X of Y
+    assert evaluate_math_query("que porcentaje es 550.000 de 22.000.000").formatted_result == "2.5%"
     # Base + X% / Base - X%
     assert evaluate_math_query("200 + 10%").formatted_result == "220"
     assert evaluate_math_query("100 - 15%").formatted_result == "85"
+    assert evaluate_math_query("22.000.000 + 2.5%").formatted_result == "22,550,000"
+    assert evaluate_math_query("22.000.000 - 2.5%").formatted_result == "21,450,000"
+    assert evaluate_math_query("22.000.000 + 19% iva").formatted_result == "26,180,000"
 
 
 def test_natural_language_prefixes():
@@ -65,6 +79,8 @@ def test_natural_language_prefixes():
     assert evaluate_math_query("calcula 100 / 5").formatted_result == "20"
     assert evaluate_math_query("what is 7 * 8?").formatted_result == "56"
     assert evaluate_math_query("resolver 2 + 3 * 4").formatted_result == "14"
+    assert evaluate_math_query("cuanto es el 2.5% de 22.000.000").formatted_result == "550,000"
+    assert evaluate_math_query("el 2.5% de 22.000.000").formatted_result == "550,000"
 
 
 def test_functions_and_constants():
