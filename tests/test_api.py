@@ -679,4 +679,51 @@ def test_news_results_strictly_strip_google_tracking_redirects(tmp_path):
             assert it["url"], f"Article URL must not be empty: {it}"
 
 
+def test_navigational_brand_direct_resolution(client):
+    """Verify that searching for a known brand/domain resolves the official portal at position 0."""
+    resp = client.get("/search?q=blender&format=json")
+    assert resp.status_code == 200
+    data = resp.json()
+    items = data.get("items", [])
+    assert len(items) > 0
+    first = items[0]
+    assert first["url"] == "https://www.blender.org/"
+    assert "blender.org" in first["domain"]
+    assert "Sitio Oficial" in first["title"]
+    assert "intención navegacional" in first["why_seen"].lower()
+    assert first["source_type"] == "sitio_oficial"
+
+
+def test_wikidata_p856_navigational_resolution(client):
+    """Verify that an entity card with Wikidata P856 official website is promoted to position 0 transparently."""
+    from unittest.mock import AsyncMock, patch
+    from senda.providers.wikipedia import WikipediaEntityCard
+
+    mock_card = WikipediaEntityCard(
+        title="Universidad de los Andes",
+        description="Universidad privada en Bogotá, Colombia",
+        extract="La Universidad de los Andes es una institución de educación superior privada en Bogotá.",
+        wikipedia_url="https://es.wikipedia.org/wiki/Universidad_de_los_Andes_(Colombia)",
+        history_url="https://es.wikipedia.org/w/index.php?title=Universidad_de_los_Andes_(Colombia)&action=history",
+        wikibase_item="Q1255555",
+        official_website="https://uniandes.edu.co/",
+    )
+
+    with patch("senda.providers.wikipedia.WikipediaEntityProvider.get_entity", new_callable=AsyncMock) as mock_get_entity:
+        mock_get_entity.return_value = mock_card
+        resp = client.get("/search?q=universidad+de+los+andes&format=json")
+        assert resp.status_code == 200
+        data = resp.json()
+        items = data.get("items", [])
+        assert len(items) > 0
+        first = items[0]
+        assert first["url"] == "https://uniandes.edu.co/"
+        assert "uniandes.edu.co" in first["domain"]
+        assert "Sitio Web Oficial" in first["title"]
+        assert "P856" in first["why_seen"]
+        assert "Reconocimiento transparente de intención navegacional" in first["why_seen"]
+        assert first["provider_origin"] == "Wikidata (CC0)"
+
+
+
 

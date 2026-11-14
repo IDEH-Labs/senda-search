@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import time
 from typing import Optional, List
+import unicodedata
 import urllib.parse
 from fastapi import FastAPI, Request, Query, Header, HTTPException, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -790,6 +791,76 @@ def create_app(
                 entity_card_obj = await app_wiki_entity.get_entity(card_query, lang=query_lang, fetch_official_website=True)
             if entity_card_obj:
                 entity_data = entity_card_obj.model_dump()
+
+                # Ethical Navigational Resolution via Wikidata P856 (Direct official site promotion)
+                if entity_card_obj.official_website and cat in ("all", "web"):
+                    official_url = entity_card_obj.official_website.strip()
+                    if official_url.startswith("http://") or official_url.startswith("https://"):
+                        # Validate that the entity corresponds to the query and is not a generic homonym/verb
+                        q_norm = "".join(c for c in unicodedata.normalize("NFKD", clean_q.lower().strip()) if not unicodedata.combining(c))
+                        ent_title_norm = "".join(c for c in unicodedata.normalize("NFKD", entity_card_obj.title.lower().strip()) if not unicodedata.combining(c))
+                        clean_title = ent_title_norm.split("(")[0].strip()
+
+                        is_match = (q_norm == clean_title or q_norm == ent_title_norm)
+                        if not is_match and len(q_norm) >= 4:
+                            is_match = (q_norm in clean_title or clean_title in q_norm)
+                            desc_lower = (entity_card_obj.description or "").lower()
+                            # Reject pure dictionary verbs or abstract grammatical concepts without entity backing
+                            if any(w in desc_lower for w in ("verbo", "gramática", "lingüística", "adjetivo")) and not any(w in desc_lower for w in ("empresa", "organización", "software", "sitio web", "fundación", "portal", "institución")):
+                                is_match = False
+
+                        if is_match:
+                            try:
+                                off_parsed = urllib.parse.urlparse(official_url)
+                                off_domain = off_parsed.netloc.lower()
+                                if off_domain.startswith("www."):
+                                    off_domain = off_domain[4:]
+                            except Exception:
+                                off_domain = ""
+
+                            if off_domain:
+                                # Check if already at index 0
+                                already_top = False
+                                if formatted_items:
+                                    top_url = formatted_items[0].url.rstrip("/").lower()
+                                    if top_url == official_url.rstrip("/").lower() or top_url == f"https://{off_domain}".lower():
+                                        already_top = True
+
+                                if not already_top:
+                                    # Deduplicate lower occurrences of this official URL
+                                    formatted_items = [
+                                        it for it in formatted_items
+                                        if it.url.rstrip("/").lower() != official_url.rstrip("/").lower()
+                                        and it.url.rstrip("/").lower() != f"https://{off_domain}".lower()
+                                        and it.url.rstrip("/").lower() != f"https://www.{off_domain}".lower()
+                                    ]
+                                    nav_why = (
+                                        f"Sitio web oficial verificado para «{entity_card_obj.title}» según datos abiertos de Wikidata "
+                                        f"(propiedad P856, {entity_card_obj.wikibase_item or 'identificador universal'}). "
+                                        f"Reconocimiento transparente de intención navegacional sin penalizar otros resultados."
+                                    )
+                                    nav_item = SearchItemModel(
+                                        url=official_url,
+                                        domain=off_domain,
+                                        title=f"{entity_card_obj.title} — Sitio Web Oficial",
+                                        snippet=(
+                                            f"{(entity_card_obj.description or entity_card_obj.extract[:140]).strip()} "
+                                            f"Acceso directo y soberano al portal oficial verificado."
+                                        ),
+                                        relevance_score=1000.0,
+                                        doc_type="web",
+                                        published_at=entity_card_obj.last_updated,
+                                        source="Wikidata / Sitio Oficial",
+                                        why_seen=nav_why,
+                                        is_sponsored=False,
+                                        canonical_url=official_url,
+                                        source_type="sitio_oficial",
+                                        content_type="portal_oficial",
+                                        published_date=entity_card_obj.last_updated,
+                                        provider_origin="Wikidata (CC0)",
+                                    )
+                                    formatted_items.insert(0, nav_item)
+                                    total_matches = max(total_matches, len(formatted_items))
 
         # Instant Sovereign Calculator Card
         calculator_data = None
