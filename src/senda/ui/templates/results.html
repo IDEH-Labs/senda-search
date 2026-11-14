@@ -501,12 +501,48 @@
                     <h2 class="worldtime-city-name">{{ world_time.display_name }}</h2>
                     <span class="worldtime-tz-badge">{{ world_time.timezone_abbr }} ({{ world_time.utc_offset }})</span>
                 </div>
-                <span class="worldtime-date">{{ world_time.date_formatted }}</span>
+                <div class="worldtime-sub-line">
+                    {% if world_time.time_period %}
+                    <span class="worldtime-period-tag">{{ world_time.time_period }}</span>
+                    <span class="metric-sep">&bull;</span>
+                    {% endif %}
+                    <span class="worldtime-date">{{ world_time.date_formatted }}</span>
+                </div>
                 <span class="worldtime-diff">{{ world_time.utc_diff_text }}</span>
             </div>
 
             <div class="worldtime-display-col">
-                <span class="worldtime-day-icon" aria-hidden="true">{{ world_time.day_icon }}</span>
+                {% if world_time.icon_type == 'moon' %}
+                <svg class="worldtime-vector-icon icon-moon" width="36" height="36" viewBox="0 0 24 24" fill="none" aria-label="{{ world_time.time_period }}">
+                    <defs>
+                        <linearGradient id="worldtimeLunarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="45%" stop-color="#cbd5e1"/>
+                            <stop offset="100%" stop-color="#64748b"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="url(#worldtimeLunarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5"/>
+                </svg>
+                {% else %}
+                <svg class="worldtime-vector-icon icon-sun" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="{{ world_time.time_period }}">
+                    <defs>
+                        <radialGradient id="worldtimeSunGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="70%" stop-color="#f59e0b"/>
+                            <stop offset="100%" stop-color="#d97706"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="12" cy="12" r="5" fill="url(#worldtimeSunGrad)" stroke="#f59e0b" stroke-width="1.2"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3" stroke="#f59e0b"></line>
+                    <line x1="12" y1="21" x2="12" y2="23" stroke="#f59e0b"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f59e0b"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f59e0b"></line>
+                    <line x1="1" y1="12" x2="3" y2="12" stroke="#f59e0b"></line>
+                    <line x1="21" y1="12" x2="23" y2="12" stroke="#f59e0b"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f59e0b"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f59e0b"></line>
+                </svg>
+                {% endif %}
                 <div class="worldtime-clock">
                     <span class="worldtime-clock-24">{{ world_time.time_24 }}</span>
                     <span class="worldtime-clock-12">{{ world_time.time_12 }}</span>

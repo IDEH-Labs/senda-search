@@ -27,6 +27,21 @@ def test_world_time_cities():
     assert "Nueva York" in ny.display_name
     assert ny.timezone_name == "America/New_York"
 
+    quito = get_world_time("hora de quito")
+    assert quito is not None
+    assert "Quito" in quito.display_name
+    assert quito.timezone_name == "America/Guayaquil"
+    assert quito.time_period in ("Madrugada", "Mañana", "Tarde", "Noche")
+    assert quito.icon_type in ("sun", "moon")
+    if quito.icon_type == "moon":
+        assert quito.time_period in ("Madrugada", "Noche")
+    else:
+        assert quito.time_period in ("Mañana", "Tarde")
+
+    quito_en = get_world_time("hora en quito")
+    assert quito_en is not None
+    assert "Quito" in quito_en.display_name
+
 
 def test_world_time_utc():
     utc = get_world_time("hora utc")

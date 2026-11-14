@@ -29,6 +29,8 @@ class WorldTimeResult(BaseModel):
     utc_offset: str
     is_day: bool
     day_icon: str
+    icon_type: str = "sun"
+    time_period: str = "Día"
     utc_diff_text: str
     source: str = "Senda Sovereign Engine (Base de Datos IANA)"
 
@@ -263,11 +265,11 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
         return None
 
     # Matching patterns:
-    # 1. "hora en Tokio", "que hora es en Bogota", "hora actual en Madrid"
+    # 1. "hora en Tokio", "hora de Quito", "que hora es en Bogota", "hora actual en Madrid"
     # 2. "time in Tokyo", "current time in London", "time London"
     # 3. "hora Tokio", "hora UTC"
     pattern = re.compile(
-        r"^(?:(?:qu[eé]\s+hora\s+es(?:\s+en)?|hora\s+actual(?:\s+en)?|hora(?:\s+en)?|current\s+time\s+in|time\s+in|time)\s+)?(.+)$",
+        r"^(?:(?:qu[eé]\s+hora\s+es(?:\s+(?:en|de))?|hora\s+actual(?:\s+(?:en|de))?|hora(?:\s+(?:en|de))?|current\s+time\s+(?:in|for|of)?|time\s+(?:in|for|of)?|time)\s+)?(.+)$",
         re.IGNORECASE,
     )
     m = pattern.match(raw)
@@ -280,6 +282,9 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
     is_time_explicit = bool(re.search(r"\b(hora|time)\b", raw, re.IGNORECASE))
     if not is_time_explicit and target not in ("utc", "gmt"):
         return None
+
+    # Strip leading prepositions if any were left in target
+    target = re.sub(r"^(?:en|de|in|of|for)\s+", "", target).strip()
 
     # Clean target of trailing words like "hoy", "ahora", "today", "now"
     target = re.sub(r"\b(hoy|ahora|today|now)\b", "", target).strip().rstrip("?¿.").strip()
@@ -324,9 +329,25 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
     else:
         utc_offset = "UTC"
 
-    # Day / Night: roughly 06:00 to 18:30 is day
+    # Discern the 4 periods of the day: Madrugada, Mañana, Tarde, Noche
     hour = now_tz.hour
-    is_day = 6 <= hour < 19
+    if 0 <= hour < 6:
+        time_period = "Madrugada"
+        is_day = False
+        icon_type = "moon"
+    elif 6 <= hour < 12:
+        time_period = "Mañana"
+        is_day = True
+        icon_type = "sun"
+    elif 12 <= hour < 19:
+        time_period = "Tarde"
+        is_day = True
+        icon_type = "sun"
+    else:  # 19 <= hour < 24
+        time_period = "Noche"
+        is_day = False
+        icon_type = "moon"
+
     day_icon = "☀️" if is_day else "🌙"
 
     # Calculate difference relative to UTC
@@ -350,5 +371,7 @@ def get_world_time(query: str) -> Optional[WorldTimeResult]:
         utc_offset=utc_offset,
         is_day=is_day,
         day_icon=day_icon,
+        icon_type=icon_type,
+        time_period=time_period,
         utc_diff_text=utc_diff_text,
     )
