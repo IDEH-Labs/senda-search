@@ -7,11 +7,13 @@ Aggregates breaking and current news from verified editorial outlets in real tim
 without cookies, tracking, or algorithmic filter bubbles.
 """
 
+import asyncio
 from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 import html
 import re
 from typing import Dict, List, Optional, Any
+import unicodedata
 import urllib.parse
 import xml.etree.ElementTree as ET
 import httpx
@@ -40,9 +42,11 @@ VERIFIED_DIRECT_FEEDS: Dict[str, List[Dict[str, str]]] = {
         {"name": "BBC Mundo", "url": "https://feeds.bbci.co.uk/mundo/rss.xml", "domain": "bbc.com"},
         {"name": "DW Español", "url": "https://rss.dw.com/rdf/rss-sp-all", "domain": "dw.com"},
         {"name": "France 24 Español", "url": "https://www.france24.com/es/rss", "domain": "france24.com"},
-        {"name": "RTVE Noticias", "url": "https://api.rtve.es/api/noticias.rss", "domain": "rtve.es"},
         {"name": "El Espectador", "url": "https://www.elespectador.com/arc/outboundfeeds/rss/", "domain": "elespectador.com"},
         {"name": "El Diario", "url": "https://www.eldiario.es/rss/", "domain": "eldiario.es"},
+        {"name": "Europa Press", "url": "https://www.europapress.es/rss/rss.aspx", "domain": "europapress.es"},
+        {"name": "Clarín", "url": "https://www.clarin.com/rss/lo-ultimo/", "domain": "clarin.com"},
+        {"name": "El Universal", "url": "https://www.eluniversal.com.mx/arc/outboundfeeds/rss/", "domain": "eluniversal.com.mx"},
     ],
     "en": [
         {"name": "BBC News", "url": "https://feeds.bbci.co.uk/news/rss.xml", "domain": "bbc.com"},
@@ -78,26 +82,31 @@ def _clean_text(text: Optional[str]) -> str:
     return " ".join(clean.split())
 
 
+def _strip_accents(text: str) -> str:
+    """Normalize text removing diacritics and accents for robust multilingual matching."""
+    return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c)).lower()
+
+
 def _is_relevant_news(query: str, title: str, source: str) -> bool:
-    """Verify that the syndicated news item genuinely matches the search query.
+    """Verify that the news item genuinely matches the search query.
 
     Prevents collaborative-filtering hallucinations and false positive synonym expansions.
-    Supports Unicode scripts across Cyrillic, Arabic, CJK, and European alphabets.
+    Supports Unicode scripts across Cyrillic, Arabic, CJK, and European alphabets with diacritics.
     """
     clean_q = re.sub(r"\b(?:when|before):\S+", "", query).strip()
     if not clean_q:
         return True
 
-    # Match alphanumeric words across all Unicode writing systems
-    raw_tokens = re.findall(r"\w+", clean_q, flags=re.UNICODE)
-    tokens = [t.lower() for t in raw_tokens if len(t) >= 2 or any(ord(c) > 127 for c in t)]
+    q_norm = _strip_accents(clean_q)
+    raw_tokens = re.findall(r"\w+", q_norm, flags=re.UNICODE)
+    tokens = [t for t in raw_tokens if len(t) >= 2 or any(ord(c) > 127 for c in t)]
     if not tokens:
         return True
 
-    title_lower = title.lower()
-    source_lower = source.lower()
+    title_norm = _strip_accents(title)
+    source_norm = _strip_accents(source)
 
-    return any(token in title_lower or token in source_lower for token in tokens)
+    return any(token in title_norm or token in source_norm for token in tokens)
 
 
 def _expand_news_query(query: str) -> str:
@@ -214,28 +223,25 @@ class RealTimeNewsProvider(SearchProvider):
             gl = gl_override
             ceid = f"{gl}:{hl}"
 
-        if clean_q:
-            query_with_time = _resolve_time_query(clean_q, time_filter)
-            encoded_q = urllib.parse.quote_plus(query_with_time)
-            feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={hl}&gl={gl}&ceid={ceid}"
-        else:
-            # Query-less breaking top headlines for the target language and region
-            feed_url = f"https://news.google.com/rss?hl={hl}&gl={gl}&ceid={ceid}"
-
         headers = {
             "User-Agent": settings.USER_AGENT,
-            "Accept": "application/rss+xml, application/xml, text/xml",
+            "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml",
         }
+
+        items: List[SearchResultItem] = []
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
-                resp = await client.get(feed_url, headers=headers)
-                if resp.status_code != 200:
-                    items = []
-                else:
-                    items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
+                # 1. Sovereign Verified Direct Editorial Feeds (100% direct article URLs, zero Google redirect)
+                direct_items = await self.search_direct_feeds(
+                    query=clean_q,
+                    lang=target_lang,
+                    max_feeds=15,
+                    client=client,
+                )
+                items.extend(direct_items)
 
-                # When searching with a query and few results, enrich with GDELT open research news using the same client
+                # 2. When searching a specific keyword with few direct feed matches, enrich with GDELT open research news
                 if len(items) < page_size and clean_q:
                     try:
                         gdelt_items = await self.search_gdelt(clean_q, lang=target_lang, page_size=page_size, sort=sort, client=client)
@@ -247,11 +253,20 @@ class RealTimeNewsProvider(SearchProvider):
                     except Exception:
                         pass
 
-                # If still empty (e.g., query-less breaking headlines), enrich with verified direct feeds
-                if not items and not clean_q:
+                # 3. Fallback for niche/long-tail search queries with few results in verified feeds
+                if len(items) < page_size and clean_q:
                     try:
-                        direct_items = await self.search_direct_feeds(query="", lang=target_lang, client=client)
-                        items.extend(direct_items)
+                        query_with_time = _resolve_time_query(clean_q, time_filter)
+                        encoded_q = urllib.parse.quote_plus(query_with_time)
+                        feed_url = f"https://news.google.com/rss/search?q={encoded_q}&hl={hl}&gl={gl}&ceid={ceid}"
+                        resp = await client.get(feed_url, headers=headers)
+                        if resp.status_code == 200:
+                            syn_items = self.parse_feed(resp.text, query=clean_q, lang=target_lang)
+                            existing_titles = {it.title.lower() for it in items}
+                            for s_item in syn_items:
+                                if s_item.title.lower() not in existing_titles:
+                                    items.append(s_item)
+                                    existing_titles.add(s_item.title.lower())
                     except Exception:
                         pass
         except Exception:
@@ -486,10 +501,10 @@ class RealTimeNewsProvider(SearchProvider):
         self,
         query: str = "",
         lang: str = "es",
-        max_feeds: int = 4,
+        max_feeds: int = 15,
         client: Optional[httpx.AsyncClient] = None,
     ) -> List[SearchResultItem]:
-        """Fetch and aggregate breaking news directly from curated editorial RSS feeds."""
+        """Fetch and aggregate breaking news directly from curated editorial RSS feeds in parallel."""
         target_lang = lang.lower().split("-")[0]
         feeds = VERIFIED_DIRECT_FEEDS.get(target_lang, VERIFIED_DIRECT_FEEDS.get("es", []))[:max_feeds]
         if not feeds:
@@ -500,21 +515,32 @@ class RealTimeNewsProvider(SearchProvider):
             "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml",
         }
 
+        async def _fetch_single_feed(c: httpx.AsyncClient, feed_info: Dict[str, str]) -> List[SearchResultItem]:
+            try:
+                resp = await c.get(feed_info["url"], headers=headers)
+                if resp.status_code == 200 and resp.text:
+                    feed_items = self.parse_feed(resp.text, query=query, lang=target_lang)
+                    for it in feed_items:
+                        if not it.source or it.source == "Prensa Verificada":
+                            it.source = feed_info["name"]
+                        if not it.source_domain:
+                            it.source_domain = feed_info["domain"]
+                        it.provider_origin = f"Prensa Directa ({feed_info['name']})"
+                        it.why_seen = (
+                            f"Artículo oficial sindicado directamente mediante el feed RSS de «{feed_info['name']}» ({feed_info['domain']}). "
+                            f"Enlace directo y genuino al medio de comunicación sin intermediarios corporativos ni pasarelas de seguimiento."
+                        )
+                    return feed_items
+            except Exception:
+                pass
+            return []
+
         async def _fetch_feeds(c: httpx.AsyncClient) -> List[SearchResultItem]:
+            results = await asyncio.gather(*[_fetch_single_feed(c, fi) for fi in feeds], return_exceptions=True)
             aggregated_items: List[SearchResultItem] = []
-            for feed_info in feeds:
-                try:
-                    resp = await c.get(feed_info["url"], headers=headers)
-                    if resp.status_code == 200 and resp.text:
-                        feed_items = self.parse_feed(resp.text, query=query, lang=target_lang)
-                        for it in feed_items:
-                            if not it.source or it.source == "Prensa Verificada":
-                                it.source = feed_info["name"]
-                            if not it.source_domain:
-                                it.source_domain = feed_info["domain"]
-                            aggregated_items.append(it)
-                except Exception:
-                    continue
+            for r in results:
+                if isinstance(r, list):
+                    aggregated_items.extend(r)
             return aggregated_items
 
         if client is not None:
