@@ -49,7 +49,7 @@ from senda.worldtime import get_world_time
 from senda.reader import SovereignReader
 from senda.crawler.network_guard import SSRFSecurityViolation
 from senda.ranking.goggles import get_available_goggles
-from senda.ranking.suggestions import SuggestionEngine
+from senda.ranking.suggestions import SuggestionEngine, damerau_levenshtein_distance
 from senda.i18n import (
     resolve_language,
     translate,
@@ -628,10 +628,9 @@ def create_app(
 
         # Typo tolerance & Did-you-mean engine (Sovereign, non-tracking, offline-first)
         if not is_literal and clean_q and len(clean_q) >= 3:
-            if len(items_list) == 0:
-                # Case A: Zero results found for imprecise query -> suggest & auto-fallback
-                suggested_q = await app_suggestions.suggest(clean_q, lang=query_lang)
-                if suggested_q and suggested_q.lower() != clean_q.lower():
+            suggested_q = await app_suggestions.suggest(clean_q, lang=query_lang)
+            if suggested_q and suggested_q.lower() != clean_q.lower():
+                if len(items_list) == 0:
                     fallback_items = await app_aggregator.aggregate(
                         query=suggested_q,
                         category=cat,
@@ -657,10 +656,7 @@ def create_app(
                         original_query = clean_q
                     else:
                         did_you_mean = suggested_q
-            else:
-                # Case B: Results exist, but check if there's an authoritative suggestion
-                suggested_q = await app_suggestions.suggest(clean_q, lang=query_lang)
-                if suggested_q and suggested_q.lower() != clean_q.lower():
+                else:
                     did_you_mean = suggested_q
 
         duration_ms = round((time.perf_counter() - start_t) * 1000, 2)
@@ -810,11 +806,15 @@ def create_app(
                     official_url = entity_card_obj.official_website.strip()
                     if official_url.startswith("http://") or official_url.startswith("https://"):
                         # Validate that the entity corresponds to the query and is not a generic homonym/verb
-                        q_norm = "".join(c for c in unicodedata.normalize("NFKD", clean_q.lower().strip()) if not unicodedata.combining(c))
+                        q_norm = "".join(c for c in unicodedata.normalize("NFKD", card_query.lower().strip()) if not unicodedata.combining(c))
                         ent_title_norm = "".join(c for c in unicodedata.normalize("NFKD", entity_card_obj.title.lower().strip()) if not unicodedata.combining(c))
                         clean_title = ent_title_norm.split("(")[0].strip()
 
-                        is_match = (q_norm == clean_title or q_norm == ent_title_norm)
+                        is_match = (
+                            q_norm == clean_title
+                            or q_norm == ent_title_norm
+                            or (len(q_norm) >= 4 and damerau_levenshtein_distance(q_norm, clean_title) <= 2)
+                        )
                         if not is_match and len(q_norm) >= 4:
                             is_match = (q_norm in clean_title or clean_title in q_norm)
                             desc_lower = (entity_card_obj.description or "").lower()

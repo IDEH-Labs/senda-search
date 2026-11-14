@@ -109,3 +109,34 @@ def test_get_sovereign_country_lookups():
     assert tr is not None
     assert tr.official_portal == "https://www.turkiye.gov.tr/"
 
+
+def test_sovereign_country_typo_tolerance():
+    """Verify typo tolerance matches sovereign countries on 1-2 edit distance."""
+    # 1-letter typo on Burundi -> Burundi official presidency portal
+    bi = get_sovereign_country(query="burundo")
+    assert bi is not None
+    assert bi.name_es == "Burundi"
+    assert bi.official_portal == "https://presidence.gov.bi/"
+
+    # Typo on Tanzania
+    tz = get_sovereign_country(query="tanzanya")
+    assert tz is not None
+    assert tz.name_es == "Tanzania"
+    assert tz.official_portal == "https://www.ikulu.go.tz/"
+
+    # Typo on Vietnam
+    vn = get_sovereign_country(query="vietna")
+    assert vn is not None
+    assert vn.name_es == "Vietnam"
+
+    # Typo on El Salvador
+    sv = get_sovereign_country(query="el salvado")
+    assert sv is not None
+    assert sv.name_es == "El Salvador"
+
+    # Typo on South Africa
+    za = get_sovereign_country(query="sudafrika")
+    assert za is not None
+    assert za.name_es == "Sudáfrica"
+
+

@@ -13,7 +13,7 @@ Zero tracking, 100% offline-resilient, privacy-first sovereign design.
 import re
 import urllib.parse
 from typing import Dict, Optional, Tuple
-from senda.countries import get_sovereign_country
+from senda.countries import get_sovereign_country, damerau_levenshtein_distance
 from senda.providers.base import SearchResultItem
 
 
@@ -293,5 +293,29 @@ class NavigationalEngine:
                 content_type="portal_oficial",
                 provider_origin="Senda Navegación",
             )
+
+        # 4. Fuzzy typo-tolerance for prominent navigational entities
+        if len(q_norm) >= 4:
+            for nav_term, (url, name, desc) in NAVIGATIONAL_DIRECTORY.items():
+                if abs(len(nav_term) - len(q_norm)) <= 1:
+                    if damerau_levenshtein_distance(q_norm, nav_term) == 1:
+                        domain = urllib.parse.urlparse(url).netloc
+                        title = f"{name} — Sitio Oficial"
+                        snippet = f"{desc} Acceso directo a {domain} sin intermediarios ni rastreadores."
+                        return SearchResultItem(
+                            url=url,
+                            domain=domain,
+                            title=title,
+                            snippet=snippet,
+                            score=1000.0,
+                            doc_type="web",
+                            source="Navegación Directa",
+                            why_seen=f"Coincidencia por proximidad tipográfica hacia el sitio oficial de '{name}'.",
+                            is_sponsored=False,
+                            canonical_url=url,
+                            source_type="sitio_oficial",
+                            content_type="portal_oficial",
+                            provider_origin="Senda Navegación",
+                        )
 
         return None

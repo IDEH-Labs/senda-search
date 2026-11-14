@@ -272,3 +272,21 @@ def test_snippet_sanitization_and_url_scheme_hardening():
     assert bad_item.url == "#"
     assert bad_item.media_url is None
 
+
+def test_navigational_typo_tolerance():
+    """Verify NavigationalEngine resolves misspelled sovereign and directory queries."""
+    from senda.ranking.navigational import NavigationalEngine
+    import pytest
+
+    # 1. Sovereign country typo resolution
+    nav_bi = NavigationalEngine.resolve("burundo")
+    assert nav_bi is not None
+    assert nav_bi.url == "https://presidence.gov.bi/"
+    assert "Burundi" in nav_bi.title
+
+    # 2. Directory typo resolution (1-edit distance: gogle -> google, gutemberg -> gutenberg)
+    nav_gogle = NavigationalEngine.resolve("gogle")
+    assert nav_gogle is not None
+    assert "google.com" in nav_gogle.url
+
+

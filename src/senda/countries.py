@@ -2276,12 +2276,36 @@ _NOISE_PREFIXES = (
 )
 
 
+def damerau_levenshtein_distance(s1: str, s2: str) -> int:
+    """Calculate the Damerau-Levenshtein edit distance between two strings."""
+    d = {}
+    len1, len2 = len(s1), len(s2)
+    for i in range(-1, len1 + 1):
+        d[(i, -1)] = i + 1
+    for j in range(-1, len2 + 1):
+        d[(-1, j)] = j + 1
+
+    for i in range(len1):
+        for j in range(len2):
+            cost = 0 if s1[i] == s2[j] else 1
+            d[(i, j)] = min(
+                d[(i - 1, j)] + 1,          # deletion
+                d[(i, j - 1)] + 1,          # insertion
+                d[(i - 1, j - 1)] + cost,   # substitution
+            )
+            if i > 0 and j > 0 and s1[i] == s2[j - 1] and s1[i - 1] == s2[j]:
+                d[(i, j)] = min(d[(i, j)], d[(i - 2, j - 2)] + 1)  # transposition
+
+    return d[(len1 - 1, len2 - 1)]
+
+
 def get_sovereign_country(
     query: Optional[str] = None,
     qid: Optional[str] = None,
     code: Optional[str] = None,
+    allow_fuzzy: bool = True,
 ) -> Optional[SovereignCountry]:
-    """Resolve a sovereign nation by Wikidata Q-ID, ISO code, or search text."""
+    """Resolve a sovereign nation by Wikidata Q-ID, ISO code, or search text with typo-tolerance."""
     if qid:
         clean_qid = qid.strip().upper()
         if clean_qid in SOVEREIGN_BY_QID:
@@ -2297,16 +2321,33 @@ def get_sovereign_country(
         if not norm_q:
             return None
 
-        # Direct term match
+        # 1. Direct term match
         if norm_q in _SOVEREIGN_BY_TERM:
             return _SOVEREIGN_BY_TERM[norm_q]
 
-        # Strip standard institutional prefixes (e.g. "gobierno de colombia" -> "colombia")
+        # 2. Strip standard institutional prefixes (e.g. "gobierno de colombia" -> "colombia")
         for pfx in _NOISE_PREFIXES:
             if norm_q.startswith(pfx):
                 sub = norm_q[len(pfx):].strip()
                 if sub in _SOVEREIGN_BY_TERM:
                     return _SOVEREIGN_BY_TERM[sub]
+                norm_q = sub
+                break
+
+        # 3. Typo-tolerance: Sovereign Fuzzy Match (Damerau-Levenshtein <= 1 or 2)
+        if allow_fuzzy and len(norm_q) >= 4:
+            max_d = 1 if len(norm_q) < 7 else 2
+            best_country: Optional[SovereignCountry] = None
+            best_dist = 999
+            for term, country in _SOVEREIGN_BY_TERM.items():
+                if abs(len(term) - len(norm_q)) > max_d:
+                    continue
+                dist = damerau_levenshtein_distance(norm_q, term)
+                if 0 < dist <= max_d and dist < best_dist:
+                    best_dist = dist
+                    best_country = country
+            if best_country:
+                return best_country
 
     return None
 
