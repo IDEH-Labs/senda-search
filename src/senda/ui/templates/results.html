@@ -694,6 +694,174 @@
     </section>
     {% endif %}
 
+    <!-- Instant Ethical Public Health Card (WHO / MedlinePlus Open Evidence) -->
+    {% if health %}
+    <section class="health-card" role="region" aria-label="Información verificada de salud pública">
+        <div class="health-header">
+            <div class="health-title-group">
+                <h2 class="health-title">{{ health.title }}</h2>
+                <span class="health-category-chip">{{ health.category }}</span>
+            </div>
+            <span class="health-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px; vertical-align: text-bottom;">
+                    <path d="M12 2v20M2 12h20"/>
+                </svg>
+                Salud Pública Verificada
+            </span>
+        </div>
+
+        <p class="health-summary">{{ health.summary }}</p>
+
+        <div class="health-columns">
+            <div class="health-col">
+                <h3 class="health-subheading">Síntomas comunes</h3>
+                <ul class="health-list symptoms-list">
+                    {% for symptom in health.symptoms %}
+                    <li>{{ symptom }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="health-col">
+                <h3 class="health-subheading">Prevención y cuidados</h3>
+                <ul class="health-list prevention-list">
+                    {% for item in health.prevention %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="health-alert-box">
+            <strong>¿Cuándo acudir al médico?</strong>
+            <p>{{ health.when_to_seek_care }}</p>
+        </div>
+
+        <footer class="health-footer">
+            <div class="health-source-info">
+                <span>Fuente oficial: <a href="{{ health.source_url }}" target="_blank" rel="noopener noreferrer">{{ health.source }} ↗</a></span>
+                <span class="footer-dot">&bull;</span>
+                <span>{{ health.license }}</span>
+            </div>
+            <p class="health-disclaimer">{{ health.disclaimer }}</p>
+        </footer>
+    </section>
+    {% endif %}
+
+    <!-- Instant Space & Astronomy Card (NASA / ESA Open Science) -->
+    {% if space %}
+    <section class="space-card" role="region" aria-label="Ficha científica espacial y astronómica">
+        <div class="space-header">
+            <div class="space-title-group">
+                <h2 class="space-title">{{ space.title }}</h2>
+                <span class="space-category-chip">{{ space.category }}</span>
+            </div>
+            <span class="space-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px; vertical-align: text-bottom;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m4.93 4.93 4.24 4.24"/>
+                    <path d="m14.83 9.17 4.24-4.24"/>
+                    <path d="m14.83 14.83 4.24 4.24"/>
+                    <path d="m9.17 14.83-4.24 4.24"/>
+                </svg>
+                Exploración Espacial • Datos Abiertos
+            </span>
+        </div>
+
+        <div class="space-body">
+            {% if space.image_url %}
+            <div class="space-image-wrapper">
+                <img src="{{ space.image_url }}" alt="{{ space.title }}" class="space-image" loading="lazy" referrerpolicy="no-referrer">
+                <span class="space-image-caption">Fotografía oficial en Dominio Público</span>
+            </div>
+            {% endif %}
+            <div class="space-info">
+                <p class="space-desc">{{ space.description }}</p>
+
+                <h3 class="space-subheading">Datos orbitales y físicos</h3>
+                <dl class="space-facts-grid">
+                    {% for k, v in space.key_facts.items() %}
+                    <div class="space-fact-item">
+                        <dt>{{ k }}:</dt>
+                        <dd>{{ v }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+
+                {% if space.mission_highlights %}
+                <h3 class="space-subheading">Misiones destacadas</h3>
+                <ul class="space-missions-list">
+                    {% for m in space.mission_highlights %}
+                    <li>{{ m }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <footer class="space-footer">
+            <span>Fuente: <a href="{{ space.source_url }}" target="_blank" rel="noopener noreferrer">{{ space.source }} ↗</a></span>
+            <span class="footer-dot">&bull;</span>
+            <span>{{ space.license }}</span>
+        </footer>
+    </section>
+    {% endif %}
+
+    <!-- Instant Sovereign Geographic & OpenStreetMap Card -->
+    {% if geo %}
+    <section class="geo-card" role="region" aria-label="Ficha geográfica soberana OpenStreetMap">
+        <div class="geo-header">
+            <div class="geo-title-group">
+                <h2 class="geo-title">{{ geo.city_name }}</h2>
+                <span class="geo-country-chip">{{ geo.admin_region }} • {{ geo.country }}</span>
+            </div>
+            <span class="geo-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px; vertical-align: text-bottom;">
+                    <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                    <line x1="9" x2="9" y1="3" y2="18"/>
+                    <line x1="15" x2="15" y1="6" y2="21"/>
+                </svg>
+                OpenStreetMap • Cartografía Libre
+            </span>
+        </div>
+
+        <div class="geo-body">
+            <div class="geo-metrics">
+                <div class="geo-metric-chip">
+                    <span class="metric-label">Coordenadas:</span>
+                    <strong class="metric-val">{{ geo.coordinates_str }}</strong>
+                </div>
+                {% if geo.population %}
+                <div class="geo-metric-chip">
+                    <span class="metric-label">Población:</span>
+                    <strong class="metric-val">{{ geo.population }}</strong>
+                </div>
+                {% endif %}
+                {% if geo.altitude %}
+                <div class="geo-metric-chip">
+                    <span class="metric-label">Altitud:</span>
+                    <strong class="metric-val">{{ geo.altitude }}</strong>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="geo-map-frame-box">
+                <iframe class="geo-osm-iframe" title="Mapa de {{ geo.city_name }}" src="{{ geo.osm_embed_url }}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
+                <div class="geo-map-actions">
+                    <a href="{{ geo.osm_map_url }}" target="_blank" rel="noopener noreferrer" class="geo-osm-btn">
+                        <span>Ver mapa completo interactivo en OpenStreetMap.org ↗</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer class="geo-footer">
+            <span>Datos cartográficos © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{{ geo.source }}</a></span>
+            <span class="footer-dot">&bull;</span>
+            <span>Licencia: {{ geo.license }}</span>
+        </footer>
+    </section>
+    {% endif %}
+
     <!-- Grounded Extractive Synthesis (Rendered only on explicit opt-in via ?synthesis=true) -->
     {% if grounded_synthesis %}
     <aside class="grounded-answer-box {% if grounded_synthesis.is_refusal %}refusal{% endif %}" role="region" aria-label="Síntesis extractiva de documentos consultados">
@@ -739,6 +907,13 @@
                     <span>Fotografías, ilustraciones y patrimonio visual en <em>Dominio Público</em>, <em>CC0</em> y <em>Cultura Libre</em> federados desde Wikimedia Commons, Openverse y Museos de Acceso Abierto. Sin publicidad, sin rastreo y con descarga directa en resolución original.</span>
                 </div>
             </div>
+        </div>
+
+        <div class="image-license-filters" role="navigation" aria-label="Filtros de licencia para imágenes">
+            <a href="/search?q={{ query | urlencode }}&category=images" class="filter-pill {% if not license_filter %}active{% endif %}">Todas las licencias libres</a>
+            <a href="/search?q={{ query | urlencode }}&category=images&license=cc0" class="filter-pill {% if license_filter == 'cc0' %}active{% endif %}" title="Uso libre sin necesidad de permiso ni mención">Solo Dominio Público (CC0)</a>
+            <a href="/search?q={{ query | urlencode }}&category=images&license=museums" class="filter-pill {% if license_filter == 'museums' %}active{% endif %}" title="Obras de arte y colecciones digitalizadas de museos">Museos Abiertos (CC0)</a>
+            <a href="/search?q={{ query | urlencode }}&category=images&license=cc-by" class="filter-pill {% if license_filter == 'cc-by' %}active{% endif %}" title="Uso libre citando la autoría">Atribución (CC-BY)</a>
         </div>
 
         <div class="image-grid" role="region" aria-label="Resultados de imágenes">

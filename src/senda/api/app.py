@@ -46,6 +46,9 @@ from senda.dictionary import DictionaryProvider
 from senda.providers.weather import WeatherProvider
 from senda.converters import convert_query
 from senda.worldtime import get_world_time
+from senda.health import evaluate_health_query
+from senda.space import evaluate_space_query
+from senda.geo import evaluate_geo_query
 from senda.reader import SovereignReader
 from senda.crawler.network_guard import SSRFSecurityViolation
 from senda.ranking.goggles import get_available_goggles
@@ -112,6 +115,9 @@ class SearchResponseModel(BaseModel):
     weather: Optional[dict] = None
     conversion: Optional[dict] = None
     world_time: Optional[dict] = None
+    health: Optional[dict] = None
+    space: Optional[dict] = None
+    geo: Optional[dict] = None
     goggle: Optional[str] = None
     custom_goggle: Optional[str] = None
     goggles_catalog: Optional[list] = None
@@ -557,6 +563,7 @@ def create_app(
         anti_slop: bool = Query(default=False),
         clustering: bool = Query(default=True),
         literal: bool = Query(default=False),
+        license: Optional[str] = Query(default=None),
         theme: Optional[str] = Query(default=None),
         lang: Optional[str] = Query(default=None),
     ):
@@ -666,6 +673,25 @@ def create_app(
         local_res = app_retriever.search(search_q_for_local, page=current_page, page_size=page_sz, category=cat if cat != "all" else "all")
         total_matches = max(len(items_list), local_res.total_matches)
         total_pages = max(1, (total_matches + page_sz - 1) // page_sz) if total_matches > 0 else 1
+
+        # Specialized image license filtering (CC0 / Public Domain / Museums)
+        lic_filter = license.lower().strip() if isinstance(license, str) and license.strip() else None
+        if cat == "images" and lic_filter:
+            if lic_filter in ("cc0", "public_domain", "publico", "público"):
+                items_list = [
+                    it for it in items_list
+                    if any(k in (it.license or "").lower() for k in ("cc0", "público", "public domain", "zero", "dominio"))
+                ]
+            elif lic_filter in ("cc-by", "by"):
+                items_list = [
+                    it for it in items_list
+                    if "by" in (it.license or "").lower() and "cc0" not in (it.license or "").lower()
+                ]
+            elif lic_filter in ("museums", "museos"):
+                items_list = [
+                    it for it in items_list
+                    if any(m in (getattr(it, "source", "") or "").lower() for m in ("museum", "museo", "art institute", "cleveland"))
+                ]
 
         formatted_items = []
         for it in items_list:
@@ -914,6 +940,27 @@ def create_app(
             if dict_card_obj:
                 dictionary_data = dict_card_obj.model_dump()
 
+        # Instant Ethical Public Health Card (WHO / MedlinePlus Open Evidence)
+        health_data = None
+        if current_page == 1 and card_query and cat in ("all", "web"):
+            health_card_obj = evaluate_health_query(card_query)
+            if health_card_obj:
+                health_data = health_card_obj.model_dump()
+
+        # Instant Space & Astronomy Card (NASA / ESA Open Science)
+        space_data = None
+        if current_page == 1 and card_query and cat in ("all", "web"):
+            space_card_obj = evaluate_space_query(card_query)
+            if space_card_obj:
+                space_data = space_card_obj.model_dump()
+
+        # Instant Sovereign Geographic Card (OpenStreetMap / ODbL)
+        geo_data = None
+        if current_page == 1 and card_query and cat in ("all", "web"):
+            geo_card_obj = evaluate_geo_query(card_query)
+            if geo_card_obj:
+                geo_data = geo_card_obj.model_dump()
+
         results_data = SearchResponseModel(
             query=clean_q,
             total_matches=total_matches,
@@ -932,6 +979,9 @@ def create_app(
             weather=weather_data,
             conversion=conversion_data,
             world_time=world_time_data,
+            health=health_data,
+            space=space_data,
+            geo=geo_data,
             goggle=goggle_val,
             custom_goggle=custom_goggle_val,
             goggles_catalog=get_available_goggles(),
@@ -963,6 +1013,10 @@ def create_app(
                 "weather": weather_data,
                 "conversion": conversion_data,
                 "world_time": world_time_data,
+                "health": health_data,
+                "space": space_data,
+                "geo": geo_data,
+                "license_filter": lic_filter,
                 "goggle": goggle_val,
                 "custom_goggle": custom_goggle_val,
                 "goggles_catalog": get_available_goggles(),
