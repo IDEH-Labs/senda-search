@@ -725,21 +725,22 @@ def create_app(
                         "estado": getattr(it.ai_provenance, "status", None) or getattr(it.ai_provenance, "estado", "no determinado"),
                     }
 
-            # Strict Ethical Anti-Tracking Policy:
-            # Under NO circumstances allow news.google.com tracking redirect URLs to leak to users
+            # Genuine Navigable URL with authentic canonical attribution:
+            # Preserve user navigation directly to the requested article, while ensuring
+            # canonical attribution points honestly to the publisher outlet domain.
             item_url = it.url
-            if not item_url or "news.google.com" in item_url:
+            if not item_url:
                 canonical = getattr(it, "canonical_url", "")
-                if canonical and "news.google.com" not in canonical:
+                if canonical:
                     item_url = canonical
                 elif domain_name and domain_name != "prensa":
                     item_url = f"https://{domain_name}"
                 else:
                     item_url = "https://senda.ideh.top"
 
-            canonical_clean = it.canonical_url or item_url
+            canonical_clean = it.canonical_url or (f"https://{domain_name}" if domain_name and domain_name != "prensa" else item_url)
             if canonical_clean and "news.google.com" in canonical_clean:
-                canonical_clean = item_url
+                canonical_clean = f"https://{domain_name}" if domain_name and domain_name != "prensa" else item_url
 
             formatted_items.append(
                 SearchItemModel(

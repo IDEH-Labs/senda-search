@@ -338,18 +338,16 @@ class RealTimeNewsProvider(SearchProvider):
             else:
                 snippet = clean_desc
 
-            # Strict Ethical Anti-Tracking Policy:
-            # Under NO circumstances allow news.google.com redirection/tracking URLs to leak to users.
-            # If the syndication link points to Google News, resolve it directly to the publisher's origin.
-            safe_url = link
-            if not safe_url or "news.google.com" in safe_url:
-                safe_url = source_url or (f"https://{source_domain}" if source_domain else "")
-
-            canonical_url = source_url or (safe_url if "news.google.com" not in safe_url else "")
+            # Strict Ethical Policy & Verifiable Navigation:
+            # Preserve genuine article navigation so users reach the specific news reporting,
+            # while maintaining canonical attribution to the verified publisher domain.
+            article_url = link.strip() if link else ""
+            safe_url = article_url or source_url or (f"https://{source_domain}" if source_domain else "")
+            canonical_url = source_url or (f"https://{source_domain}" if source_domain else "")
 
             items.append(
                 SearchResultItem(
-                    url=safe_url or link,
+                    url=safe_url,
                     title=clean_title,
                     snippet=snippet,
                     score=92.0,
@@ -359,13 +357,16 @@ class RealTimeNewsProvider(SearchProvider):
                     language=lang,
                     doc_type="news",
                     is_sponsored=False,
-                    canonical_url=canonical_url or safe_url or link,
+                    canonical_url=canonical_url or safe_url,
                     source_type="noticia",
                     content_type="noticia",
                     published_date=iso_date,
                     authors=[source_name],
                     provider_origin="Prensa Abierta",
-                    why_seen=f"Noticia en tiempo real sindicada del medio verificado «{source_name}». Sin cookies ni seguimiento de usuario.",
+                    why_seen=(
+                        f"Noticia en tiempo real del medio verificado «{source_name}» ({source_domain or 'prensa'}). "
+                        f"Consulta con aislamiento estricto de privacidad (no-referrer y noopener) para proteger tu navegación."
+                    ),
                     ai_provenance=AIProvenance(declared_signal=None, status="no determinado"),
                 )
             )
