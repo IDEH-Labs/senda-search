@@ -1282,22 +1282,6 @@ html.light .country-search-box {
   display: inline-block;
 }
 
-/* Pure Zero-JS Backdrop: Clicking outside closes why-seen panel natively */
-.why-seen-disclosure[open] > .why-seen-summary::before {
-  content: "";
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 35;
-  background: transparent;
-  cursor: default;
-}
-
 .why-seen-summary {
   display: inline-flex;
   align-items: center;
@@ -1312,6 +1296,7 @@ html.light .country-search-box {
   cursor: pointer;
   user-select: none;
   list-style: none;
+  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 
@@ -1349,9 +1334,9 @@ html.light .country-search-box {
   right: 0;
   top: calc(100% + 6px);
   z-index: 40;
-  width: 460px;
-  max-width: min(460px, calc(100vw - 2rem));
-  max-height: min(520px, 78vh);
+  width: 480px;
+  max-width: min(480px, calc(100vw - 2rem));
+  max-height: min(580px, 82vh);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -1360,6 +1345,7 @@ html.light .country-search-box {
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
   box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-subtle);
+  box-sizing: border-box;
   animation: whySlideDown 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1378,6 +1364,8 @@ html.light .country-search-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   margin-bottom: 0.5rem;
   font-size: 0.72rem;
 }
@@ -1386,6 +1374,7 @@ html.light .country-search-box {
   color: var(--text-accent);
   font-weight: 600;
   font-family: var(--font-mono);
+  word-break: break-word;
 }
 
 .why-seen-privacy-tag {
@@ -1394,13 +1383,16 @@ html.light .country-search-box {
   padding: 0.05rem 0.4rem;
   border-radius: 3px;
   font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .why-seen-text {
   font-size: 0.82rem;
   color: var(--text-main);
-  line-height: 1.5;
+  line-height: 1.55;
   margin-bottom: 0.65rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .why-seen-footer {
@@ -1408,6 +1400,7 @@ html.light .country-search-box {
   color: var(--text-faint);
   border-top: 1px solid var(--border-subtle);
   padding-top: 0.4rem;
+  line-height: 1.4;
 }
 
 /* Badges semánticos de procedencia en resultados */
@@ -2200,10 +2193,36 @@ footer.app-footer a:hover {
     font-size: 1.15rem;
   }
 
+  .why-seen-disclosure {
+    position: static;
+    display: block;
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.35rem;
+  }
+
+  .why-seen-summary {
+    display: inline-flex;
+    margin-bottom: 0.2rem;
+  }
+
   .why-seen-dropdown {
-    width: 320px;
-    max-width: calc(100vw - 2rem);
-    right: 0;
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
   }
 
   .provenance-row {
@@ -2258,12 +2277,6 @@ footer.app-footer a:hover {
     min-width: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-  }
-
-  .why-seen-dropdown {
-    width: 290px;
-    max-width: calc(100vw - 1.5rem);
-    right: 0;
   }
 
   .suggestion-chip {

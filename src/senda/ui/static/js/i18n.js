@@ -326,10 +326,12 @@ function initDropdownsAndFilters() {
   }
 
   function resetMenuPosition(d) {
-    var menu = d.querySelector('.filter-dropdown-menu');
+    var menu = d.querySelector('.filter-dropdown-menu, .why-seen-dropdown');
     if (menu) {
       menu.style.left = '';
       menu.style.right = '';
+      menu.style.top = '';
+      menu.style.bottom = '';
       menu.style.transform = '';
     }
   }
@@ -351,35 +353,50 @@ function initDropdownsAndFilters() {
   }
 
   function adjustMenuBoundary(d) {
-    var menu = d.querySelector('.filter-dropdown-menu');
+    var menu = d.querySelector('.filter-dropdown-menu, .why-seen-dropdown');
     if (!menu) return;
 
     var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-    // On mobile screens (<= 640px), the dropdown menu is anchored full-width under the toolbar via CSS
+    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+    // On mobile screens (<= 640px), dropdowns are anchored full-width / in-flow via CSS
     if (viewportWidth <= 640) {
       menu.style.left = '';
       menu.style.right = '';
+      menu.style.top = '';
+      menu.style.bottom = '';
       menu.style.transform = '';
       return;
     }
 
     menu.style.left = '';
     menu.style.right = '';
+    menu.style.top = '';
+    menu.style.bottom = '';
     menu.style.transform = '';
 
     var rect = menu.getBoundingClientRect();
 
     // If menu extends beyond right edge, align right edge to button
-    if (rect.right > viewportWidth - 8) {
+    if (rect.right > viewportWidth - 16) {
       menu.style.left = 'auto';
       menu.style.right = '0';
     }
 
-    // If after alignment it extends beyond left edge, shift it right
+    // If after alignment it extends beyond left edge (left < 16), shift it right
     var updatedRect = menu.getBoundingClientRect();
-    if (updatedRect.left < 8) {
-      var shift = 8 - updatedRect.left;
+    if (updatedRect.left < 16) {
+      var shift = 16 - updatedRect.left;
       menu.style.transform = 'translateX(' + shift + 'px)';
+    }
+
+    // If panel extends below viewport, check if flipping upwards provides better visibility
+    if (updatedRect.bottom > viewportHeight - 16) {
+      var btnRect = d.getBoundingClientRect();
+      if (btnRect.top > (viewportHeight - btnRect.bottom)) {
+        menu.style.top = 'auto';
+        menu.style.bottom = 'calc(100% + 6px)';
+      }
     }
   }
 
