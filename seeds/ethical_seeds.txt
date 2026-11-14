@@ -274,16 +274,32 @@ https://tongastats.gov.to/
 https://tuvalustats.gov.tv/
 https://vnso.gov.vu/
 https://presidence.gov.bi/
-# Bibliotecas Abiertas y Patrimonio Bibliográfico
+# Bibliotecas Abiertas y Patrimonio Bibliográfico Universal (Global, Asia, África, Oceanía, Europa, Norteamérica, Latinoamérica)
 https://www.gutenberg.org/
 https://openlibrary.org/
+https://unesdoc.unesco.org/
+https://wikisource.org/
+https://dl.ndl.go.jp/
+https://ndl.iitkgp.ac.in/
+https://www.nl.go.kr/
+https://www.qnl.qa/
+https://www.bibalex.org/
+https://www.ajol.info/
+https://ghanalibrary.org/
+https://www.knls.ac.ke/
+https://natlib.govt.nz/
+https://trove.nla.gov.au/
+https://www.bl.uk/
+https://digi.vatlib.it/
 https://www.europeana.eu/
+https://gallica.bnf.fr/
 https://bdh.bne.es/
 https://www.cervantesvirtual.com/
+https://www.loc.gov/
 https://dp.la/
-https://gallica.bnf.fr/
-https://bibdigital.rjb.csic.es/
-https://www.bibliotecadigitaldebogota.gov.co/
+https://www.canadiana.ca/
+https://bndigital.bn.gov.br/
+https://books.scielo.org/
 # Exploración Espacial y Astrofísica
 https://data.nasa.gov/
 https://science.nasa.gov/

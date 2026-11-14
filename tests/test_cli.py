@@ -230,14 +230,40 @@ def test_expanded_strategic_niches_coverage():
     }
     assert expected_niches.issubset(set(niches.keys()))
 
-    # Verify Open Libraries niche
+    # Verify Universal Open Libraries niche across all continents
     lib_seeds = get_niche_seeds("open_libraries")
-    assert len(lib_seeds) >= 8
+    assert len(lib_seeds) >= 20
     lib_domains = {s.domain for s in lib_seeds}
+    # Multilateral / Global
     assert "gutenberg.org" in lib_domains
     assert "openlibrary.org" in lib_domains
-    assert "bdh.bne.es" in lib_domains
+    assert "unesdoc.unesco.org" in lib_domains
+    assert "wikisource.org" in lib_domains
+    # Asia & Middle East
+    assert "dl.ndl.go.jp" in lib_domains
+    assert "ndl.iitkgp.ac.in" in lib_domains
+    assert "nl.go.kr" in lib_domains
+    assert "qnl.qa" in lib_domains
+    # Africa
+    assert "bibalex.org" in lib_domains
+    assert "ajol.info" in lib_domains
+    assert "ghanalibrary.org" in lib_domains
+    assert "knls.ac.ke" in lib_domains
+    # Oceania
+    assert "natlib.govt.nz" in lib_domains
+    assert "trove.nla.gov.au" in lib_domains
+    # Europe
+    assert "bl.uk" in lib_domains
+    assert "digi.vatlib.it" in lib_domains
+    assert "gallica.bnf.fr" in lib_domains
     assert "europeana.eu" in lib_domains
+    # North America
+    assert "loc.gov" in lib_domains
+    assert "dp.la" in lib_domains
+    assert "canadiana.ca" in lib_domains
+    # Latin America
+    assert "bndigital.bn.gov.br" in lib_domains
+    assert "books.scielo.org" in lib_domains
 
     # Verify Space & Astronomy niche
     space_seeds = get_niche_seeds("space_astronomy")
